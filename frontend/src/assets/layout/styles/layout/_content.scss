@@ -1,0 +1,14 @@
+.layout-main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-left: 330px;
+    margin-top: 8rem;
+    justify-content: space-between;
+    padding: 2rem;
+    transition: margin-left $transitionDuration;
+}
+
+.layout-main {
+    flex: 1 1 auto;
+}

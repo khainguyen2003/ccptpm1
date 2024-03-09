@@ -1,0 +1,30 @@
+package com.khai.admin.service;
+
+import com.khai.admin.entity.User;
+import com.khai.admin.entity.security.UserDetailsImpl;
+import com.khai.admin.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class UserDetailSeviceImpl implements UserDetailsService {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserDetailSeviceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> optionalUser = userRepository.findFirstByUsername(username);
+        if(optionalUser.isEmpty()) {
+            throw new UsernameNotFoundException("Tên người dùng không tồn tại");
+        }
+        User user = optionalUser.get();
+        return new UserDetailsImpl(user);
+    }
+}
