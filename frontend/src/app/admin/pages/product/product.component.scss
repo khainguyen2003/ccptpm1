@@ -1,3 +1,61 @@
 .p-fileupload .p-fileupload-buttonbar {
     display: none;
 }
+
+// Cho vertical carousel
+
+:host ::ng-deep {
+    .product-item {
+        .product-item-content {
+            border: 1px solid var(--surface-d);
+            border-radius: 3px;
+            margin: .3rem;
+            text-align: center;
+            padding: 2rem 0;
+        }
+    
+        .product-image {
+            width: 50%;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)
+        }
+    }
+    .p-fileupload .p-fileupload-buttonbar {
+        display: none;
+    }
+}
+//     &::-webkit-scrollbar {
+//         height: 0;
+//         width: 0;
+//     }
+//     &::-webkit-scrollbar-track {
+//         height: 0;
+//         width: 0;
+//     }
+//     &::-webkit-scrollbar-thumb {
+//         width: 0;
+//         height: 0;
+//     }
+    
+// }
+
+.preview-box {
+    border: 1px dashed #999;
+    padding: 3px;
+}
+.preview {
+    width: 90px;
+    object-fit: cover;
+}
+.rm-img-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    padding: 5px;
+    background: var(--red-400);
+    font-size: 8px;
+    border-radius: 50%;
+    color: white;
+    line-height: 1;
+    z-index: 10;
+}
