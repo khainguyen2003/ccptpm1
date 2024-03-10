@@ -1,7 +1,7 @@
 import { AddDepartmentModalComponent } from './../../components/add-department-modal/add-department-modal.component';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Product } from 'src/app/demo/api/product';
-import { SelectEvent} from 'src/app/models/SelectEvent'
+import { SelectEvent } from 'src/app/models/SelectEvent';
 import {
     LazyLoadEvent,
     MenuItem,
@@ -27,14 +27,11 @@ import {
     FormGroup,
     Validators,
 } from '@angular/forms';
+import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
 
 @Component({
     templateUrl: './product.component.html',
-    styles: [`
-        :host ::ng-deep .p-fileupload .p-fileupload-buttonbar {
-            display: none;
-        }
-    `],
+    styleUrl: './product.component.scss',
     providers: [MessageService],
 })
 export class ProductComponent implements OnInit {
@@ -54,17 +51,27 @@ export class ProductComponent implements OnInit {
     rows = 10;
     totalRecords!: number;
     errorMessage = '';
-    uploadedFiles: any[] = [];
     categories: SelectItem[];
-    selectedFiles: any[] = [];
-    selectedImgsUrl: string[] = [];
+    // For upload files
+    uploadedFiles: File[] = [];
+    selectedFiles: File[] = [];
+    imgUploadedUrl: string[] = [
+        'https://th.bing.com/th?id=OSK.da7181f009aaebfd25febccdbaca6a04&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.de50cc0c235faefc5d8cd6ba77c8de04&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.3722be2b715b17dba8a171946f8aa0e2&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.7c981adf524b78e11bf03e32204fcd68&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.aa5618135e9f039c89b28eda34197ee1&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+    ];
+    defaultImg: number[] = [];
 
     addForm!: FormGroup;
 
     // Menu import
     importOptions: MenuItem[] | undefined;
     // add department dialog
-    @ViewChild('addDepartment') addDepartmentDialog: AddDepartmentModalComponent;
+    @ViewChild('addDepartment')
+    addDepartmentDialog: AddDepartmentModalComponent;
+    @ViewChild('addCategory') addCategory: AddCategoryModalComponent;
 
     constructor(
         private productService: ProductService,
@@ -122,17 +129,44 @@ export class ProductComponent implements OnInit {
                 value: 'cc',
             },
         ];
+
+        this.generateIndexForDefault();
     }
 
-    onSelect(event: SelectEvent) {
-        for (let file of event.files) {
-            this.selectedFiles.push(file);
+    onSelect(event: any) {
+        this.selectedFiles = event.target.files;
+        this.uploadedFiles.push(event.target.files);
+        console.log(event.target.files);
+        
+        for (let file of event.target.files) {
             const reader = new FileReader();
             reader.onload = (e: any) => {
-                this.selectedImgsUrl.push(e.target.result);
+                console.log(this.imgUploadedUrl);
+                if(this.imgUploadedUrl.indexOf(e.target.result) === -1) {
+                    this.imgUploadedUrl.push(e.target.result);
+                    this.defaultImg.pop();
+                    console.log(this.defaultImg);
+                }
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    removeImg(src: string) {
+        this.imgUploadedUrl = this.imgUploadedUrl.filter(item => item !== src);
+        this.defaultImg.push(1);
+        console.log(this.defaultImg);
+        console.log(this.imgUploadedUrl)
+    }
+    generateIndexForDefault() {
+        if(this.imgUploadedUrl.length < 6){
+            for(var i = this.imgUploadedUrl.length; i < 6; i++) {
+                this.defaultImg.push(1);
+            }
+        } else {
+            this.defaultImg = [];
+        }
+        console.log(this.defaultImg)
     }
 
     /**
@@ -188,6 +222,7 @@ export class ProductComponent implements OnInit {
         // });
         console.log($event);
     }
+    // pagination end
 
     openNew() {
         this.product = {};
@@ -338,6 +373,9 @@ export class ProductComponent implements OnInit {
 
     showAddDepartmentDialog() {
         this.addDepartmentDialog.showDialog();
+    }
+    showAddCategoryDialog() {
+        this.addCategory.showDialog();
     }
 }
 

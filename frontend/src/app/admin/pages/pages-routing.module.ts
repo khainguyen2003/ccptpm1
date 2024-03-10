@@ -1,3 +1,4 @@
+import { category } from 'src/app/models/category';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -9,6 +10,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
         { path: 'empty', loadChildren: () => import('./empty/emptydemo.module').then(m => m.EmptyDemoModule) },
         { path: 'timeline', loadChildren: () => import('./timeline/timelinedemo.module').then(m => m.TimelineDemoModule) },
         { path: 'products', loadChildren: () => import('./product/product.module').then(m => m.ProductModule) },
+        { path: 'categories', loadChildren: () => import('./category/category.module').then(m => m.CategoryModule) },
         { path: '**', redirectTo: '/notfound' }
     ])],
     exports: [RouterModule]
