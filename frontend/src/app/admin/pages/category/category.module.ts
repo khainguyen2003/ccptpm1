@@ -33,7 +33,8 @@ import { CategoryRoutingModule } from './category-routing.module';
         DropdownModule,
         RadioButtonModule,
         InputNumberModule,
-        DialogModule
+        DialogModule,
+        CategoryRoutingModule,
     ],
     declarations: [CategoryComponent]
 })
