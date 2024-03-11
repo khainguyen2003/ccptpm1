@@ -35,6 +35,7 @@ import { CategoryRoutingModule } from './category-routing.module';
         InputNumberModule,
         DialogModule,
         CategoryRoutingModule,
+
     ],
     declarations: [CategoryComponent]
 })

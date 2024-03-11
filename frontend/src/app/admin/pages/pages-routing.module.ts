@@ -1,3 +1,4 @@
+import { category } from 'src/app/models/category';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
