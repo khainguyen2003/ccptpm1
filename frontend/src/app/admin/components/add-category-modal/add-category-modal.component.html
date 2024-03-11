@@ -15,7 +15,7 @@
             <div class="field grid pl-2">
                 <label for="desc" class="col-fixed font-semibold" style="width:150px; padding-left: 0;">Nhóm cha</label>
                 <div class="col">
-                    <p-multiSelect [options]="categories" formControlName="parentCates" placeholder="Nhóm cha" appendTo="body"></p-multiSelect>
+                    <p-multiSelect [options]="categories" formControlName="parentCates" placeholder="Nhóm cha" appendTo="body" display="chip"></p-multiSelect>
                 </div>
             </div>
             <button #btnSubmit type="button" hidden (click)="save()"></button>
