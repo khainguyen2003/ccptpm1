@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "tblcategory")
+@Table(name = "tblpc")
 @Data
 public class Category {
     @Id
