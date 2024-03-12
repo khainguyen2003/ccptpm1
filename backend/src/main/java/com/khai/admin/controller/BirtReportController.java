@@ -1,3 +1,4 @@
+/*
 package com.khai.admin.controller;
 
 import com.khai.admin.dto.OutputType;
@@ -48,4 +49,4 @@ public class BirtReportController {
         OutputType format = OutputType.from(output);
         reportService.generateMainReport(name, format, response, request);
     }
-}
+}*/
