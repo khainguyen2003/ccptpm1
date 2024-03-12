@@ -19,7 +19,7 @@ public class Product {
     private int id;
     @Column(name = "product_name")
     private String name;
-    @Column(name = "product_desc")
+    @Column(name = "product_desc", length = 500)
     private String description;
     @Column(name = "product_images")
     private String images;
@@ -31,10 +31,20 @@ public class Product {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
     private boolean deleted;
-    @Column(name = "prooduct_code", length = 100)
+    // Có ngừng kinh doanh không
+    @Column(columnDefinition = "bit default 0")
+    private boolean isStopCell;
+    // Có bán trục tiếp không
+    @Column(columnDefinition = "bit default 1")
+    private boolean isDirectCell;
+    // <trọng lượng>:<đơn vị tính>
+    private String weight;
+    @Column(name = "product_code", length = 30)
     private String code;
-    @Column(name = "product_rate", columnDefinition = "tinyint default 0")
+    @Column(name = "product_rate", columnDefinition = "DECIMAL(1,1) default 0")
     private float rate;
+    // Các thuộc tính của sản phẩm
+    private String attr;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)

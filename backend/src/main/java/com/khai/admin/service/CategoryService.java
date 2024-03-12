@@ -37,7 +37,7 @@ public class CategoryService {
     public Category getCategoryById(int id) {
         Optional<Category> optCategory = categoryRepository.findById(id);
         if(optCategory.isPresent()) {
-            return (Category) optCategory.get();
+            return optCategory.get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục có id " + id);
         }

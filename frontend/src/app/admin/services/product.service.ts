@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Product } from '../../models/product';
 import { Observable, map } from 'rxjs';
-import { category } from 'src/app/models/category';
+import { Category } from 'src/app/models/category';
 
 @Injectable({
     providedIn: 'root'
@@ -57,7 +57,7 @@ export class ProductService {
             );
     }
   
-    findAllProductCategories(catId:number): Observable<category[]> {
+    findAllProductCategories(catId:number): Observable<Category[]> {
         return this.http.get('/api/categories', {
             params: new HttpParams()
                 .set('cid', catId.toString())
