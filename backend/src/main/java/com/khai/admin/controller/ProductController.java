@@ -31,7 +31,7 @@ public class ProductController {
             HttpServices httpServices
     ) {
         this.productService = productService;
-        this.httpServices = httpServices
+        this.httpServices = httpServices;
     }
 
 //    public ResponseEntity<Page<Product>> getProducts()
@@ -48,8 +48,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createProduct(@RequestBody Category category) {
-        Category result = productService.create(category);
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product result = productService.create(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
     @GetMapping
@@ -66,8 +66,8 @@ public class ProductController {
         return ResponseEntity.status(200).body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getProduct(@PathVariable("id") int id) {
-        Category response = productService.getProductInfo(id);
+    public ResponseEntity<Product> getProduct(@PathVariable("id") int id) {
+        Product response = productService.getProductInfo(id);
         return ResponseEntity.ok(response);
     }
     @DeleteMapping("/{id}")
@@ -76,8 +76,8 @@ public class ProductController {
         return ResponseEntity.ok("Xóa danh mục thành công");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateProduct(@PathVariable("id") int id, @RequestBody Product product) {
-        Category updatedCategory = productService.updateProduct(id, product);
-        return ResponseEntity.ok(updatedCategory);
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") int id, @RequestBody Product product) {
+        Product updatedProduct = productService.updateProduct(id, product);
+        return ResponseEntity.ok(updatedProduct);
     }
 }

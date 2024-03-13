@@ -49,4 +49,21 @@ public class Product {
     @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category category;
+
+    public void applyToProduct(Product product) {
+        this.id = product.id;
+        this.name = product.name;
+        this.description = product.description;
+        this.images = product.images;
+        this.createdDate = product.createdDate;
+        this.user = product.user;
+        this.deleted = product.deleted;
+        this.isStopCell = product.isStopCell;
+        this.isDirectCell = product.isDirectCell;
+        this.weight = product.weight;
+        this.code = product.code;
+        this.rate = product.rate;
+        this.attr = product.attr;
+        this.category = product.category;
+    }
 }

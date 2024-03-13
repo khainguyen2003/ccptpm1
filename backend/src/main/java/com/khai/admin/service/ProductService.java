@@ -57,39 +57,30 @@ public class ProductService {
             throw new AlreadyExist("Sản phẩm", product.getName());
         }
         product.setDeleted(false);
-        product.setEnabled(true);
-        category.setCreated_date(now);
-        category.setLast_modified(now);
+        product.setCreatedDate(now);
+//        product.setLast_modified(now);
 
-        return categoryRepository.save(category);
+        return productRepository.save(product);
     }
 
-    public Category getCategoryById(int id) {
-        Optional<Category> optCategory = categoryRepository.findById(id);
-        if(optCategory.isPresent()) {
-            return (Category) optCategory.get();
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục có id " + id);
-        }
-    }
-
-    public Map<String, Object> getCategories(String name, Pageable pageable) {
+    public Map<String, Object> getProducts(String name, Pageable pageable) {
         try {
-            List<Category> categories = new ArrayList<>();
-            Page<Category> pageCategories;
-            if(name == null) {
-                pageCategories = categoryRepository.findAll(pageable);
-            } else {
-                pageCategories = categoryRepository.findByNameContaining(name, pageable);
-            }
-            categories = pageCategories.getContent();
+            List<Product> products = new ArrayList<>();
+            Page<Product> pageProducts;
+//            if(name == null) {
+                pageProducts = productRepository.findAll(pageable);
+//            }
+//            } else {
+//                pageProducts = productRepository.findByNameContaining(name, pageable);
+//            }
+            products = pageProducts.getContent();
             Map<String, Object> response = new HashMap<>();
-            response.put("categories", categories);
-            response.put("curPage", pageCategories.getNumber());
-            response.put("totalPage", pageCategories.getTotalPages());
-            response.put("totalElements", pageCategories.getTotalElements());
-            response.put("pageSize", pageCategories.getSize());
-            response.put("numberOfElements", pageCategories.getNumberOfElements());
+            response.put("products", products);
+            response.put("curPage", pageProducts.getNumber());
+            response.put("totalPage", pageProducts.getTotalPages());
+            response.put("totalElements", pageProducts.getTotalElements());
+            response.put("pageSize", pageProducts.getSize());
+            response.put("numberOfElements", pageProducts.getNumberOfElements());
             return response;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Thực hiện không thành công. Vui lòng thử lại sau");
@@ -98,20 +89,20 @@ public class ProductService {
 
     public void deleteById(int id) {
         try {
-            categoryRepository.deleteById(id);
+            productRepository.deleteById(id);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Thực hiện không thành công. Vui lòng thử lại sau");
         }
     }
 
-    public Category updateCategory(int id, Category updatedCategory) {
+    public Product updateProduct(int id, Product updatedProduct) {
         try {
-            Optional<Category> optCategory = categoryRepository.findById(id);
-            if(optCategory.isPresent()) {
-                Category category = optCategory.get();
-                updatedCategory.applyToCategory(category);
-                categoryRepository.save(category);
-                return category;
+            Optional<Product> optProduct = productRepository.findById(id);
+            if(optProduct.isPresent()) {
+                Product product = optProduct.get();
+                updatedProduct.applyToProduct(product);
+                productRepository.save(product);
+                return product;
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục có id " + id);
             }
