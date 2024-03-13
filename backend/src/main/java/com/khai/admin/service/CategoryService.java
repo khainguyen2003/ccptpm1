@@ -30,6 +30,7 @@ public class CategoryService {
         category.setEnabled(true);
         category.setCreated_date(now);
         category.setLast_modified(now);
+        System.out.println(category);
 
         return categoryRepository.save(category);
     }

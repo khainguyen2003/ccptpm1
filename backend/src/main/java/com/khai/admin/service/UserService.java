@@ -160,17 +160,17 @@ public class UserService {
 
         }
     }
-    public List<User> searchUser(String search) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<User> query = builder.createQuery(User.class);
-        Root r = query.from(User.class);
-
-        Predicate predicate = builder.conjunction();
-        params.stream().forEach(searchConsumer);
-        predicate = searchConsumer.getPredicate();
-        query.where(predicate);
-
-        List<User> result = entityManager.createQuery(query).getResultList();
-        return result;
-    }
+//    public List<User> searchUser(String search) {
+//        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<User> query = builder.createQuery(User.class);
+//        Root r = query.from(User.class);
+//
+//        Predicate predicate = builder.conjunction();
+//        params.stream().forEach(searchConsumer);
+//        predicate = searchConsumer.getPredicate();
+//        query.where(predicate);
+//
+//        List<User> result = entityManager.createQuery(query).getResultList();
+//        return result;
+//    }
 }
