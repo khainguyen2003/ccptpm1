@@ -8,10 +8,10 @@ import { environment } from "src/environments/environment";
 })
 export class CategoryService {
     
-    categoryApi = environment.apiUrl + '/categories';
+    categoryApi = environment.testApiUrl + '/admin/categories';
 
     constructor(private http: HttpClient){}
-    getCategories(value: string):  Observable<any>{
+    getCategories(value: string = ""):  Observable<any>{
         var params = new HttpParams();
         if(value != null) {
             params.set('filter', value);
@@ -20,7 +20,17 @@ export class CategoryService {
             params
         });
     }
-    getCategoryById(id: string) {
+    getCategoryById(id: string): Observable<any> {
+        return this.http.get(this.categoryApi, {
+            params: new HttpParams().set('id', id),
+        });
+    }
+    createCategory(form: any): Observable<any> {
+        console.log(this.categoryApi);
         
+        return this.http.post(this.categoryApi, form);
+    }
+    deleteCategory(id): Observable<any> {
+        return this.http.delete(this.categoryApi + '/' + id);
     }
 }

@@ -28,7 +28,6 @@
                                 </ul> -->
                             </ng-template>
                         </p-fileUpload>
-
                     </p-dialog>
                     <button pButton type="button" (click)="menu.toggle($event)" (hover)="menu.toggle($event)"
                         icon="pi pi-file-import" label="Nhập dữ liệu" class="mr-3"></button>
@@ -74,7 +73,10 @@
                 </ng-template>
 
                 <ng-template pTemplate="body" let-product let-expanded="expanded">
-                    <tr [pRowToggler]="product" [ngClass]="expanded ? 'expanded': ''">
+                    <tr>
+                        <td>
+                            <button type="button" pButton pRipple [pRowToggler]="product" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                        </td>
                         <td>
                             <p-tableCheckbox [value]="product"></p-tableCheckbox>
                         </td>
@@ -195,7 +197,7 @@
         </div>
 
         <!-- Add product dialog -->
-        <p-dialog [(visible)]="productDialog" header="Thêm hàng" [modal]="true" class="p-fluid"
+        <p-dialog [(visible)]="addDialogVisible" header="Thêm hàng" [modal]="true" class="p-fluid"
             [breakpoints]="{ '960px': '90vw' }" [style]="{ width: '75vw'}" [maximizable]="true">
             <ng-template pTemplate="content">
                 <form [formGroup]="addForm">
@@ -310,7 +312,7 @@
         </p-dialog>
 
         <!-- Delete dialog -->
-        <p-dialog [(visible)]="deleteProductDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+        <p-dialog [(visible)]="deleteProductDialogVisible" header="Confirm" [modal]="true" [style]="{width:'450px'}">
             <div class="flex align-items-center justify-content-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                 <span *ngIf="product">Are you sure you want to delete <b>{{product.name}}</b>?</span>
@@ -323,7 +325,7 @@
             </ng-template>
         </p-dialog>
 
-        <p-dialog [(visible)]="deleteProductsDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+        <p-dialog [(visible)]="deleteProductsDialogVisible" header="Confirm" [modal]="true" [style]="{width:'450px'}">
             <div class="flex align-items-center justify-content-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                 <span>Are you sure you want to delete selected products?</span>

@@ -22,15 +22,31 @@ export class AppTopBarComponent implements OnInit {
     ngOnInit() { 
         this.userMenus = [
             {
+                label: 'Thông tin',
+                icon: 'pi pi-fw pi-user mr-2',
+                routerLink: '/users'
+            },
+            {
                 label: 'Đăng nhập',
                 icon: 'pi pi-fw pi-sign-in mr-2',
                 routerLink: '/auth/login'
+            },
+            {
+                label: 'Đăng xuất',
+                icon: 'pi pi-fw pi-sign-out mr-2',
+                routerLink: '/auth/logout'
+            },
+            {
+                label: 'Đăng ký',
+                icon: 'pi pi-fw pi-user-plus mr-2',
+                routerLink: '/auth/register'
             },
         ];
         this.mainFunctions = [
             {
                 label: 'Tổng quan',
                 icon: 'pi pi-fw pi-eye',
+                routerLink: "/admin"
             },
             {
                 label: 'Hàng hóa',

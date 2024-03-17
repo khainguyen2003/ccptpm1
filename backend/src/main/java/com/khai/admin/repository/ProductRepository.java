@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    @Query("SELECT * FROM p Product WHERE c.name=:name OR c.code=:code")
+    @Query("SELECT p FROM Product p WHERE p.name=:name OR p.code=:code")
     Optional<Product> isExist(@Param("name") String name, @Param("code") String code);
 }
