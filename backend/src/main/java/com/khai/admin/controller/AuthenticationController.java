@@ -6,8 +6,12 @@ import com.khai.admin.dto.JwtView;
 import com.khai.admin.entity.User;
 import com.khai.admin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -27,16 +31,30 @@ public class AuthenticationController {
 //            }),
 //            @ApiResponse(responseCode = "400", description = "User already exists", content = {@Content(mediaType = "application/json")})
 //    })
-    @PostMapping("/admin/signup")
+
+    /*@PostMapping("/admin/signup")
     public ResponseEntity<String> signup(@RequestBody UserCreateDto userCreateDto) {
         userCreateDto.setUserRole(UserRole.ADMIN);
         userService.create(userCreateDto);
         return ResponseEntity.ok("Đăng ký thành công");
+    }*/
+
+    @PostMapping("/admin/signup")
+    public ResponseEntity<String> signupV2(@RequestBody UserCreateDto userCreateDto) {
+        userCreateDto.setUserRole(UserRole.ADMIN);
+        userService.createV2(userCreateDto);
+        return ResponseEntity.ok("Đăng ký thành công");
     }
 
-    @PostMapping("/admin/login")
+    /*@PostMapping("/admin/login")
     public ResponseEntity<JwtView> login(@RequestBody User loginRequest) {
         JwtView jwtView = userService.authenticate(loginRequest);
+        return ResponseEntity.ok(jwtView);
+    }*/
+
+    @PostMapping("/admin/login")
+    public ResponseEntity<JwtView> loginV2(@RequestHeader Map<String, String> headers, @RequestBody User loginRequest) {
+        JwtView jwtView = userService.authenticate(headers, loginRequest);
         return ResponseEntity.ok(jwtView);
     }
 

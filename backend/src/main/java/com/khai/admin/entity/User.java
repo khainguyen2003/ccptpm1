@@ -2,6 +2,7 @@ package com.khai.admin.entity;
 
 import com.khai.admin.constants.UserRole;
 import com.khai.admin.dto.user.UserView;
+import com.khai.admin.entity.security.KeyStore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -58,6 +59,16 @@ public class User {
     @Column(name="user_roles")
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+//    mappedBy = "<Tên thuộc tính của LogDetail"
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    private List<LogDetail> logDetailList;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private KeyStore keyStore;
+
+
 
     public UserView toUserview() {
         UserView userView = new UserView();

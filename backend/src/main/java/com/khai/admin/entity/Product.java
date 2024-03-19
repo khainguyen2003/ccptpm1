@@ -50,6 +50,9 @@ public class Product {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category category;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private WorkplaceDetail wpd;
+
     public void applyToProduct(Product product) {
         this.id = product.id;
         this.name = product.name;

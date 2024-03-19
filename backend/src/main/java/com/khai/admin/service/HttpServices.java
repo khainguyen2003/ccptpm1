@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 public class HttpServices {
+    // /api/tutorials?page=0&size=3&sort=published,desc&sort=title,asc
     private SearchCriteria criteria;
     public List<Sort.Order> getSortOrders(String[] sort) {
         List<Sort.Order> orders = new ArrayList<>();

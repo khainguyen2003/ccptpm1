@@ -14,7 +14,7 @@ public class BillDetail {
     @Column(name = "bd_bill_id")
     private int bill_id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "bd_product_id", referencedColumnName = "product_id")
     private Product product;
 

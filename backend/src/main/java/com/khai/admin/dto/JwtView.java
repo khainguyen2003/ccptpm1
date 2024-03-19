@@ -17,4 +17,6 @@ public class JwtView {
     private String accessToken;
     @JsonProperty("user_details")
     private UserView userDetails;
+
+    String value;
 }

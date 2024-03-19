@@ -36,13 +36,20 @@
                 </ng-template>
             </p-toolbar>
 
-            <p-table #dt [value]="products" [columns]="cols" responsiveLayout="scroll"
-                (sortFunction)="customSort($event)" [customSort]="true" [paginator]="true" [rows]="10"
-                (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" [scrollable]="true" [resizableColumns]="true"  columnResizeMode="expand"
-                scrollHeight="500px" [virtualScroll]="true" [virtualScrollItemSize]="46"
-                (onLazyLoad)="loadProductsPage($event)" [loading]="loading" [showCurrentPageReport]="true"
+            <p-table #dt [value]="products" dataKey="id" 
+                (sortFunction)="customSort($event)" [customSort]="true" 
+                [paginator]="true" [rows]="10"
+                (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" 
                 currentPageReportTemplate="Hiển thị {first} - {last}/ Tổng số {totalRecords} hàng hóa"
-                [(selection)]="selectedProducts" selectionMode="multiple" [rowHover]="true" dataKey="id">
+                responsiveLayout="scroll" [scrollable]="true" scrollHeight="500px"
+                [resizableColumns]="true"  columnResizeMode="expand"
+                [virtualScroll]="true" [virtualScrollItemSize]="46"
+                (onLazyLoad)="loadProductsPage($event)" [loading]="loading" 
+                [showCurrentPageReport]="true" 
+                [(selection)]="selectedProducts" selectionMode="multiple" 
+                [rowHover]="true"
+                [expandedRowKeys]="expandedRows"
+                >
                 <ng-template pTemplate="caption">
                     <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                         <h5 class="m-0">Manage Products</h5>
@@ -55,7 +62,7 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 3rem">
+                        <th>
                             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                         </th>
                         <th></th>
@@ -69,14 +76,12 @@
                         <th pSortableColumn="position">Vị trí<p-sortIcon field="position"></p-sortIcon></th>
                         <th pSortableColumn="status">Trạng thái<p-sortIcon field="status"></p-sortIcon>
                         </th>
+                        <th></th>
                     </tr>
                 </ng-template>
 
                 <ng-template pTemplate="body" let-product let-expanded="expanded">
                     <tr>
-                        <td>
-                            <button type="button" pButton pRipple [pRowToggler]="product" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
-                        </td>
                         <td>
                             <p-tableCheckbox [value]="product"></p-tableCheckbox>
                         </td>
@@ -105,6 +110,12 @@
                         <td ><span class="p-column-title">Nhóm hàng</span>
                             <span [ngModel]="product.category" [readonly]="true" [cancel]="false"></span>
                         </td>
+                        <td ><span class="p-column-title">Tồn kho</span>
+                            <span [ngModel]="product.inventory" [readonly]="true" [cancel]="false"></span>
+                        </td>
+                        <td ><span class="p-column-title">Vị trí</span>
+                            <span [ngModel]="product.position" [readonly]="true" [cancel]="false"></span>
+                        </td>
                         <td><span class="p-column-title">Trạng thái</span>
                             <span>{{product.status}}</span>
                         </td>
@@ -120,9 +131,9 @@
                     </tr>
                 </ng-template>
                 <!-- expansion details -->
-                <ng-template pTemplate="rowexpansion" let-product>
+                <!-- <ng-template pTemplate="rowexpansion" let-product>
                     <tr>
-                        <td colspan="7">
+                        <td colspan="10">
                             <p-tabView>
                                 <p-tabPanel header="Thông tin">
                                     <div>
@@ -177,7 +188,7 @@
                             </p-tabView>
                         </td>
                     </tr>
-                </ng-template>
+                </ng-template> -->
                 <!-- Skeleton-loading -->
                 <ng-template pTemplate="loadingbody" let-columns="columns">
                     <tr style="height:46px">

@@ -1,2 +1,4 @@
-package com.khai.admin.entity;public class WorkProcess {
+package com.khai.admin.entity;
+
+public class WorkProcess {
 }
