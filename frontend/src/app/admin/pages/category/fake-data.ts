@@ -15,7 +15,7 @@ export const fakeCategories: Category[] = [
         name: 'Loai 4',
         notes: 'Note 4',
         deleted: false,
-        enabled: true,
+        enabled: false,
         deleted_date: new Date(),
         last_modified: new Date(),
         created_date: new Date()
@@ -25,7 +25,7 @@ export const fakeCategories: Category[] = [
         name: 'Loai 5',
         notes: 'Note 5',
         deleted: false,
-        enabled: true,
+        enabled: false,
         deleted_date: new Date(),
         last_modified: new Date(),
         created_date: new Date()

@@ -73,6 +73,11 @@ export class CategoryComponent implements OnInit {
         this.categoryDialog = true;
     }
 
+    saveCategory() {
+        this.categoryDialog = false;
+        this.category = null;
+    }
+
     deleteCategory(category: Category) {
         this.deleteCategoryDialog = true;
         this.category = { ...category };
@@ -81,20 +86,21 @@ export class CategoryComponent implements OnInit {
     confirmDeleteSelected() {
         this.deleteCategoriesDialog = false;
         this.categories = this.categories.filter(val => !this.selectedCategories.includes(val));
-        //this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Đã xóa danh sách thể loại được chọn', life: 3000 });
         this.selectedCategories = [];
     }
 
     confirmDelete() {
         this.deleteCategoryDialog = false;
         this.categories = this.categories.filter(val => val.id !== this.category.id);
-        //this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+        this.messageService.add({ severity: 'success', summary: 'Successful', detail: `Đã xóa thể loại ${this.category.name}`, life: 3000 });
         this.category = null;
     }
 
     hideDialog() {
         this.categoryDialog = false;
         this.submitted = false;
+        this.category = null;
     }
 
     findIndexById(id: string): number {

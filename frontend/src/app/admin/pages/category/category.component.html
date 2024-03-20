@@ -16,11 +16,12 @@
                 </ng-template>
             </p-toolbar>
 
-            <!-- <p-table #dt [value]="categories"
+            <p-table #dt [value]="categories"
+                dataKey="id"
                 [columns]="cols"
                 responsiveLayout="scroll"
                 [rows]="10"
-                [globalFilterFields]="['name','country.name','representative.name','status']"
+                [globalFilterFields]="['name']"
                 [paginator]="true"
                 [rowsPerPageOptions]="[10,20,30]"
                 [showCurrentPageReport]="true"
@@ -43,119 +44,80 @@
                         <th style="width: 3rem">
                             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                         </th>
-                        <th pSortableColumn="code">Code <p-sortIcon field="code"></p-sortIcon></th>
-                        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-                        <th>Image</th>
-                        <th pSortableColumn="price">Price <p-sortIcon field="price"></p-sortIcon></th>
-                        <th pSortableColumn="category">Category <p-sortIcon field="category"></p-sortIcon></th>
-                        <th pSortableColumn="rating">Reviews <p-sortIcon field="rating"></p-sortIcon></th>
-                        <th pSortableColumn="inventoryStatus">Status <p-sortIcon field="inventoryStatus"></p-sortIcon></th>
-                        <th></th>
+                        <th pSortableColumn="id">ID <p-sortIcon field="id"></p-sortIcon></th>
+                        <th pSortableColumn="name">Tên thể loại <p-sortIcon field="name"></p-sortIcon></th>
+                        <th>Hiển thị</th>
+                        <th pSortableColumn="last_modified">Lần sửa cuối <p-sortIcon field="last_modified"></p-sortIcon></th>
+                        <th>Thực hiện</th>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-product>
+                <ng-template pTemplate="body" let-category>
                     <tr>
                         <td>
-                            <p-tableCheckbox [value]="product"></p-tableCheckbox>
+                            <p-tableCheckbox [value]="category"></p-tableCheckbox>
                         </td>
-                        <td style="width:14%; min-width:10rem;"><span class="p-column-title">Code</span>
-                            {{product.code || product.id}}
+                        <td>
+                            <span class="p-column-title">ID</span>
+                            {{ category.id }}
                         </td>
-                        <td style="width:14%; min-width:10rem;">
-                            <span class="p-column-title">Name</span>
-                            {{product.name}}
+                        <td>
+                            <span class="p-column-title">Tên loại</span>
+                            {{category.name}}
                         </td>
-                        <td style="width:14%; min-width:10rem;"><span class="p-column-title">Image</span>
-                            <img [src]="'assets/demo/images/product/' + product.image" [alt]="product.name" width="100" class="shadow-4" />
+                        <td>
+                            <span class="p-column-title">Hiển thị</span>
+                            {{ category.enabled ? 'Hiển thị' : 'Không hiển thị' }}
                         </td>
-                        <td style="width:14%; min-width:8rem;">
-                            <span class="p-column-title">Price</span>
-                            {{product.price | currency:'USD'}}
-                        </td>
-                        <td style="width:14%; min-width:10rem;">
-                            <span class="p-column-title">Category</span>
-                            {{product.category}}
-                        </td>
-                        <td style="width:14%; min-width: 10rem;"><span class="p-column-title">Reviews</span>
-                            <p-rating [ngModel]="product.rating" [readonly]="true" [cancel]="false"></p-rating>
-                        </td>
-                        <td style="width:14%; min-width: 10rem;"><span class="p-column-title">Status</span>
-                            <span [class]="'product-badge status-' + (product.inventoryStatus ? product.inventoryStatus.toLowerCase() : '')">{{product.inventoryStatus}}</span>
+                        <td>
+                            <span class="p-column-title">Lần sửa cuối</span>
+                            {{ category.last_modified | date:'dd/MM/yyyy' }}
                         </td>
                         <td>
                             <div class="flex">
-                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editProduct(product)"></button>
-                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteProduct(product)"></button>
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editCategory(category)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteCategory(category)"></button>
                             </div>
                         </td>
                     </tr>
                 </ng-template>
-            </p-table> -->
+            </p-table>
         </div>
 
-        <!-- <p-dialog [(visible)]="categoryDialog" [style]="{width: '450px'}" header="Product Details" [modal]="true" class="p-fluid">
+        <p-dialog [(visible)]="categoryDialog" [style]="{width: '450px'}" header="Chi tiết thể loại" [modal]="true" class="p-fluid">
             <ng-template pTemplate="content">
-                <img [src]="'assets/demo/images/product/' + product.image" [alt]="product.image" width="150" class="mt-0 mx-auto mb-5 block shadow-2" *ngIf="product.image">
+                <!-- <img [src]="'assets/demo/images/product/' + product.image" [alt]="product.image" width="150" class="mt-0 mx-auto mb-5 block shadow-2" *ngIf="product.image"> -->
                 <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.name}"/>
-                    <small class="ng-dirty ng-invalid" *ngIf="submitted && !product.name">Name is required.</small>
+                    <label for="name">Tên thể loại</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="category.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !category.name}"/>
+                    <small class="ng-dirty ng-invalid" *ngIf="submitted && !category.name">Tên thể loại không được bỏ trống.</small>
                 </div>
                 <div class="field">
-                    <label for="description">Description</label>
-                    <textarea id="description" pInputTextarea [(ngModel)]="product.description" required rows="3" cols="20"></textarea>
+                    <label for="description">Ghi chú</label>
+                    <textarea id="description" pInputTextarea [(ngModel)]="category.notes" required rows="3" cols="20"></textarea>
                 </div>
-                <div class="field">
-                    <label for="status">Inventory Status</label>
-                    <p-dropdown [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" optionValue="label" [options]="statuses" placeholder="Select">
-                        <ng-template pTemplate="selectedItem">
-                            <span *ngIf="product && product.inventoryStatus" [class]="'product-badge status-' + product.inventoryStatus.toString().toLowerCase()">{{product.inventoryStatus}}</span>
-                        </ng-template>
-                        <ng-template let-option pTemplate="item">
-                            <span [class]="'product-badge status-' + option.value">{{option.label}}</span>
-                        </ng-template>
-                    </p-dropdown>
+                <div class="field row" style="
+                        display: flex;
+                        align-items: center;">
+                    <label for="enabled" style="margin-right: 1rem;">Hiển thị lên trình duyệt </label>
+                    <p-inputSwitch [(ngModel)]="category.enabled"></p-inputSwitch>
                 </div>
-
-                <div class="field">
-                    <label class="mb-3">Category</label>
-                    <div class="formgrid grid">
-                        <div class="field-radiobutton col-6">
-                            <p-radioButton id="category1" name="category" value="Accessories" [(ngModel)]="product.category"></p-radioButton>
-                            <label for="category1">Accessories</label>
-                        </div>
-                        <div class="field-radiobutton col-6">
-                            <p-radioButton id="category2" name="category" value="Clothing" [(ngModel)]="product.category"></p-radioButton>
-                            <label for="category2">Clothing</label>
-                        </div>
-                        <div class="field-radiobutton col-6">
-                            <p-radioButton id="category3" name="category" value="Electronics" [(ngModel)]="product.category"></p-radioButton>
-                            <label for="category3">Electronics</label>
-                        </div>
-                        <div class="field-radiobutton col-6">
-                            <p-radioButton id="category4" name="category" value="Fitness" [(ngModel)]="product.category"></p-radioButton>
-                            <label for="category4">Fitness</label>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="formgrid grid">
                     <div class="field col">
-                        <label for="price">Price</label>
-                        <p-inputNumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US"></p-inputNumber>
+                        <label for="created_date">Ngày tạo</label>
+                        <input pInputText id="created_date" [(ngModel)]="category.created_date" disabled/>
                     </div>
                     <div class="field col">
-                        <label for="quantity">Quantity</label>
-                        <p-inputNumber id="quantity" [(ngModel)]="product.quantity"></p-inputNumber>
+                        <label for="last_modified">Lần sửa cuối</label>
+                        <input pInputText id="last_modified" [(ngModel)]="category.last_modified" disabled/>
                     </div>
                 </div>
             </ng-template>
 
             <ng-template pTemplate="footer">
-                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveProduct()"></button>
+                <button pButton pRipple label="Hủy" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-text" (click)="saveCategory()"></button>
             </ng-template>
-        </p-dialog>-->
+        </p-dialog>
 
         <p-dialog [(visible)]="deleteCategoryDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
             <div class="flex align-items-center justify-content-center">
@@ -163,8 +125,8 @@
                 <span *ngIf="category">Chắc chắn bạn muốn xóa thể loại <b>{{category.name}}</b>?</span>
             </div>
             <ng-template pTemplate="footer">
-                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteCategoryDialog = false"></button>
-                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="confirmDelete()"></button>
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Hủy" (click)="deleteCategoryDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Xóa" (click)="confirmDelete()"></button>
             </ng-template>
         </p-dialog>
 
@@ -174,8 +136,8 @@
                 <span>Bạn chắc chắn muốn xóa những thể loại được chọn?</span>
             </div>
             <ng-template pTemplate="footer">
-                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteCategoryDialog = false"></button>
-                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes" (click)="confirmDeleteSelected()"></button>
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Hủy" (click)="deleteCategoryDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Xóa" (click)="confirmDeleteSelected()"></button>
             </ng-template>
         </p-dialog>
     </div>

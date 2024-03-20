@@ -15,6 +15,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { CategoryRoutingModule } from './category-routing.module';
 import { AddCategoryModalComponent } from "../../components/add-category-modal/add-category-modal.component";
 
@@ -38,6 +39,7 @@ import { AddCategoryModalComponent } from "../../components/add-category-modal/a
         DialogModule,
         CategoryRoutingModule,
         AddCategoryModalComponent,
+        InputSwitchModule,
     ]
 })
 export class CategoryModule { }
