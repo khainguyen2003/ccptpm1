@@ -20,7 +20,7 @@
                 dataKey="id"
                 [columns]="cols"
                 responsiveLayout="scroll"
-                [rows]="10"
+                [rows]="pageSize"
                 [globalFilterFields]="['name']"
                 [paginator]="true"
                 [rowsPerPageOptions]="[10,20,30]"
@@ -98,17 +98,17 @@
                 <div class="field row" style="
                         display: flex;
                         align-items: center;">
-                    <label for="enabled" style="margin-right: 1rem;">Hiển thị lên trình duyệt </label>
+                    <label for="enabled" style="margin-right: 1rem;">Hiển thị lên trình duyệt:</label>
                     <p-inputSwitch [(ngModel)]="category.enabled"></p-inputSwitch>
                 </div>
                 <div class="formgrid grid">
                     <div class="field col">
                         <label for="created_date">Ngày tạo</label>
-                        <input pInputText id="created_date" [(ngModel)]="category.created_date" disabled/>
+                        <input pInputText id="created_date" [value]="category.created_date.toLocaleDateString('en-GB')" disabled/>
                     </div>
                     <div class="field col">
                         <label for="last_modified">Lần sửa cuối</label>
-                        <input pInputText id="last_modified" [(ngModel)]="category.last_modified" disabled/>
+                        <input pInputText id="last_modified" [value]="category.last_modified.toLocaleDateString('en-GB')" disabled/>
                     </div>
                 </div>
             </ng-template>

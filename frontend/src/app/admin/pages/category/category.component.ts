@@ -13,26 +13,19 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
 export class CategoryComponent implements OnInit {
 
     categoryDialog: boolean = false;
-
     deleteCategoryDialog: boolean = false;
-
     deleteCategoriesDialog: boolean = false;
-
     categoryResponse: any;
-
     categories: Category[] = [];
-
     category:Category;
-
     selectedCategories: Category[] = [];
-
     submitted: boolean = false;
-
     cols: any[] = [];
-
     statuses: any[] = [];
-
     rowsPerPageOptions = [5, 10, 20];
+    countPage: number = 1;
+    pageNum: number = 0;
+    pageSize: number = 10;
 
     @ViewChild('addCategory') addCategory: AddCategoryModalComponent;
 
@@ -42,9 +35,7 @@ export class CategoryComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        //this.loadCategories();
-        //Fake categories
-        this.categories = fakeCategories;
+        this.loadCategories();
     }
 
     loadCategories() {
@@ -53,7 +44,11 @@ export class CategoryComponent implements OnInit {
                 this.categoryResponse = res;
                 this.categories = res.categories;
             },
-            error: err => console.log(err),
+            error: err => {
+                this.categories = fakeCategories;
+                this.messageService.add({ severity: 'warn', summary: 'Warning', detail: `Đây là danh sách giả để demo và được tạo ra khi không lấy đc dữ liệu`, life: 3000 });
+                console.log(err);
+            },
             complete: () => {}
         }).add(() => {
             //Chạy sau khi subcribe xong.
@@ -75,7 +70,18 @@ export class CategoryComponent implements OnInit {
 
     saveCategory() {
         this.categoryDialog = false;
-        this.category = null;
+        this.categoryService.updateCategory(this.category).subscribe({
+            next: res => {
+                this.categories = [this.category, ...this.categories.filter(item => item.id !== this.category.id)];
+                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Cập nhật thành công.', life: 3000 });
+                console.log(res);
+            },
+            error: err => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cập nhật không thành công.', life: 3000 });
+                console.log(err);
+            },
+            complete: () => {}
+        }).add(() => this.category = null);
     }
 
     deleteCategory(category: Category) {
@@ -92,9 +98,20 @@ export class CategoryComponent implements OnInit {
 
     confirmDelete() {
         this.deleteCategoryDialog = false;
-        this.categories = this.categories.filter(val => val.id !== this.category.id);
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: `Đã xóa thể loại ${this.category.name}`, life: 3000 });
-        this.category = null;
+        this.categoryService.deleteCategory(this.category.id).subscribe({
+            next: res => {
+                this.categories = this.categories.filter(val => val.id !== this.category.id);
+                this.messageService.add({ severity: 'success', summary: 'Successful', detail: `Đã xóa thể loại ${this.category.name}`, life: 3000 });
+                console.log(res);
+            },
+            error: err => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: `Xóa thể loại ${this.category.name} không thành công!`, life: 3000 });
+                console.log(err);
+            },
+            complete: () => {}
+        }).add(() => {
+            this.category = null;
+        });
     }
 
     hideDialog() {
