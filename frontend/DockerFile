@@ -1,0 +1,54 @@
+# stage 1: compile and build angular codebase
+
+# use official node image as the base image 
+FROM node:latest as build
+
+WORKDIR usr/local/app
+
+COPY ./ /usr/local/app/
+
+RUN npm i npm@latest -g
+RUN npm install -g @angular/cli@17.3.0
+
+RUN npm install
+# Build app
+RUN npm run build
+
+# Stage 2: Serve app with nginx server
+# use official nginx image as the base image
+FROM nginx:latest
+# Copy the build output to replace the default nginx contents
+COPY --from=build /usr/local/app/dist/sakai-ng /usr/share/nginx/html
+# Chạy port
+EXPOSE 80
+
+# Build docker
+# docker build -t <project build name>:<phiên bản build>
+
+# Chạy với tên container
+# docker run --name <container name tùy chọn> -d -p <port build:port chạy> <project build name>:<phiên bản build>
+# vi dụ docker run --name docker-rest-api -d -p 4200:8080 docker-rest-api:1.0.0
+
+# Kiểm tra lịch sử của phiên bản ứng dụng
+# docker history <project build name>:<phiên bản build>
+
+# Lấy các images
+# docker images
+
+# dừng docker
+# docker stop <container name>
+
+# Lấy danh sách log của ứng dụng trong đó -f là bắt buộc (forch)
+# docker logs -f <container-name>
+
+# Thực hiện bash trên ứng dụng
+# docker exec -it <container-name> bash
+# Nhập lệnh bash như ls -la
+# thoát bash thì gõ exit
+
+# Push lên docker hub
+# 1. vào docker hub
+# 2. Tạo repository
+# 3. chạy lệnh
+#   docker tag local-image:tagname new-repo:tagname
+#   docker push new-repo:tagname

@@ -12,22 +12,24 @@ import java.util.List;
 
 @Service
 public class HttpServices {
+    // /api/tutorials?page=0&size=3&sort=published,desc&sort=title,asc
     private SearchCriteria criteria;
-    public List<Sort.Order> getSortOrders(String[] sort) {
+
+    /**
+     *
+     * @param sort sort=<field 1>:<dir1>,<field 2>:<dir2>
+     * @return
+     */
+    public List<Sort.Order> getSortOrders(String sort) {
         List<Sort.Order> orders = new ArrayList<>();
-
-        if (sort[0].contains(",")) {
-            // will sort more than 2 fields
-            // sortOrder="field, direction"
-            for (String sortOrder : sort) {
-                String[] _sort = sortOrder.split(",");
-                orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
-            }
-        } else {
-            // sort=[field, direction]
-            orders.add(new Sort.Order(getSortDirection(sort[1]), sort[0]));
+        sort = sort.trim();
+        String[] sorts = sort.split(",");
+        // will sort more than 2 fields
+        // sortOrder="field:direction"
+        for (String sortOrder : sorts) {
+            String[] _sort = sortOrder.split(":");
+            orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
         }
-
         return orders;
     }
     /**

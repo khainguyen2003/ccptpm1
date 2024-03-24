@@ -14,13 +14,16 @@
         </button>
 
         <div #topbarmenu class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+            <button class="p-link flex align-items-center">
+                <i class="pi pi-envelope p-text-secondary" pBadge severity="danger" [value]="2"  style="font-size: 1.5rem"></i>
+            </button>
             <button class="p-link layout-topbar-button">
                 <i class="pi pi-calendar"></i>
-                <span>Calendar</span>
+                <span>Lịch làm việc</span>
             </button>
             <button class="p-link layout-topbar-button" (click)="userMenu.toggle($event)">
                 <i class="pi pi-user"></i>
-                <span>Profile</span>
+                <span>Thông tin cá nhân</span>
             </button>
             <p-menu #userMenu [model]="userMenus" [popup]="true">
                 <ng-template pTemplate="item" let-item>
@@ -47,8 +50,8 @@
                 </ng-template>
             </p-menu>
             <button class="p-link layout-topbar-button" [routerLink]="'/documentation'">
-                <i class="pi pi-cog"></i>
-                <span>Settings</span>
+                <i class="pi pi-cog pi-spin"></i>
+                <span>Cài đặt</span>
             </button>
         </div>
 

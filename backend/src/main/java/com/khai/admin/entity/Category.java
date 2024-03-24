@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "tblcategory")
+@Table(name = "tblpc")
 @Data
 public class Category {
     @Id
@@ -19,9 +19,9 @@ public class Category {
     private String name;
     @Column(name = "pc_notes")
     private String notes;
-    @Column(name = "pc_deleted")
+    @Column(name = "pc_deleted", columnDefinition = "BIT(1) DEFAULT b'0'")
     private boolean deleted;
-    @Column(name = "pc_enabled")
+    @Column(name = "pc_enabled", columnDefinition = "BIT(1) DEFAULT b'0'")
     private boolean enabled;
     @Column(name = "pc_deleted_date")
     private Date deleted_date;
@@ -32,7 +32,7 @@ public class Category {
     @Column(name = "pc_images")
     private String images;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Product> products;
 

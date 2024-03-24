@@ -1,8 +1,13 @@
 package com.khai.admin.service;
 
+import com.khai.admin.dto.ProductDto;
+import com.khai.admin.dto.user.UserView;
 import com.khai.admin.entity.Category;
 import com.khai.admin.entity.Product;
+import com.khai.admin.entity.User;
 import com.khai.admin.exception.AlreadyExist;
+import com.khai.admin.exception.NoSuchElementException;
+import com.khai.admin.repository.CategoryRepository;
 import com.khai.admin.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -18,16 +23,24 @@ import java.util.*;
 @Service
 public class ProductService {
     private ProductRepository productRepository;
+    private UserService userService;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(
+        ProductRepository productRepository,
+        CategoryRepository categoryRepository,
+        UserService userService
+    ) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.userService = userService;
     }
 
-    public Product getProductInfo(int id) {
+    public ProductDto getProductInfo(int id) {
         Optional<Product> product = productRepository.findById(id);
         if(product.isPresent()) {
-            return product.get();
+            return product.get().toDto();
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm có id" + id);
     }
@@ -51,70 +64,102 @@ public class ProductService {
         }
     }
 
-    public Product create(Product product) {
-        Date now = new Date();
-        if(productRepository.isExist(product.getName(), product.getCode()).isPresent()) {
-            throw new AlreadyExist("Sản phẩm", product.getName());
-        }
-        product.setDeleted(false);
-        product.setEnabled(true);
-        category.setCreated_date(now);
-        category.setLast_modified(now);
-
-        return categoryRepository.save(category);
-    }
-
-    public Category getCategoryById(int id) {
-        Optional<Category> optCategory = categoryRepository.findById(id);
-        if(optCategory.isPresent()) {
-            return (Category) optCategory.get();
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục có id " + id);
-        }
-    }
-
-    public Map<String, Object> getCategories(String name, Pageable pageable) {
+    @Transactional
+    public ProductDto create(Map<String, String> headers, Product product) {
         try {
-            List<Category> categories = new ArrayList<>();
-            Page<Category> pageCategories;
-            if(name == null) {
-                pageCategories = categoryRepository.findAll(pageable);
-            } else {
-                pageCategories = categoryRepository.findByNameContaining(name, pageable);
+            Date now = new Date();
+            if(productRepository.isExist(product.getName(), product.getCode()).isPresent()) {
+                throw new AlreadyExist("Sản phẩm");
             }
-            categories = pageCategories.getContent();
+            User user = userService.getUserById(1);
+
+            product.setDeleted(false);
+            product.setCreatedDate(now);
+            Category category = categoryRepository.findById(product.getCategory().getId()).orElse(null);
+            if(category != null)
+                product.setCategory(category);
+            product.setCreator(user);
+            productRepository.save(product);
+
+            return product.toDto();
+        } catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public Map<String, Object> getProducts(String name, Pageable pageable) {
+        try {
+            List<Product> products = new ArrayList<>();
+            List<ProductDto> productDtoList = new ArrayList<>();
+            Page<Product> pageProducts;
+//            if(name == null) {
+                pageProducts = productRepository.findAll(pageable);
+//            }
+//            } else {
+//                pageProducts = productRepository.findByNameContaining(name, pageable);
+//            }
+            products = pageProducts.getContent();
+            products.stream().map(ProductDto::new).forEach(productDtoList::add);
             Map<String, Object> response = new HashMap<>();
-            response.put("categories", categories);
-            response.put("curPage", pageCategories.getNumber());
-            response.put("totalPage", pageCategories.getTotalPages());
-            response.put("totalElements", pageCategories.getTotalElements());
-            response.put("pageSize", pageCategories.getSize());
-            response.put("numberOfElements", pageCategories.getNumberOfElements());
+            response.put("products", productDtoList);
+            response.put("curPage", pageProducts.getNumber());
+            response.put("totalPage", pageProducts.getTotalPages());
+            response.put("totalElements", pageProducts.getTotalElements());
+            response.put("pageSize", pageProducts.getSize());
+            response.put("numberOfElements", pageProducts.getNumberOfElements());
             return response;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Thực hiện không thành công. Vui lòng thử lại sau");
         }
     }
 
+    @Transactional
     public void deleteById(int id) {
         try {
-            categoryRepository.deleteById(id);
+            Optional<Product> productOpt = productRepository.findById(id);
+            if(!productOpt.isPresent()) {
+                throw new NoSuchElementException("Sản phẩm", "id", String.valueOf(id));
+            } else {
+                Product product = productOpt.get();
+                if(product.isDeleted()) {
+                    productRepository.deleteById(id);
+                } else {
+                    productRepository.updateDeletedById(id, true);
+                }
+            }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Thực hiện không thành công. Vui lòng thử lại sau");
         }
     }
 
-    public Category updateCategory(int id, Category updatedCategory) {
+    @Transactional
+    public ProductDto updateProduct(int id, Product updatedProduct) {
         try {
-            Optional<Category> optCategory = categoryRepository.findById(id);
-            if(optCategory.isPresent()) {
-                Category category = optCategory.get();
-                updatedCategory.applyToCategory(category);
-                categoryRepository.save(category);
-                return category;
+            Optional<Product> optProduct = productRepository.findById(id);
+            if(optProduct.isPresent()) {
+                Product product = optProduct.get();
+                updatedProduct.applyToProduct(product);
+                productRepository.save(product);
+                return product.toDto();
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục có id " + id);
             }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @Transactional
+    public ProductDto updateSellStatus(int id, ProductDto productDto) {
+        try {
+            Optional<Product> product = productRepository.findById(id);
+            if(!product.isPresent()) {
+                throw new NoSuchElementException("Sản phẩm", "id", String.valueOf(id));
+            }
+            Product updatedProduct = product.get();
+            updatedProduct.setStopCell(productDto.isStopCell());
+            productRepository.save(updatedProduct);
+            return updatedProduct.toDto();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }

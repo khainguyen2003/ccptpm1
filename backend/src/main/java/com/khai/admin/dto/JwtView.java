@@ -15,6 +15,8 @@ public class JwtView {
 
     @JsonProperty("access_token")
     private String accessToken;
+    @JsonProperty("refresh_token")
+    private String refreshToken;
     @JsonProperty("user_details")
     private UserView userDetails;
 }

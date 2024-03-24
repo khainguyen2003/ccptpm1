@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -8,7 +8,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 @Component({
   selector: 'add-department-modal',
   standalone: true,
-  imports: [DialogModule, ButtonModule, InputTextModule, RadioButtonModule],
+  imports: [DialogModule, ButtonModule, InputTextModule, RadioButtonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './add-department-modal.component.html',
   styleUrl: './add-department-modal.component.scss'
 })

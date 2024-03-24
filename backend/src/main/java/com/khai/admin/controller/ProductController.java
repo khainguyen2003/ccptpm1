@@ -1,5 +1,6 @@
 package com.khai.admin.controller;
 
+import com.khai.admin.dto.ProductDto;
 import com.khai.admin.entity.Category;
 import com.khai.admin.entity.Product;
 import com.khai.admin.service.HttpServices;
@@ -20,7 +21,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@RestController("/api/admin/products")
+@CrossOrigin("*")
+@RestController
+@RequestMapping("/test/api/admin/products")
 public class ProductController {
     private ProductService productService;
     private final HttpServices httpServices;
@@ -31,7 +34,7 @@ public class ProductController {
             HttpServices httpServices
     ) {
         this.productService = productService;
-        this.httpServices = httpServices
+        this.httpServices = httpServices;
     }
 
 //    public ResponseEntity<Page<Product>> getProducts()
@@ -48,8 +51,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createProduct(@RequestBody Category category) {
-        Category result = productService.create(category);
+    public ResponseEntity<ProductDto> createProduct(@RequestHeader Map<String, String> headers, @RequestBody Product product) {
+        ProductDto result = productService.create(headers, product);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
     @GetMapping
@@ -58,7 +61,7 @@ public class ProductController {
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(defaultValue = "0") short page,
             @RequestParam(defaultValue = "5") short size,
-            @RequestParam(defaultValue = "id,desc") String[] sort
+            @RequestParam(defaultValue = "id:asc") String sort
     ) {
         List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
@@ -66,18 +69,24 @@ public class ProductController {
         return ResponseEntity.status(200).body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getProduct(@PathVariable("id") int id) {
-        Category response = productService.getProductInfo(id);
+    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") int id) {
+        ProductDto response = productService.getProductInfo(id);
         return ResponseEntity.ok(response);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable("id") int id) {
         productService.deleteById(id);
-        return ResponseEntity.ok("Xóa danh mục thành công");
+        return ResponseEntity.ok("Xóa sản phẩm thành công");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateProduct(@PathVariable("id") int id, @RequestBody Product product) {
-        Category updatedCategory = productService.updateProduct(id, product);
-        return ResponseEntity.ok(updatedCategory);
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") int id, @RequestBody Product product) {
+        ProductDto updatedProduct = productService.updateProduct(id, product);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @PutMapping("/sellstatus/{id}")
+    public ResponseEntity<ProductDto> updateSellStatus(@PathVariable("id") int id, @RequestBody ProductDto productDto) {
+        ProductDto res = productService.updateSellStatus(id, productDto);
+        return ResponseEntity.ok(res);
     }
 }

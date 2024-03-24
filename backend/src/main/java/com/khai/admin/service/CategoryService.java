@@ -30,6 +30,7 @@ public class CategoryService {
         category.setEnabled(true);
         category.setCreated_date(now);
         category.setLast_modified(now);
+        System.out.println(category);
 
         return categoryRepository.save(category);
     }
@@ -37,7 +38,7 @@ public class CategoryService {
     public Category getCategoryById(int id) {
         Optional<Category> optCategory = categoryRepository.findById(id);
         if(optCategory.isPresent()) {
-            return (Category) optCategory.get();
+            return optCategory.get();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục có id " + id);
         }
