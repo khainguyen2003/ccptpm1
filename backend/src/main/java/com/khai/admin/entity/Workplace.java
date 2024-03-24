@@ -53,7 +53,7 @@ public class Workplace {
     @Column(name = "workplace_status", columnDefinition = "smallint(1) NOT NULL DEFAULT '1' COMMENT 'Trạng thái của gian hàng'")
     private byte status;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "workplace_manager_id", referencedColumnName = "workplace_id")
+    @JoinColumn(name = "workplace_manager_id", referencedColumnName = "user_id")
     private User user;
     @Column(name = "workplace_website_link", columnDefinition = "varchar(100) DEFAULT NULL COMMENT 'Đường dẫn liên kết đến trang web làm việc'")
     private String website_link;
@@ -62,13 +62,13 @@ public class Workplace {
     @CreatedDate
     @Column(name = "workplace_created_date")
     private Date created_date;
-    @LastModifiedBy
-    @Column(name = "workplace_last_modified_id", columnDefinition = "int(11) DEFAULT NULL COMMENT 'Người chỉnh sửa lần cuối'")
+    @ManyToOne
+    @JoinColumn(name = "workplace_last_modified_id")
     private User last_modified_by;
     @LastModifiedDate
     @Column(name = "workplace_last_modified_date")
     private Date last_modified_time;
-    @Column(name = "workplace_deleted", columnDefinition = "smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Trạng thái xóa'")
+    @Column(name = "workplace_deleted", columnDefinition = "BIT(1) DEFAULT b'0' COMMENT 'Trạng thái xóa'")
     private byte isDeleted;
     @Column(name = "workplace_images", columnDefinition = "varchar(255) DEFAULT NULL COMMENT 'Hình ảnh gian hàng'")
     private String images;
@@ -82,9 +82,10 @@ public class Workplace {
     private String phone;
     @Column(name = "workplace_email")
     private String email;
-    @CreatedBy
-    @Column(name = "workplace_creator_id")
+    @ManyToOne
+    @JoinColumn(name = "workplace_creator_id")
     private User creator;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "workplace")
     private List<WorkplaceDetail> wpdList;
+
 }

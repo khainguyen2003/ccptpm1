@@ -22,7 +22,7 @@ public class BillDetail {
     private int quantity;
     @Column(name = "bd_product_price")
     private int price;
-    @Column(name = "bd_product_discount", columnDefinition = "DECIMAL(5, 10) DEFAULT 0")
+    @Column(name = "bd_product_discount", columnDefinition = "DECIMAL(10, 5) DEFAULT 0")
     private float discount;
     @Column(name = "bill_type", columnDefinition = "TINYINT(1)")
     private byte type;

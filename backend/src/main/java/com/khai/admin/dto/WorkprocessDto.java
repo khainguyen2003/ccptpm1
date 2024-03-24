@@ -1,2 +1,4 @@
-package com.khai.admin.dto;public class WorkprocessDto {
+package com.khai.admin.dto;
+
+public class WorkprocessDto {
 }

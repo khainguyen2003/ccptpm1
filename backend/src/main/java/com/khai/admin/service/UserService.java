@@ -76,6 +76,13 @@ public class UserService {
         userView.loadFromUser(user.get());
         return userView;
     }
+    public User getUserById(int id) {
+        Optional<User> user = userRepository.findUserById(id);
+        if(user.isEmpty()) {
+            throw new UsernameNotFoundException("Tên tài khoản không tồn tại");
+        }
+        return user.get();
+    }
 
     public UserView getUserInfoByEmail(String email) {
         Optional<User> user = userRepository.findFirstByEmail(email);
@@ -132,24 +139,24 @@ public class UserService {
      * @param user
      * @return
      */
-    public JwtView login(User user) {
-        try {
-//            String passworEncoded = passwordEncoder.encode(user.getPass());
-            System.out.println(user);
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
-            );
-
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String accessToken = jwtService.generateAccessToken(userDetails);
-            UserView userView = new UserView();
-            userView.loadFromUser(user);
-
-            return new JwtView(accessToken, userView);
-        } catch (AuthenticationException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
-        }
-    }
+//    public JwtView login(User user) {
+//        try {
+////            String passworEncoded = passwordEncoder.encode(user.getPass());
+//            System.out.println(user);
+//            Authentication authentication = authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+//            );
+//
+//            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//            String accessToken = jwtService.generateAccessToken(userDetails);
+//            UserView userView = new UserView();
+//            userView.loadFromUser(user);
+//
+//            return new JwtView(accessToken, userView);
+//        } catch (AuthenticationException e) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
+//        }
+//    }
 
     /**
      * Các bước login
@@ -176,11 +183,12 @@ public class UserService {
             }
 
             KeyPair keyPair = keyTokenService.generateKeyPair();
-            String accessToken = jwtService.generateAccessToken(userDetails);
+            String accessToken = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
+            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
             UserView userView = new UserView();
             userView.loadFromUser(user);
 
-            return new JwtView(accessToken, userView);
+            return new JwtView(accessToken, refreshToken, userView);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
         }
@@ -215,30 +223,32 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
             }
             KeyPair keyPair = keyTokenService.generateKeyPair();
+            String accessKey = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
+            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
             UserView userView = new UserView();
             userView.loadFromUser(user);
 
-            return new JwtView(accessToken, userView);
+            return new JwtView(accessKey, refreshToken, userView);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
         }
     }
 
-    public JwtView refreshToken(JwtView jwtView, String signinKey) {
-        boolean isExpiredAccessToken = jwtServiceV2.isExpired(jwtView.getAccessToken(), signinKey);
-        Claims claims = jwtServiceV2.parseToken(jwtView.getAccessToken(), signinKey);
-
-        String newAccessToken = jwtView.getAccessToken();
-        if (isExpiredAccessToken) {
-            newAccessToken = jwtServiceV2.generateAccessToken(username, signinKey);
-        }
-
-        JwtView res = JwtView.builder()
-                .accessToken(newAccessToken)
-                .build();
-
-        return res;
-    }
+//    public JwtView refreshToken(JwtView jwtView, String signinKey) {
+//        boolean isExpiredAccessToken = jwtServiceV2.isExpired(jwtView.getAccessToken(), signinKey);
+//        Claims claims = jwtServiceV2.parseToken(jwtView.getAccessToken(), signinKey);
+//
+//        String newAccessToken = jwtView.getAccessToken();
+//        if (isExpiredAccessToken) {
+//            newAccessToken = jwtServiceV2.generateAccessToken(username, signinKey);
+//        }
+//
+//        JwtView res = JwtView.builder()
+//                .accessToken(newAccessToken)
+//                .build();
+//
+//        return res;
+//    }
 
 //    public boolean create(UserCreateDto userCreateDto) {
 //        if(userRepository.findFirstByEmail(userCreateDto.getEmail()).isPresent() ) {
@@ -275,6 +285,7 @@ public class UserService {
         if(userRepository.findFirstByEmail(userCreateDto.getEmail()).isPresent() ) {
             throw new AlreadyExist("Email", userCreateDto.getEmail());
         } else {
+            Date now = new Date();
             String passworEncoded = passwordEncoder.encode(userCreateDto.getPassword());
             User user = User.builder()
                     .username(userCreateDto.getEmail())
@@ -284,7 +295,8 @@ public class UserService {
                     .password(passworEncoded)
                     .phone(userCreateDto.getPhoneNumber())
                     .active(true)
-                    .createdAt(new Date())
+                    .createdAt(now)
+                    .lastModified(now)
                     .role(userCreateDto.getUserRole())
                     .build();
             try {

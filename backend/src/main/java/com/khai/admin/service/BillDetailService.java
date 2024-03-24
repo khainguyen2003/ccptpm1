@@ -1,2 +1,7 @@
-package com.khai.admin.service;public class BillDetailService {
+package com.khai.admin.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class BillDetailService {
 }

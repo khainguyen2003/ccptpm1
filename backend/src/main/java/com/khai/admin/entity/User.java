@@ -1,5 +1,6 @@
 package com.khai.admin.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.khai.admin.constants.UserRole;
 import com.khai.admin.dto.user.UserView;
 import com.khai.admin.entity.security.KeyStore;
@@ -43,9 +44,9 @@ public class User {
     private Date createdAt;
     @Column(name = "last_modified")
     private Date lastModified;
-    @Column(columnDefinition = "BIT(1) DEFAULT 0")
+    @Column(columnDefinition = "BIT(1) DEFAULT b'0'")
     private boolean deleted;
-    @Column(columnDefinition = "BIT(1) DEFAULT 1")
+    @Column(columnDefinition = "BIT(1) DEFAULT b'1'")
     private boolean active;
     @Column(name = "apply_year")
     private short applyYear;
@@ -68,7 +69,20 @@ public class User {
     @PrimaryKeyJoinColumn
     private KeyStore keyStore;
 
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Log> logCreatedList;
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Product> createdProduct;
 
+    @OneToMany(mappedBy = "last_modified_by", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Workplace> lastModifiedWorkplace;
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Workplace> createdWorkplace;
 
     public UserView toUserview() {
         UserView userView = new UserView();

@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 @Slf4j
 public class JwtServiceV2 {
-    private final KeyTokenService keyTokenService;
+    private KeyTokenService keyTokenService;
 
     @Autowired
     public JwtServiceV2(KeyTokenService keyTokenService) {

@@ -27,7 +27,7 @@ public class LogController {
     public List<Log> getLogs(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size,
-            @RequestParam(defaultValue = "[created_time,desc']") String[] sort
+            @RequestParam(defaultValue = "created_time:desc") String sort
     ) {
         List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
         if(page < 1)
@@ -36,5 +36,7 @@ public class LogController {
             size = 5;
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
 
+
+        return null;
     }
 }

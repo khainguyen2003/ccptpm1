@@ -58,9 +58,9 @@ public class AuthenticationController {
         return ResponseEntity.ok(jwtView);
     }
 
-    @PostMapping("/refresh-token")
-    public ResponseEntity<JwtView> refreshToken(@RequestBody JwtView jwtView) {
-        JwtView response = userService.refreshToken(jwtView);
-        return ResponseEntity.ok(response);
-    }
+//    @PostMapping("/refresh-token")
+//    public ResponseEntity<JwtView> refreshToken(@RequestBody JwtView jwtView) {
+//        JwtView response = userService.refreshToken(jwtView);
+//        return ResponseEntity.ok(response);
+//    }
 }

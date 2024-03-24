@@ -1,5 +1,8 @@
 package com.khai.admin.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.khai.admin.dto.ProductDto;
+import com.khai.admin.dto.user.UserView;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
@@ -8,6 +11,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "tblproduct")
@@ -26,16 +30,17 @@ public class Product {
     @CreatedDate
     @Column(name = "product_created_date")
     private Date createdDate;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_created_id", referencedColumnName = "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    @JsonProperty("created_by")
+    private User creator;
+    @Column(name = "user_deleted", columnDefinition = "BIT(1) DEFAULT b'1'")
     private boolean deleted;
     // Có ngừng kinh doanh không
-    @Column(columnDefinition = "bit default 0")
+    @Column(columnDefinition = "bit default b'0'")
     private boolean isStopCell;
     // Có bán trục tiếp không
-    @Column(columnDefinition = "bit default 1")
+    @Column(columnDefinition = "bit default b'1'")
     private boolean isDirectCell;
     // <trọng lượng>:<đơn vị tính>
     private String weight;
@@ -45,28 +50,32 @@ public class Product {
     private float rate;
     // Các thuộc tính của sản phẩm
     private String attr;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne
+    @JoinColumn(name = "category_id", referencedColumnName = "pc_id")
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private WorkplaceDetail wpd;
+    private List<WorkplaceDetail> wpd;
 
     public void applyToProduct(Product product) {
-        this.id = product.id;
-        this.name = product.name;
-        this.description = product.description;
-        this.images = product.images;
-        this.createdDate = product.createdDate;
-        this.user = product.user;
-        this.deleted = product.deleted;
-        this.isStopCell = product.isStopCell;
-        this.isDirectCell = product.isDirectCell;
-        this.weight = product.weight;
-        this.code = product.code;
-        this.rate = product.rate;
-        this.attr = product.attr;
-        this.category = product.category;
+        if(!product.getName().isBlank()) {
+            this.name = product.getName();
+        }
+        this.description = product.getDescription();
+        this.images = product.getImages();
+        this.deleted = product.isDeleted();
+        this.isStopCell = product.isStopCell();
+        this.isDirectCell = product.isDirectCell();
+        this.weight = product.getWeight();
+        this.code = product.getCode();
+        this.rate = product.getRate();
+        this.attr = product.getAttr();
+        this.category = product.getCategory();
+    }
+
+    public ProductDto toDto() {
+        UserView createdBy = new UserView();
+        createdBy.loadFromUser(creator);
+        return new ProductDto(this);
     }
 }

@@ -36,8 +36,8 @@ public class Log {
     @Column(name = "log_id", updatable = false)
     private int id;
 
-    @CreatedBy
-    @Column(name="log_creator_id", columnDefinition = "INT(11) NOT NULL COMMENT 'ID người khởi tạo'")
+    @ManyToOne
+    @JoinColumn(name = "log_creator_id")
     private User creator;
     @Column(name="log_user_permission", columnDefinition = "smallint(1) unsigned NOT NULL COMMENT 'Quyền của người dùng'")
     private byte permis;

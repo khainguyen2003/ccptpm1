@@ -1,2 +1,4 @@
-package com.khai.admin.dto;public class ExportBillDto {
+package com.khai.admin.dto;
+
+public class ExportBillDto {
 }

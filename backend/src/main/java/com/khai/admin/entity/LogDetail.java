@@ -1,17 +1,16 @@
 package com.khai.admin.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Objects;
 
 @Entity
-@Table(name = "tblLogDetail")
+@Table(name = "tbl_log_detail")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 public class LogDetail {
     @EmbeddedId
     private LogDetailKey key;

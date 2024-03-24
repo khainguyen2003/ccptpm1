@@ -21,7 +21,7 @@ public class ImportBill {
     @Column(name = "bi_created_date")
     private Date created_date;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "creator_id", referencedColumnName = "id")
+    @JoinColumn(name = "creator_id", referencedColumnName = "user_id")
     private User user;
     @Column(name = "bill_transporter_id")
     private int transporter_id;
