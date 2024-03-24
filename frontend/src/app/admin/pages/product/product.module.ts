@@ -56,9 +56,10 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
         EditorModule,
         AddDepartmentModalComponent,
         AddCategoryModalComponent,
-        CarouselModule
+        CarouselModule,
+        
     ],
-    providers: [ProductService],
+     providers: [ProductService],
     declarations: [ProductComponent]
 })
 export class ProductModule { }
