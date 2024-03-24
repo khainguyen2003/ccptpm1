@@ -28,6 +28,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // --------------
     Optional<User> findUserById(int id);
 
-    @Query("SELECT u FROM User u WHERE u.email=:username OR u.username=:username")
-    Optional<User> findFirstByUsername(@Param("username") String username);
+    @Query("SELECT u FROM User u WHERE u.email=:email")
+    Optional<User> findFirstByEmail(@Param("email") String email);
 }

@@ -14,7 +14,7 @@ public class BillDetail {
     @Column(name = "bd_bill_id")
     private int bill_id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "bd_product_id", referencedColumnName = "product_id")
     private Product product;
 
@@ -22,7 +22,7 @@ public class BillDetail {
     private int quantity;
     @Column(name = "bd_product_price")
     private int price;
-    @Column(name = "bd_product_discount", columnDefinition = "DECIMAL(5, 10) DEFAULT 0")
+    @Column(name = "bd_product_discount", columnDefinition = "DECIMAL(10, 5) DEFAULT 0")
     private float discount;
     @Column(name = "bill_type", columnDefinition = "TINYINT(1)")
     private byte type;

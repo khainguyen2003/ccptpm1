@@ -6,4 +6,7 @@ public class AlreadyExist extends RestClientException {
     public AlreadyExist(String className, String value) {
         super(String.format("%s có %s đã tồn tại", className, value));
     }
+    public AlreadyExist(String className) {
+        super(String.format("%s đã tồn tại", className));
+    }
 }

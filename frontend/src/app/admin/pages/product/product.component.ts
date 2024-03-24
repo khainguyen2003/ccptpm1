@@ -45,6 +45,8 @@ export class ProductComponent implements OnInit {
     selectedProducts: Product[] = [];
     submitted: boolean = false;
     cols: any[] = [];
+    expandedRows: expandedRows = {};
+    isExpanded: boolean = false;
     statuses: any[] = [];
     rowsPerPageOptions = [10, 25, 50];
     loading = false;
@@ -349,7 +351,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp02',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -359,7 +361,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp03',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -369,7 +371,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp04',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -379,7 +381,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp05',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -389,7 +391,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp06',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -399,7 +401,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp07',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -409,7 +411,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp08',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -419,7 +421,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp09',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -429,7 +431,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp10',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -439,7 +441,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp11',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -449,7 +451,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp12',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -459,7 +461,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp13',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -469,7 +471,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp14',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -479,7 +481,7 @@ export class ProductComponent implements OnInit {
                 status: 'Đang kinh doanh'
             },
             {
-                id: 'sp01',
+                id: 'sp15',
                 code: 'abbssgsfaf',
                 name: 'Điện thoại thông minh Oppo gen 9 M1',
                 image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
@@ -529,4 +531,8 @@ export class ProductComponent implements OnInit {
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
+}
+
+interface expandedRows {
+    [key: string]: boolean;
 }

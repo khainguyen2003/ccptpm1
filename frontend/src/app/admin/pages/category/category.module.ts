@@ -15,9 +15,12 @@ import { DropdownModule } from 'primeng/dropdown';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { CategoryRoutingModule } from './category-routing.module';
+import { AddCategoryModalComponent } from "../../components/add-category-modal/add-category-modal.component";
 
 @NgModule({
+    declarations: [CategoryComponent],
     imports: [
         CommonModule,
         TableModule,
@@ -35,8 +38,8 @@ import { CategoryRoutingModule } from './category-routing.module';
         InputNumberModule,
         DialogModule,
         CategoryRoutingModule,
-
-    ],
-    declarations: [CategoryComponent]
+        AddCategoryModalComponent,
+        InputSwitchModule,
+    ]
 })
 export class CategoryModule { }

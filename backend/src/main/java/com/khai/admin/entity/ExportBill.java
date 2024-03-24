@@ -22,15 +22,17 @@ public class ExportBill {
     @Column(name = "be_created_date")
     private Date created_date;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "creator_id", referencedColumnName = "id")
+    @JoinColumn(name = "creator_id", referencedColumnName = "user_id")
     private User user;
-    @Column(name = "be_customer_id")
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "be_customer_id", referencedColumnName = "user_id")
     private User be_customer_id;
     @Column(name = "be_current_workplace_id")
     private int be_current_workplace_id;
     @Column(name = "be_target_address")
     private String be_target_address;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "bd_id", referencedColumnName = "bd_bill_id")
+    @JoinColumn(name = "bd_id", referencedColumnName = "be_id")
     private List<BillDetail> billDetails;
 }
