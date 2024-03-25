@@ -17,33 +17,35 @@ export class CategoryService {
         private headerService: HeaderService
     ){}
 
-    getCategories(value: string = ""):  Observable<any>{
+    getCategories(value : string = ""):  Observable<any>{
         var params = new HttpParams();
         if(value != null) {
             params.set('filter', value);
         }
         return this.http.get(this.categoryApi, {
-            params
+            headers: this.headerService.createAuthorizationHeader()
         });
     }
     getCategoryById(id: string): Observable<any> {
         return this.http.get(this.categoryApi, {
             params: new HttpParams().set('id', id),
+            headers: this.headerService.createAuthorizationHeader()
         });
     }
     createCategory(form: any): Observable<any> {
-        console.log(this.categoryApi);
-        
-        return this.http.post(this.categoryApi, form);
+        return this.http.post(this.categoryApi, form, {
+            headers: this.headerService.createAuthorizationHeader()
+        });
     }
     deleteCategory(id: any): Observable<any> {
-        return this.http.delete(this.categoryApi + '/' + id);
+        return this.http.delete(this.categoryApi + '/' + id, {
+            headers: this.headerService.createAuthorizationHeader()
+        });
     }
 
     updateCategory(category: Category) : Observable<any> {
-        return this.http.put(`${this.categoryApi}/${category.id}`, category,
-            {
-                //headers: this.headerService.createAuthorizationHeader()
+        return this.http.put(`${this.categoryApi}/${category.id}`, category,{
+                headers: this.headerService.createAuthorizationHeader()
             }
         );
     }
