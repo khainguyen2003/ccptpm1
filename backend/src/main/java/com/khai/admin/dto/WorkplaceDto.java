@@ -1,14 +1,19 @@
 package com.khai.admin.dto;
 
 import com.khai.admin.entity.User;
+import com.khai.admin.entity.Workplace;
 import com.khai.admin.entity.WorkplaceDetail;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
 public class WorkplaceDto {
     private int id;
     private String name;
@@ -30,4 +35,22 @@ public class WorkplaceDto {
     private String email;
     private User creator;
     private List<WorkplaceDetailDto> wpdList;
+
+    public WorkplaceDto(Workplace workplace){
+        this.id = workplace.getId();
+        if (!workplace.getName().isBlank()){
+            this.name = workplace.getName();
+        }
+        this.type = workplace.getType();
+
+    }
+
+    public WorkplaceDto() {
+    }
+
+    public void applyToEntity(Workplace workplace){
+        if (!this.name.isBlank()){
+            workplace.setName(this.name);
+        }
+    }
 }
