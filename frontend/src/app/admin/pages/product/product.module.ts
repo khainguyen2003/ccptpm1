@@ -24,11 +24,15 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { TabViewModule } from 'primeng/tabview';
 import { EditorModule } from 'primeng/editor';
 import { AddDepartmentModalComponent } from '../../components/add-department-modal/add-department-modal.component';
+import { CarouselModule } from 'primeng/carousel';
+import { BadgeModule } from 'primeng/badge';
+import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
 
 @NgModule({
     imports: [
         CommonModule,
         TableModule,
+        BadgeModule,
         FileUploadModule,
         FormsModule,
         ReactiveFormsModule,
@@ -50,9 +54,12 @@ import { AddDepartmentModalComponent } from '../../components/add-department-mod
         MultiSelectModule,
         TabViewModule,
         EditorModule,
-        AddDepartmentModalComponent
+        AddDepartmentModalComponent,
+        AddCategoryModalComponent,
+        CarouselModule,
+        
     ],
-    providers: [ProductService],
+     providers: [ProductService],
     declarations: [ProductComponent]
 })
 export class ProductModule { }

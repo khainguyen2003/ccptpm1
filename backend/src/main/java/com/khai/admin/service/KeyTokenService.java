@@ -1,6 +1,6 @@
 package com.khai.admin.service;
 
-import com.khai.admin.entity.security.Token;
+import com.khai.admin.entity.security.KeyStore;
 import com.khai.admin.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -17,6 +17,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 public class KeyTokenService {
@@ -29,9 +30,9 @@ public class KeyTokenService {
     }
 
     public String createToken(int userId, PublicKey publicKey) {
-        Token newToken = new Token(userId, publicKey.toString());
+        KeyStore newToken = new KeyStore(userId, publicKey.toString());
         try {
-            Token token = tokenRepository.save(newToken);
+            KeyStore token = tokenRepository.save(newToken);
             return publicKey.toString();
         } catch(DataAccessException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -44,13 +45,31 @@ public class KeyTokenService {
         KeyPairGenerator generator = null;
         try {
             generator = KeyPairGenerator.getInstance("RSA");
-            KeyPair pair = generator.generateKeyPair();
+            generator.initialize(4096);
+            KeyPair pair= generator.generateKeyPair();
             return pair;
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
 
     }
+
+    public void deleteTokenById(int id) {
+        this.tokenRepository.deleteById(id);
+    }
+
+    public KeyStore getKeyStoreByUserId(int userId) {
+        Optional<KeyStore> keyStore = tokenRepository.findByUserId(userId);
+        if(keyStore.isPresent()) {
+            return keyStore.get();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy keystore");
+        }
+    }
+
+//    public String handleRefreshToken(String refreshToken) {
+//
+//    }
 
     public String encrypt(String content, Key pubKey) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         byte[] contentBytes = content.getBytes();

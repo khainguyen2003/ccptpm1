@@ -2,13 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Product } from '../../models/product';
 import { Observable, map } from 'rxjs';
-import { category } from 'src/app/models/category';
+import { Category } from 'src/app/models/category';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ProductService {
-    private productApi = 'http://localhost:8080/admin/api/products';
+    private productApi = environment.testApiUrl + '/admin/products';
     constructor(private http: HttpClient) {}
 
     getProducts(
@@ -30,22 +31,6 @@ export class ProductService {
             .pipe(map((res) => res['payload']));
     }
 
-    // getProductsMixed() {
-    //     return this.http
-    //         .get<any>('assets/demo/data/products-mixed.json')
-    //         .toPromise()
-    //         .then((res) => res.data as Product[])
-    //         .then((data) => data);
-    // }
-
-    // getProductsWithOrdersSmall() {
-    //     return this.http
-    //         .get<any>('assets/demo/data/products-orders-small.json')
-    //         .toPromise()
-    //         .then((res) => res.data as Product[])
-    //         .then((data) => data);
-    // }
-
     findProductById(productId: number): Observable<Product> {
         return this.http.get<Product>(this.productApi + '/' + productId);
     }
@@ -57,7 +42,7 @@ export class ProductService {
             );
     }
   
-    findAllProductCategories(catId:number): Observable<category[]> {
+    findAllProductCategories(catId:number): Observable<Category[]> {
         return this.http.get('/api/categories', {
             params: new HttpParams()
                 .set('cid', catId.toString())
@@ -76,5 +61,8 @@ export class ProductService {
                 .set('ps', pageSize)
                 .set('s', sortColumn)
         });
+    }
+    createProduct(form: any): Observable<any> {
+        return this.http.post(this.productApi, form);
     }
 }

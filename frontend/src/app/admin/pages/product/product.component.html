@@ -28,7 +28,6 @@
                                 </ul> -->
                             </ng-template>
                         </p-fileUpload>
-
                     </p-dialog>
                     <button pButton type="button" (click)="menu.toggle($event)" (hover)="menu.toggle($event)"
                         icon="pi pi-file-import" label="Nhập dữ liệu" class="mr-3"></button>
@@ -37,14 +36,20 @@
                 </ng-template>
             </p-toolbar>
 
-            <p-table #dt [value]="products" [columns]="cols" responsiveLayout="scroll"
-                (sortFunction)="customSort($event)" [customSort]="true" [paginator]="true" [rows]="10"
-                (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" [scrollable]="true"
-                scrollHeight="500px" [virtualScroll]="true" [virtualScrollItemSize]="46"
-                [globalFilterFields]="['name','country.name','representative.name','status']"
-                (onLazyLoad)="loadProductsPage($event)" [loading]="loading" [showCurrentPageReport]="true"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                [(selection)]="selectedProducts" selectionMode="multiple" [rowHover]="true" dataKey="id">
+            <p-table #dt [value]="products" dataKey="id" 
+                (sortFunction)="customSort($event)" [customSort]="true" 
+                [paginator]="true" [rows]="10"
+                (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" 
+                currentPageReportTemplate="Hiển thị {first} - {last}/ Tổng số {totalRecords} hàng hóa"
+                responsiveLayout="scroll" [scrollable]="true" scrollHeight="500px"
+                [resizableColumns]="true"  columnResizeMode="expand"
+                [virtualScroll]="true" [virtualScrollItemSize]="46"
+                (onLazyLoad)="loadProductsPage($event)" [loading]="loading" 
+                [showCurrentPageReport]="true" 
+                [(selection)]="selectedProducts" selectionMode="multiple" 
+                [rowHover]="true"
+                [expandedRowKeys]="expandedRows"
+                >
                 <ng-template pTemplate="caption">
                     <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                         <h5 class="m-0">Manage Products</h5>
@@ -57,51 +62,62 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 3rem">
+                        <th>
                             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                         </th>
-                        <th pSortableColumn="code">Code <p-sortIcon field="code"></p-sortIcon></th>
-                        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-                        <th>Image</th>
-                        <th pSortableColumn="price">Price <p-sortIcon field="price"></p-sortIcon></th>
-                        <th pSortableColumn="category">Category <p-sortIcon field="category"></p-sortIcon></th>
-                        <th pSortableColumn="rating">Reviews <p-sortIcon field="rating"></p-sortIcon></th>
-                        <th pSortableColumn="inventoryStatus">Status <p-sortIcon field="inventoryStatus"></p-sortIcon>
+                        <th></th>
+                        <th pSortableColumn="id">Mã hàng <p-sortIcon field="id"></p-sortIcon></th>
+                        <th pSortableColumn="code">Mã vạch <p-sortIcon field="code"></p-sortIcon></th>
+                        <th pSortableColumn="name">Tên hàng <p-sortIcon field="name"></p-sortIcon></th>
+                        <th pSortableColumn="importPrice">Giá vốn<p-sortIcon field="importPrice"></p-sortIcon></th>
+                        <th pSortableColumn="sellPrice">Giá bán<p-sortIcon field="sellPrice"></p-sortIcon></th>
+                        <th pSortableColumn="category">Nhóm hàng<p-sortIcon field="category"></p-sortIcon></th>
+                        <th pSortableColumn="inventory">Tồn kho<p-sortIcon field="inventory"></p-sortIcon></th>
+                        <th pSortableColumn="position">Vị trí<p-sortIcon field="position"></p-sortIcon></th>
+                        <th pSortableColumn="status">Trạng thái<p-sortIcon field="status"></p-sortIcon>
                         </th>
                         <th></th>
                     </tr>
                 </ng-template>
 
-                <ng-template pTemplate="body" let-product>
+                <ng-template pTemplate="body" let-product let-expanded="expanded">
                     <tr>
                         <td>
                             <p-tableCheckbox [value]="product"></p-tableCheckbox>
                         </td>
-                        <td style="width:14%; min-width:10rem;"><span class="p-column-title">Code</span>
-                            {{product.code || product.id}}
-                        </td>
-                        <td style="width:14%; min-width:10rem;">
-                            <span class="p-column-title">Name</span>
-                            {{product.name}}
-                        </td>
-                        <td style="width:14%; min-width:10rem;"><span class="p-column-title">Image</span>
-                            <img [src]="'assets/demo/images/product/' + product.image" [alt]="product.name" width="100"
+                        <td >
+                            <img [src]="product.image" [alt]="product.name" width="50"
                                 class="shadow-4" />
                         </td>
+                        <td ><span class="p-column-title">Mã hàng</span>
+                            {{product.id}}
+                        </td>
+                        <td ><span class="p-column-title">Mã vạch</span>
+                            {{product.code}}
+                        </td>
+                        <td >
+                            <span class="p-column-title">Tên hàng</span>
+                            {{product.name}}
+                        </td>
                         <td style="width:14%; min-width:8rem;">
-                            <span class="p-column-title">Price</span>
-                            {{product.price | currency:'USD'}}
+                            <span class="p-column-title">Giá vốn</span>
+                            {{product.importPrice}}
                         </td>
-                        <td style="width:14%; min-width:10rem;">
-                            <span class="p-column-title">Category</span>
-                            {{product.category}}
+                        <td >
+                            <span class="p-column-title">Giá bán</span>
+                            {{product.sellPrice}}
                         </td>
-                        <td style="width:14%; min-width: 10rem;"><span class="p-column-title">Reviews</span>
-                            <p-rating [ngModel]="product.rating" [readonly]="true" [cancel]="false"></p-rating>
+                        <td ><span class="p-column-title">Nhóm hàng</span>
+                            <span [ngModel]="product.category" [readonly]="true" [cancel]="false"></span>
                         </td>
-                        <td style="width:14%; min-width: 10rem;"><span class="p-column-title">Status</span>
-                            <span
-                                [class]="'product-badge status-' + (product.inventoryStatus ? product.inventoryStatus.toLowerCase() : '')">{{product.inventoryStatus}}</span>
+                        <td ><span class="p-column-title">Tồn kho</span>
+                            <span [ngModel]="product.inventory" [readonly]="true" [cancel]="false"></span>
+                        </td>
+                        <td ><span class="p-column-title">Vị trí</span>
+                            <span [ngModel]="product.position" [readonly]="true" [cancel]="false"></span>
+                        </td>
+                        <td><span class="p-column-title">Trạng thái</span>
+                            <span>{{product.status}}</span>
                         </td>
                         <td>
                             <div class="flex">
@@ -114,6 +130,65 @@
                         </td>
                     </tr>
                 </ng-template>
+                <!-- expansion details -->
+                <!-- <ng-template pTemplate="rowexpansion" let-product>
+                    <tr>
+                        <td colspan="10">
+                            <p-tabView>
+                                <p-tabPanel header="Thông tin">
+                                    <div>
+                                        <h3 class="font-xl font-semibold">{{product.name}}</h3>
+                                        <div class="grid">
+                                            <div class="lg:col-4 col-12">
+                                                <p-carousel [value]="imgUploadedUrl" [numVisible]="1" [numScroll]="1" [circular]="false" [responsiveOptions]="responsiveOptions" [circular]="true" autoplayInterval="3000">
+                                                    <ng-template let-image pTemplate="item">
+                                                        <div class="border-1 surface-border border-round m-2 text-center py-5 px-3">
+                                                            <div class="mb-3">
+                                                                <img src="image" alt="Xem ảnh phóng to" class="w-6 shadow-2" />
+                                                            </div>
+                                                        </div>
+                                                    </ng-template>
+                                                </p-carousel>
+                                            </div>
+                                            <div class="lg:col-4 col-12">
+                                                <div class="grid">
+                                                    <p style="width: 100px;" class="col-fix">Mã hàng</p>
+                                                    <p class="col">{{product.id}}</p>
+                                                </div>
+                                                <div class="grid">
+                                                    <p style="width: 100px;" class="col-fix">Mã vạch</p>
+                                                    <p class="col">{{product.code}}</p>
+                                                </div>
+                                                <div class="grid">
+                                                    <p style="width: 100px;" class="col-fix">Tên hàng</p>
+                                                    <p class="col">{{product.name}}</p>
+                                                </div>
+                                                <div class="grid">
+                                                    <p style="width: 100px;" class="col-fix">Nhóm hàng</p>
+                                                    <p class="col">{{product.category}}</p>
+                                                </div>
+                                                <div class="grid">
+                                                    <p style="width: 100px;" class="col-fix">Giá bán</p>
+                                                    <p class="col">{{product.sellPrice}}</p>
+                                                </div>
+                                                <div class="grid">
+                                                    <p style="width: 100px;" class="col-fix">Giá vốn</p>
+                                                    <p class="col">{{product.importPrice}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="lg:col-4 col-12">
+                                                <div>
+                                                    <p>Mô tả</p>
+                                                    <p>{{product.desc}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </p-tabPanel>
+                            </p-tabView>
+                        </td>
+                    </tr>
+                </ng-template> -->
                 <!-- Skeleton-loading -->
                 <ng-template pTemplate="loadingbody" let-columns="columns">
                     <tr style="height:46px">
@@ -133,7 +208,7 @@
         </div>
 
         <!-- Add product dialog -->
-        <p-dialog [(visible)]="productDialog" header="Thêm hàng" [modal]="true" class="p-fluid"
+        <p-dialog [(visible)]="addDialogVisible" header="Thêm hàng" [modal]="true" class="p-fluid"
             [breakpoints]="{ '960px': '90vw' }" [style]="{ width: '75vw'}" [maximizable]="true">
             <ng-template pTemplate="content">
                 <form [formGroup]="addForm">
@@ -155,10 +230,11 @@
                                     </div>
                                     <div class="field grid">
                                         <label for="cate" class="col-fixed" style="width:100px; padding-left: 0;">Nhóm hàng</label>
-                                        <div class="col">
+                                        <div class="col flex">
                                             <p-multiSelect [options]="categories" id="cate" formControlName="categories"
                                                 optionLabel="name" placeholder="Thể loại" scrollHeight="250px"
-                                                display="chip"></p-multiSelect>
+                                                display="chip" class="flex-1"></p-multiSelect>
+                                            <p-button icon="pi pi-plus" [text]="true" [rounded]="true" class="ml-1" (click)="showAddCategoryDialog()"></p-button>
                                         </div>
                                     </div>
                                 </div>
@@ -168,43 +244,48 @@
                                             nhập</label>
                                         <div class="col">
                                             <p-inputNumber 
-                                                id="importPrice" mode="currency" currency="USD"
-                                                locale="en-US" formControlName="importPrice"
+                                                id="importPrice" dir="rtl" formControlName="importPrice"
                                             ></p-inputNumber>
                                         </div>
                                     </div>
                                     <div class="field grid">
                                         <label for="sellPrice" class="col-fixed" style="width:100px">Giá xuất</label>
                                         <div class="col">
-                                            <p-inputNumber id="sellPrice" formControlName="sellPrice"></p-inputNumber>
+                                            <p-inputNumber id="sellPrice" dir="rtl" formControlName="sellPrice"></p-inputNumber>
                                         </div>
                                     </div>
                                     <div class="field grid">
                                         <label for="inventory" class="col-fixed" style="width:100px">Tồn kho</label>
                                         <div class="col">
-                                            <p-inputNumber id="inventory" formControlName="inventory"></p-inputNumber>
+                                            <p-inputNumber id="inventory" dir="rtl" formControlName="inventory"></p-inputNumber>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="grid">
-                                <div class="col">
-                                    <p-fileUpload 
-                                        accept="image/*" 
-                                        maxFileSize="1000000" 
-                                        [multiple]="true"
-                                        fileLimit="5"
-                                        removeStyleClass="removefile"
-                                        [showUploadButton]="false"
-                                        [showCancelButton]="false"
-                                    >
-                                        <ng-template pTemplate="content" >
-                                            <div >
-                                                <img src="assets/demo/images/product/bamboo-watch.jpg" alt="" class="p-ripple p-element p-button p-component p-fileupload-choose">
-                                            </div>
-                                        </ng-template>
-                                    </p-fileUpload>
+                            <div class="flex align-items-center image-section">
+                                <input 
+                                    id="file" 
+                                    type="file" 
+                                    multiple="true" 
+                                    (change)="onSelect($event)"
+                                    hidden="true"
+                                    accept="image/*"
+                                    #inputImage
+                                />
+                                <div class="flex align-items-center gap-3 flex-wrap">
+                                    <div *ngFor='let preview of imgUploadedUrl' class="relative preview-box">
+                                        <img  [src]="preview" class="preview">
+                                        <i class="pi pi-minus rm-img-btn" (click)="removeImg(preview)"></i>
+                                    </div>
+                                    @if(imgUploadedUrl.length < 6) {
+                                        <label *ngFor='let i of defaultImg' for="file" class="preview-box">
+                                            <img src="https://static.vecteezy.com/system/resources/previews/004/141/669/non_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg" class="preview"/>
+                                        </label>
+                                    }
                                 </div>
+                                <label for="file" pripple class="p-ripple p-element p-button p-component p-button-icon-only p-button-rounded ml-5">
+                                    <i class="pi pi-plus"></i>
+                                </label>
                             </div>
                         </p-tabPanel>
                         <p-tabPanel header="Mô tả">
@@ -212,14 +293,14 @@
                                 <div class="field col grid">
                                     <label for="price" class="col-fixed" style="width:100px">Giá nhập</label>
                                     <div class="col">
-                                        <p-inputNumber id="price" class="text-right"
+                                        <p-inputNumber id="price" dir="rtl" class="text-right"
                                             formControlName="minInventory"></p-inputNumber>
                                     </div>
                                 </div>
                                 <div class="field col grid">
-                                    <label for="inventory" style="width:100px">Giá xuất</label>
+                                    <label for="inventory"  style="width:100px">Giá xuất</label>
                                     <div class="col">
-                                        <p-inputNumber id="inventory" class="text-right"
+                                        <p-inputNumber id="inventory" dir="rtl" class="text-right"
                                             formControlName="maxInventory"></p-inputNumber>
                                     </div>
                                 </div>
@@ -242,7 +323,7 @@
         </p-dialog>
 
         <!-- Delete dialog -->
-        <p-dialog [(visible)]="deleteProductDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+        <p-dialog [(visible)]="deleteProductDialogVisible" header="Confirm" [modal]="true" [style]="{width:'450px'}">
             <div class="flex align-items-center justify-content-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                 <span *ngIf="product">Are you sure you want to delete <b>{{product.name}}</b>?</span>
@@ -255,7 +336,7 @@
             </ng-template>
         </p-dialog>
 
-        <p-dialog [(visible)]="deleteProductsDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+        <p-dialog [(visible)]="deleteProductsDialogVisible" header="Confirm" [modal]="true" [style]="{width:'450px'}">
             <div class="flex align-items-center justify-content-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
                 <span>Are you sure you want to delete selected products?</span>
@@ -272,3 +353,4 @@
 
 <p-button (click)="showAddDepartmentDialog()" icon="pi pi-external-link" label="Show"></p-button>
 <add-department-modal #addDepartment></add-department-modal>
+<add-category-modal #addCategory ></add-category-modal>

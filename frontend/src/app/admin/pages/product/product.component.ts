@@ -1,7 +1,7 @@
 import { AddDepartmentModalComponent } from './../../components/add-department-modal/add-department-modal.component';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Product } from 'src/app/demo/api/product';
-import { SelectEvent} from 'src/app/models/SelectEvent'
+import { SelectEvent } from 'src/app/models/SelectEvent';
 import {
     LazyLoadEvent,
     MenuItem,
@@ -27,26 +27,26 @@ import {
     FormGroup,
     Validators,
 } from '@angular/forms';
+import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
 
 @Component({
     templateUrl: './product.component.html',
-    styles: [`
-        :host ::ng-deep .p-fileupload .p-fileupload-buttonbar {
-            display: none;
-        }
-    `],
+    styleUrl: './product.component.scss',
     providers: [MessageService],
 })
 export class ProductComponent implements OnInit {
-    productDialog: boolean = false;
-    importFileDialog: boolean = false;
-    deleteProductDialog: boolean = false;
-    deleteProductsDialog: boolean = false;
-    products: Product[] = [];
+    addDialogVisible: boolean = false;
+    editDialogVisible: boolean = false;
+    importFileDialogVisible: boolean = false;
+    deleteProductDialogVisible: boolean = false;
+    deleteProductsDialogVisible: boolean = false;
+    products: any[] = [];
     product: Product = {};
     selectedProducts: Product[] = [];
     submitted: boolean = false;
     cols: any[] = [];
+    expandedRows: expandedRows = {};
+    isExpanded: boolean = false;
     statuses: any[] = [];
     rowsPerPageOptions = [10, 25, 50];
     loading = false;
@@ -54,21 +54,32 @@ export class ProductComponent implements OnInit {
     rows = 10;
     totalRecords!: number;
     errorMessage = '';
-    uploadedFiles: any[] = [];
     categories: SelectItem[];
-    selectedFiles: any[] = [];
-    selectedImgsUrl: string[] = [];
+    // For upload files
+    uploadedFiles: File[] = [];
+    selectedFiles: File[] = [];
+    imgUploadedUrl: string[] = [
+        'https://th.bing.com/th?id=OSK.da7181f009aaebfd25febccdbaca6a04&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.de50cc0c235faefc5d8cd6ba77c8de04&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.3722be2b715b17dba8a171946f8aa0e2&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.7c981adf524b78e11bf03e32204fcd68&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+        'https://th.bing.com/th?id=OSK.aa5618135e9f039c89b28eda34197ee1&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
+    ];
+    defaultImg: number[] = [];
 
+    lengthToDisplayDefault: number = 6;
     addForm!: FormGroup;
 
     // Menu import
     importOptions: MenuItem[] | undefined;
     // add department dialog
-    @ViewChild('addDepartment') addDepartmentDialog: AddDepartmentModalComponent;
+    @ViewChild('addDepartment')
+    addDepartmentDialog: AddDepartmentModalComponent;
+    @ViewChild('addCategory') addCategory: AddCategoryModalComponent;
 
     constructor(
         private productService: ProductService,
-        private messageService: MessageService
+        private message: MessageService
     ) {}
 
     ngOnInit() {
@@ -85,7 +96,11 @@ export class ProductComponent implements OnInit {
             desc: new FormControl(''),
             inventory: new FormControl(0),
         });
-        this.loadProductsPage();
+        // Lấy dữ liệu cho product
+        // this.loadProductsPage();
+
+        // fake dữ liệu danh sách sản phẩm
+        this.fakeData();
 
         this.cols = [
             { field: 'product', header: 'Product' },
@@ -122,17 +137,46 @@ export class ProductComponent implements OnInit {
                 value: 'cc',
             },
         ];
+
+        this.generateIndexForDefault();
     }
 
-    onSelect(event: SelectEvent) {
-        for (let file of event.files) {
-            this.selectedFiles.push(file);
+    onSelect(event: any) {
+        this.selectedFiles = event.target.files;
+        this.uploadedFiles.push(event.target.files);
+        console.log(event.target.files);
+        
+        for (let file of event.target.files) {
             const reader = new FileReader();
             reader.onload = (e: any) => {
-                this.selectedImgsUrl.push(e.target.result);
+                console.log(this.imgUploadedUrl);
+                if(this.imgUploadedUrl.indexOf(e.target.result) === -1) {
+                    this.imgUploadedUrl.push(e.target.result);
+                    this.defaultImg.pop();
+                    console.log(this.defaultImg);
+                }
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    removeImg(src: string) {
+        this.imgUploadedUrl = this.imgUploadedUrl.filter(item => item !== src);
+        if(this.imgUploadedUrl.length < this.lengthToDisplayDefault) {
+            this.defaultImg.push(1);
+        }
+        console.log(this.defaultImg);
+        console.log(this.imgUploadedUrl)
+    }
+    generateIndexForDefault() {
+        if(this.imgUploadedUrl.length < this.lengthToDisplayDefault){
+            for(var i = this.imgUploadedUrl.length; i < 6; i++) {
+                this.defaultImg.push(1);
+            }
+        } else {
+            this.defaultImg = [];
+        }
+        console.log(this.defaultImg)
     }
 
     /**
@@ -188,11 +232,12 @@ export class ProductComponent implements OnInit {
         // });
         console.log($event);
     }
+    // pagination end
 
     openNew() {
         this.product = {};
         this.submitted = false;
-        this.productDialog = true;
+        this.addDialogVisible = true;
     }
 
     onUploadJson($event: UploadEvent) {
@@ -203,25 +248,25 @@ export class ProductComponent implements OnInit {
     }
 
     deleteSelectedProducts() {
-        this.deleteProductsDialog = true;
+        this.deleteProductsDialogVisible = true;
     }
 
     editProduct(product: Product) {
         this.product = { ...product };
-        this.productDialog = true;
+        this.editDialogVisible = true;
     }
 
     deleteProduct(product: Product) {
-        this.deleteProductDialog = true;
+        this.deleteProductDialogVisible = true;
         this.product = { ...product };
     }
 
     confirmDeleteSelected() {
-        this.deleteProductsDialog = false;
+        this.deleteProductsDialogVisible = false;
         this.products = this.products.filter(
             (val) => !this.selectedProducts.includes(val)
         );
-        this.messageService.add({
+        this.message.add({
             severity: 'success',
             summary: 'Successful',
             detail: 'Products Deleted',
@@ -231,11 +276,11 @@ export class ProductComponent implements OnInit {
     }
 
     confirmDelete() {
-        this.deleteProductDialog = false;
+        this.deleteProductDialogVisible = false;
         this.products = this.products.filter(
             (val) => val.id !== this.product.id
         );
-        this.messageService.add({
+        this.message.add({
             severity: 'success',
             summary: 'Successful',
             detail: 'Product Deleted',
@@ -245,49 +290,33 @@ export class ProductComponent implements OnInit {
     }
 
     hideDialog() {
-        this.productDialog = false;
+        this.addDialogVisible = false;
         this.submitted = false;
     }
 
     saveProduct() {
         this.submitted = true;
-
-        // if (this.product.name?.trim()) {
-        //     if (this.product.id) {
-        //         // @ts-ignore
-        //         this.product.inventoryStatus = this.product.inventoryStatus
-        //             .value
-        //             ? this.product.inventoryStatus.value
-        //             : this.product.inventoryStatus;
-        //         this.products[this.findIndexById(this.product.id)] =
-        //             this.product;
-        //         this.messageService.add({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Updated',
-        //             life: 3000,
-        //         });
-        //     } else {
-        //         this.product.id = this.createId();
-        //         this.product.code = this.createId();
-        //         this.product.image = 'product-placeholder.svg';
-        //         // @ts-ignore
-        //         this.product.inventoryStatus = this.product.inventoryStatus
-        //             ? this.product.inventoryStatus.value
-        //             : 'INSTOCK';
-        //         this.products.push(this.product);
-        //         this.messageService.add({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Created',
-        //             life: 3000,
-        //         });
-        //     }
-
-        //     this.products = [...this.products];
-        //     this.productDialog = false;
-        //     this.product = {};
-        // }
+        var addFormData = new FormData();
+        this.uploadedFiles.forEach(file => addFormData.append('files', file));
+        console.log(addFormData);
+        
+        // this.productService.createProduct(this.addForm.value)
+        // .pipe(
+        //     tap((res) => {
+        //       this.categories.push(res);
+        //       this.loading = false;
+        //       this.message.add({ severity: 'success', summary: 'Đăng ký', detail: 'Đăng ký thành công' })
+        //     }),
+        //     catchError((err) => {
+        //         this.message.add({ severity: 'error', detail: err.error })
+        //           console.log('Không tải được thông tin sản phẩm', err);
+        //           return throwError(err);
+        //         }),
+        //     finalize(() => (this.loading = false))
+        //   )
+        //   .subscribe();
+        // ;
+        
     }
 
     findIndexById(id: string): number {
@@ -307,6 +336,161 @@ export class ProductComponent implements OnInit {
             (event.target as HTMLInputElement).value,
             'contains'
         );
+    }
+
+    fakeData() {
+        this.products = [
+            {
+                id: 'sp01',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp02',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp03',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp04',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp05',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp06',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp07',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp08',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp09',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp10',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp11',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp12',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp13',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp14',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+            {
+                id: 'sp15',
+                code: 'abbssgsfaf',
+                name: 'Điện thoại thông minh Oppo gen 9 M1',
+                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
+                importPrice: 100000000,
+                sellPrice: 100000000,
+                category: 'Điện thoại',
+                status: 'Đang kinh doanh'
+            },
+        ];
     }
 
     loadProductsPage($event?: LazyLoadEvent) {
@@ -333,15 +517,22 @@ export class ProductComponent implements OnInit {
     }
 
     showImportFileDialog() {
-        this.importFileDialog = true;
+        this.importFileDialogVisible = true;
     }
 
     showAddDepartmentDialog() {
         this.addDepartmentDialog.showDialog();
+    }
+    showAddCategoryDialog() {
+        this.addCategory.showDialog();
     }
 }
 
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
+}
+
+interface expandedRows {
+    [key: string]: boolean;
 }

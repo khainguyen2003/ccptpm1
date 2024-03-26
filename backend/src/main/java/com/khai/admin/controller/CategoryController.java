@@ -48,7 +48,7 @@ public class CategoryController {
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(defaultValue = "0") short page,
             @RequestParam(defaultValue = "5") short size,
-            @RequestParam(defaultValue = "id,desc") String[] sort
+            @RequestParam(defaultValue = "id:asc") String sort
     ) {
         List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));

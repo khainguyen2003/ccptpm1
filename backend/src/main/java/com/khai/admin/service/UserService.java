@@ -4,14 +4,13 @@ import com.khai.admin.dto.JwtView;
 import com.khai.admin.dto.user.UserCreateDto;
 import com.khai.admin.dto.user.UserView;
 import com.khai.admin.entity.User;
+import com.khai.admin.entity.security.KeyStore;
 import com.khai.admin.exception.AlreadyExist;
 import com.khai.admin.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -22,12 +21,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.KeyPair;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -35,18 +37,34 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final JwtServiceV2 jwtServiceV2;
     private final AuthenticationManager authenticationManager;
     private final StorageService storageService;
+    private final KeyTokenService keyTokenService;
+
+    private HttpSession session;
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public UserService(UserRepository _userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, StorageService storageService) {
+    public UserService(
+            UserRepository _userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            JwtServiceV2 jwtServiceV2,
+            AuthenticationManager authenticationManager,
+            StorageService storageService,
+            HttpSession session,
+            KeyTokenService keyTokenService
+    ) {
         this.userRepository = _userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
+        this.jwtServiceV2 = jwtServiceV2;
         this.authenticationManager = authenticationManager;
         this.storageService = storageService;
+        this.session = session;
+        this.keyTokenService = keyTokenService;
+        this.jwtService = jwtService;
     }
 
     public UserView getUserInfo(int id) {
@@ -58,14 +76,25 @@ public class UserService {
         userView.loadFromUser(user.get());
         return userView;
     }
+    public User getUserById(int id) {
+        Optional<User> user = userRepository.findUserById(id);
+        if(user.isEmpty()) {
+            throw new UsernameNotFoundException("Tên tài khoản không tồn tại");
+        }
+        return user.get();
+    }
 
-//    public UserView getUserInfo(String email) {
-//        var user = userRepository.getUserByEmail(email);
-//        UserView userView = new UserView();
-//        userView.loadFromUser(user);
-//
-//        return userView;
-//    }
+    public UserView getUserInfoByEmail(String email) {
+        Optional<User> user = userRepository.findFirstByEmail(email);
+        if(user.isPresent()) {
+            UserView userView = new UserView();
+            userView.loadFromUser(user.get());
+            return userView;
+        } else {
+            throw new UsernameNotFoundException("Không tồn tại người dùng có email " + email);
+        }
+
+    }
     /**
      * Phương thức dùng cho đăng nhập
      * @param username
@@ -80,9 +109,9 @@ public class UserService {
     /**
      * Phương thúc lấy thông tin của người dùng đang yêu cầu
      * @return
-     *      email của người dùng đang đươc xác thưc
+     *      email của người dùng đã đươc xác thưc
      */
-    public String getCurrentUsername() {
+    public static String getCurrentUsername() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
         // Nếu người dùng đã đăng nhập thì lấy thông tin chi tiết
@@ -97,60 +126,187 @@ public class UserService {
         return username;
     }
 
-    public JwtView authenticate(User user) {
-        try {
-//            String passworEncoded = passwordEncoder.encode(user.getPass());
-            System.out.println(user);
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
-            );
+    // chuyển lại bằng cách bỏ signinKey và chuyển thành jwtService
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String accessToken = jwtService.generateAccessToken(userDetails);
+
+    /**
+     * Các bước login
+     * 1. check email
+     * 2. match password
+     * 3. Tạo AT và RT và lừu
+     * 4. Generate token
+     * 5. get data return login
+     * @param user
+     * @return
+     */
+//    public JwtView login(User user) {
+//        try {
+////            String passworEncoded = passwordEncoder.encode(user.getPass());
+//            System.out.println(user);
+//            Authentication authentication = authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+//            );
+//
+//            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//            String accessToken = jwtService.generateAccessToken(userDetails);
+//            UserView userView = new UserView();
+//            userView.loadFromUser(user);
+//
+//            return new JwtView(accessToken, userView);
+//        } catch (AuthenticationException e) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
+//        }
+//    }
+
+    /**
+     * Các bước login
+     * 1. check email
+     * 2. match password
+     * 3. Tạo AT và RT và lừu
+     * 4. Generate token
+     * 5. get data return login
+     * @param user
+     * @return
+     */
+    public JwtView loginV2(User user) {
+
+        try {
+            // 1.
+            Optional<User> optUser = userRepository.findFirstByEmail(user.getEmail());
+            if(optUser.isEmpty()) {
+                throw new UsernameNotFoundException("Tên đăng nhập hoặc mật khẩu không đúng");
+            }
+            // 2.
+            boolean match = BCrypt.checkpw(user.getPassword(), optUser.get().getPassword());
+            if(!match) {
+                throw new UsernameNotFoundException("Tên đăng nhập hoặc mật khẩu không đúng");
+            }
+
+            KeyPair keyPair = keyTokenService.generateKeyPair();
+            String accessToken = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
+            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
             UserView userView = new UserView();
             userView.loadFromUser(user);
 
-            return new JwtView(accessToken, userView);
+            return new JwtView(accessToken, refreshToken, userView);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
         }
     }
 
-    public JwtView refreshToken(JwtView jwtView) {
-        boolean isExpiredAccessToken = jwtService.isExpired(jwtView.getAccessToken());
-        String username = jwtService.extractUsernameFromToken(jwtView.getAccessToken());
-        String newAccessToken = jwtView.getAccessToken();
-        if (isExpiredAccessToken) {
-            newAccessToken = jwtService.generateAccessToken(username);
+    /**
+     * Các bước kiểm tra
+     * <br/>1. Kiểm tra userId có tồn tại trong header request không
+     * <br/>2. Kiểm ra userId có tồn tại trong bảng keyStore (certificate center) không
+     * <br/>3. Kiểm tra accessToken có tồn tại trong request không
+     * <br/>4. decode payload và kiểm tra userId có trùng với userId trong payload khôgn
+     * <br/>5. Nếu pass thì trả kết quả
+     * @param user
+     * @return
+     */
+    public JwtView authenticate(Map<String, String> headers, User user) {
+        Integer userId = Integer.valueOf(headers.get("userId"));
+        if(userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
         }
 
-        JwtView res = JwtView.builder()
-                .accessToken(newAccessToken)
-                .build();
+        try {
+            KeyStore keyStore = keyTokenService.getKeyStoreByUserId(userId);
 
-        return res;
+            String accessToken = headers.get("x-access-token");
+            if(accessToken == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
+            }
+
+            Claims claims = jwtServiceV2.parseToken(accessToken, keyStore.getPublicKey());
+            if(userId != Integer.valueOf(claims.getId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
+            }
+            KeyPair keyPair = keyTokenService.generateKeyPair();
+            String accessKey = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
+            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
+            UserView userView = new UserView();
+            userView.loadFromUser(user);
+
+            return new JwtView(accessKey, refreshToken, userView);
+        } catch (AuthenticationException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
+        }
     }
 
-    public boolean create(UserCreateDto userCreateDto) {
-        if(userRepository.findFirstByUsername(userCreateDto.getEmail()).isPresent() ) {
+//    public JwtView refreshToken(JwtView jwtView, String signinKey) {
+//        boolean isExpiredAccessToken = jwtServiceV2.isExpired(jwtView.getAccessToken(), signinKey);
+//        Claims claims = jwtServiceV2.parseToken(jwtView.getAccessToken(), signinKey);
+//
+//        String newAccessToken = jwtView.getAccessToken();
+//        if (isExpiredAccessToken) {
+//            newAccessToken = jwtServiceV2.generateAccessToken(username, signinKey);
+//        }
+//
+//        JwtView res = JwtView.builder()
+//                .accessToken(newAccessToken)
+//                .build();
+//
+//        return res;
+//    }
+
+//    public boolean create(UserCreateDto userCreateDto) {
+//        if(userRepository.findFirstByEmail(userCreateDto.getEmail()).isPresent() ) {
+//            throw new AlreadyExist("Email", userCreateDto.getEmail());
+//        } else {
+//            String passworEncoded = passwordEncoder.encode(userCreateDto.getPassword());
+//            User user = User.builder()
+//                    .username(userCreateDto.getEmail())
+//                    .firstname(userCreateDto.getFirstName())
+//                    .lastname(userCreateDto.getLastName())
+//                    .email(userCreateDto.getEmail())
+//                    .password(passworEncoded)
+//                    .phone(userCreateDto.getPhoneNumber())
+//                    .active(true)
+//                    .createdAt(new Date())
+//                    .role(userCreateDto.getUserRole())
+//                    .build();
+//            try {
+//                userRepository.save(user);
+//                String accessToken = jwtService.generateAccessToken(userCreateDto.getEmail());
+//                UserView userView = new UserView();
+//                userView.loadFromUser(user);
+//                return true;
+//            } catch (DataAccessException e) {
+//                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//            } catch (Exception e) {
+//                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//            }
+//
+//        }
+//    }
+
+    public boolean createV2(UserCreateDto userCreateDto) {
+        if(userRepository.findFirstByEmail(userCreateDto.getEmail()).isPresent() ) {
             throw new AlreadyExist("Email", userCreateDto.getEmail());
         } else {
+            Date now = new Date();
             String passworEncoded = passwordEncoder.encode(userCreateDto.getPassword());
             User user = User.builder()
+                    .username(userCreateDto.getEmail())
                     .firstname(userCreateDto.getFirstName())
                     .lastname(userCreateDto.getLastName())
                     .email(userCreateDto.getEmail())
                     .password(passworEncoded)
                     .phone(userCreateDto.getPhoneNumber())
                     .active(true)
-                    .createdAt(new Date())
+                    .createdAt(now)
+                    .lastModified(now)
                     .role(userCreateDto.getUserRole())
                     .build();
             try {
-                userRepository.save(user);
-                String accessToken = jwtService.generateAccessToken(userCreateDto.getEmail());
-                UserView userView = new UserView();
-                userView.loadFromUser(user);
+                User newUser = userRepository.save(user);
+                KeyPair keyPair = keyTokenService.generateKeyPair();
+                String publicKeyString = keyTokenService.createToken(newUser.getId(), keyPair.getPublic());
+                String accessToken = jwtServiceV2.generateAccessToken(newUser, publicKeyString);
+                String refreshToken = jwtServiceV2.generateRefreshToken(newUser, keyPair.getPrivate().toString());
+                System.out.println("accessToken: " + accessToken);
+                System.out.println("refreshToken: " + refreshToken);
                 return true;
             } catch (DataAccessException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -160,17 +316,17 @@ public class UserService {
 
         }
     }
-    public List<User> searchUser(String search) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<User> query = builder.createQuery(User.class);
-        Root r = query.from(User.class);
-
-        Predicate predicate = builder.conjunction();
-        params.stream().forEach(searchConsumer);
-        predicate = searchConsumer.getPredicate();
-        query.where(predicate);
-
-        List<User> result = entityManager.createQuery(query).getResultList();
-        return result;
-    }
+//    public List<User> searchUser(String search) {
+//        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<User> query = builder.createQuery(User.class);
+//        Root r = query.from(User.class);
+//
+//        Predicate predicate = builder.conjunction();
+//        params.stream().forEach(searchConsumer);
+//        predicate = searchConsumer.getPredicate();
+//        query.where(predicate);
+//
+//        List<User> result = entityManager.createQuery(query).getResultList();
+//        return result;
+//    }
 }

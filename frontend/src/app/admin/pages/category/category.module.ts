@@ -1,4 +1,3 @@
-import { Product } from 'src/app/demo/api/product';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,8 +15,12 @@ import { DropdownModule } from 'primeng/dropdown';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { CategoryRoutingModule } from './category-routing.module';
+import { AddCategoryModalComponent } from "../../components/add-category-modal/add-category-modal.component";
 
 @NgModule({
+    declarations: [CategoryComponent],
     imports: [
         CommonModule,
         TableModule,
@@ -33,8 +36,10 @@ import { DialogModule } from 'primeng/dialog';
         DropdownModule,
         RadioButtonModule,
         InputNumberModule,
-        DialogModule
-    ],
-    declarations: [CategoryComponent]
+        DialogModule,
+        CategoryRoutingModule,
+        AddCategoryModalComponent,
+        InputSwitchModule,
+    ]
 })
-export class ProductModule { }
+export class CategoryModule { }
