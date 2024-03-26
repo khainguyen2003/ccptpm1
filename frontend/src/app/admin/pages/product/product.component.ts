@@ -35,15 +35,28 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
     providers: [MessageService],
 })
 export class ProductComponent implements OnInit {
-    addDialogVisible: boolean = false;
+    // For dialog
+    // addDialogVisible: boolean = false;
+    // updateDiaVisible: boolean = false;
+    productDiaVisible: boolean = false;
     editDialogVisible: boolean = false;
     importFileDialogVisible: boolean = false;
     deleteProductDialogVisible: boolean = false;
     deleteProductsDialogVisible: boolean = false;
+    // -- end for dialog
+    // For filter
+    slcInvenStatus: string = '0';
+    slcSellStatus: string = '0';
+    search: string | undefined;
+    selectedCat: SelectItem = { value: '' };
+    // --  end for filter
+    // for interact with product
     products: any[] = [];
     product: Product = {};
     selectedProducts: Product[] = [];
     submitted: boolean = false;
+    headerProductDia: string = 'Thêm hàng';
+    //-- end for interact with product
     cols: any[] = [];
     expandedRows: expandedRows = {};
     isExpanded: boolean = false;
@@ -235,9 +248,10 @@ export class ProductComponent implements OnInit {
     // pagination end
 
     openNew() {
+        this.headerProductDia = 'Thêm hàng';
         this.product = {};
         this.submitted = false;
-        this.addDialogVisible = true;
+        this.productDiaVisible = true;
     }
 
     onUploadJson($event: UploadEvent) {
@@ -252,8 +266,9 @@ export class ProductComponent implements OnInit {
     }
 
     editProduct(product: Product) {
+        this.headerProductDia = 'Sửa hàng';
         this.product = { ...product };
-        this.editDialogVisible = true;
+        this.productDiaVisible = true;
     }
 
     deleteProduct(product: Product) {
@@ -290,7 +305,7 @@ export class ProductComponent implements OnInit {
     }
 
     hideDialog() {
-        this.addDialogVisible = false;
+        this.productDiaVisible = false;
         this.submitted = false;
     }
 
@@ -339,158 +354,10 @@ export class ProductComponent implements OnInit {
     }
 
     fakeData() {
-        this.products = [
-            {
-                id: 'sp01',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp02',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp03',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp04',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp05',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp06',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp07',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp08',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp09',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp10',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp11',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp12',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp13',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp14',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp15',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-        ];
+        this.productService.fakeData().then((data) => {
+            this.products = data;
+            this.loading = false;
+        })
     }
 
     loadProductsPage($event?: LazyLoadEvent) {

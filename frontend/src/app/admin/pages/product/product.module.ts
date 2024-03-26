@@ -27,6 +27,9 @@ import { AddDepartmentModalComponent } from '../../components/add-department-mod
 import { CarouselModule } from 'primeng/carousel';
 import { BadgeModule } from 'primeng/badge';
 import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
+import { AppFooterComponent } from '../../layout/app.footer.component';
+import { PanelModule } from 'primeng/panel';
+import { ListboxModule } from 'primeng/listbox';
 
 @NgModule({
     imports: [
@@ -56,9 +59,14 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
         EditorModule,
         AddDepartmentModalComponent,
         AddCategoryModalComponent,
-        CarouselModule
+        CarouselModule,
+        PanelModule,
+        ListboxModule
     ],
     providers: [ProductService],
-    declarations: [ProductComponent]
+    declarations: [
+        ProductComponent,
+        AppFooterComponent
+    ]
 })
 export class ProductModule { }
