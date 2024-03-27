@@ -27,6 +27,11 @@ import { AddDepartmentModalComponent } from '../../components/add-department-mod
 import { CarouselModule } from 'primeng/carousel';
 import { BadgeModule } from 'primeng/badge';
 import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
+import { AppFooterComponent } from '../../layout/app.footer.component';
+import { PanelModule } from 'primeng/panel';
+import { ListboxModule } from 'primeng/listbox';
+import { RadioFilterComponent } from '../../components/radio-filter/radio-filter.component';
+import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkbox-filter.component';
 
 @NgModule({
     imports: [
@@ -57,9 +62,15 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
         AddDepartmentModalComponent,
         AddCategoryModalComponent,
         CarouselModule,
-        
+        PanelModule,
+        ListboxModule,
+        RadioFilterComponent,
+        CheckboxFilterComponent,
     ],
-     providers: [ProductService],
-    declarations: [ProductComponent]
+    providers: [ProductService],
+    declarations: [
+        ProductComponent,
+        AppFooterComponent
+    ]
 })
 export class ProductModule { }

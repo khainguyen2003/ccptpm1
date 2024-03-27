@@ -65,4 +65,12 @@ export class ProductService {
     createProduct(form: any): Observable<any> {
         return this.http.post(this.productApi, form);
     }
+
+    fakeData(
+        
+    ) {
+        return this.http.get<any>('assets/demo/data/products.json')
+            .toPromise()
+            .then(res => res.data)
+    }
 }
