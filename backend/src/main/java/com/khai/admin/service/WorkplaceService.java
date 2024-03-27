@@ -94,7 +94,7 @@ public class WorkplaceService {
 
         Map<String, Object> response = new HashMap<>();
 
-        response.put("workplace_list", workplaceDtoList);
+        response.put("workplaceList", workplaceDtoList);
         response.put("currentPage", pageable.getPageNumber());
         response.put("pageSize",pageable.getPageSize());
         response.put("totalPage", workplacePage.getTotalPages());

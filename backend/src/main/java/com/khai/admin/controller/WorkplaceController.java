@@ -35,6 +35,26 @@ public class WorkplaceController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PutMapping
+    @Transactional
+    public ResponseEntity<WorkplaceDto> update(@RequestBody WorkplaceDto workplaceDto){
+        WorkplaceDto response = this.workplaceService.update(workplaceDto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping
+    @Transactional
+    public ResponseEntity<String> delete(@RequestBody WorkplaceDto workplaceDto){
+        this.workplaceService.delete(workplaceDto.getId());
+        return ResponseEntity.ok("Xóa chi nhánh thành công");
+    }
+
+    public ResponseEntity<WorkplaceDto> getWorkplaceById(
+            @RequestParam(value = "") int id
+    ){
+        return new ResponseEntity<>(this.workplaceService.getWorkplaceById(id), HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<Map<String,Object>> getWorkplaces(
             @RequestParam(value = "search", required = false) String search,
@@ -48,4 +68,6 @@ public class WorkplaceController {
 
         return new ResponseEntity<>(this.workplaceService.getWorkplaces(pageable), HttpStatus.OK);
     }
+
+
 }
