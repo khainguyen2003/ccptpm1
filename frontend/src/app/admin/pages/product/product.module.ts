@@ -30,6 +30,8 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
 import { AppFooterComponent } from '../../layout/app.footer.component';
 import { PanelModule } from 'primeng/panel';
 import { ListboxModule } from 'primeng/listbox';
+import { RadioFilterComponent } from '../../components/radio-filter/radio-filter.component';
+import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkbox-filter.component';
 
 @NgModule({
     imports: [
@@ -61,7 +63,9 @@ import { ListboxModule } from 'primeng/listbox';
         AddCategoryModalComponent,
         CarouselModule,
         PanelModule,
-        ListboxModule
+        ListboxModule,
+        RadioFilterComponent,
+        CheckboxFilterComponent,
     ],
     providers: [ProductService],
     declarations: [

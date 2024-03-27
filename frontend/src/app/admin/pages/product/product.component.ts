@@ -45,7 +45,54 @@ export class ProductComponent implements OnInit {
     deleteProductsDialogVisible: boolean = false;
     // -- end for dialog
     // For filter
-    slcInvenStatus: string = '0';
+    slcInvenStatus = {
+        name: 'invenFilter',
+        items: [
+            {
+                label: 'Tất cả',
+                checked: true,
+                value: 0
+            },
+            {
+                label: 'Dưới định mức tồn',
+                value: 1
+            },
+            {
+                label: 'Vượt định mức tồn',
+                value: 2
+            },
+            {
+                label: 'Còn hàng trong kho',
+                value: 3
+            },
+            {
+                label: 'Hết hàng',
+                value: 4
+            },
+            {
+                label: 'Lựa chọn khác',
+                value: 5
+            },
+        ]
+    };
+    proTypeFilter = {
+        name: 'typeFilter',
+        items: [
+            {
+                label: 'Hàng hóa',
+                checked: true,
+                value: 0
+            },
+            {
+                label: 'Dịch vụ',
+                value: 1
+            },
+            {
+                label: 'Combo - Đóng gói',
+                value: 2
+            }
+        ]
+    };
     slcSellStatus: string = '0';
     search: string | undefined;
     selectedCat: SelectItem = { value: '' };
@@ -189,7 +236,6 @@ export class ProductComponent implements OnInit {
         } else {
             this.defaultImg = [];
         }
-        console.log(this.defaultImg)
     }
 
     /**
@@ -392,6 +438,20 @@ export class ProductComponent implements OnInit {
     }
     showAddCategoryDialog() {
         this.addCategory.showDialog();
+    }
+
+    // For filter
+    /**
+     * 
+     * @param option Là giá trị nhận từ emit của thằng con
+     */
+    selectInvenOpt(option: any) {
+        // gọi http service để tạo request filter
+        console.log(option);
+    }
+
+    slcTypeOpt(options: any) {
+        console.log(options);
     }
 }
 
