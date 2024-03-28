@@ -1,0 +1,6 @@
+<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel flex flex-column gap-3">
+  @for (item of filterList.items; track item.value; let i =  $index) {
+    <input type="radio" [name]="filterList.name" [id]="filterList.name + i" (change)="filterChanged($event)" [checked]="item?.checked" [value]="item.value" class="p-radioButton">
+    <label for="filterList.name + i">{{item.label}}</label>
+  }
+</p-panel>

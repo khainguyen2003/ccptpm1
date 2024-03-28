@@ -85,7 +85,9 @@ public class ProductController {
     }
 
     @PutMapping("/sellstatus/{id}")
-    public ResponseEntity<ProductDto> updateSellStatus(@PathVariable("id") int id, @RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> updateSellStatus(@RequestHeader Map<String, String> headers, @PathVariable("id") int id, @RequestBody ProductDto productDto) {
+        String apiKey = headers.get("x-api-key");
+
         ProductDto res = productService.updateSellStatus(id, productDto);
         return ResponseEntity.ok(res);
     }
