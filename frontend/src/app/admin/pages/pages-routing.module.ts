@@ -10,6 +10,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
         { path: 'timeline', loadChildren: () => import('./timeline/timelinedemo.module').then(m => m.TimelineDemoModule) },
         { path: 'products', loadChildren: () => import('./product/product.module').then(m => m.ProductModule) },
         { path: 'categories', loadChildren: () => import('./category/category.module').then(m => m.CategoryModule)},
+        { path: 'employees', loadChildren: () => import('./employee/employee.module').then(m => m.EmployeeModule)},
         { path: '**', redirectTo: '/notfound' }
     ])],
     exports: [RouterModule]

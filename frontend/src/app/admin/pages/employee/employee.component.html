@@ -1,0 +1,19 @@
+<div class="layout-sidebar filter-section">
+    <app-multi-select-filter
+        [label]="'Phòng ban'"
+        [placeholder]="'Chọn phòng ban'"
+        [options]="optDepartment"
+        (select)="handleDepartmentSelected($event)">
+    </app-multi-select-filter>
+    <app-multi-select-filter
+        [label]="'Chức vụ'"
+        [placeholder]="'Chọn chức vụ'"
+        [options]="optJobtitle"
+        (select)="handleJobtitleSelected($event)">
+    </app-multi-select-filter>
+</div>
+<div class="layout-main-container">
+    <div class="layout-main">
+        <p>Employees work</p>
+    </div>
+</div>
