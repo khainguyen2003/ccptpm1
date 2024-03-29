@@ -1,12 +1,14 @@
 package com.khai.admin.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalTime;
 import java.util.Date;
 
 @Entity
 @Table(name = "tblemployee")
+@Data
 public class Employee {
     /*
     `employee_id` int(11) NOT NULL,
@@ -35,4 +37,5 @@ public class Employee {
     private byte role;
     @Column(name="employee_created_date", columnDefinition = "DATETIME(6) NOT NULL COMMENT 'Ngày khởi tạo nhân viên'")
     private Date created_date;
+
 }
