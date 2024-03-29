@@ -1,12 +1,16 @@
-<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel flex flex-column gap-3">
+<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel">
   <p-calendar 
+    [(ngModel)]="rangeDates"
     selectionMode="range" 
     [readonlyInput]="true" 
-    numberOfMonths="2" 
+    numberOfMonths="1" 
     [name]="name" 
     dateFormat="dd/mm/yy" 
     [iconDisplay]="'input'" [showIcon]="true"
     [minDate]="minDate" [maxDate]="maxDate"
+    [appendTo]="appendTo"
     placeholder="Lựa chọn khác"
+    #picker
   ></p-calendar>
+  <p-button label="Chọn" (onClick)="picker.show()"></p-button>
 </p-panel>

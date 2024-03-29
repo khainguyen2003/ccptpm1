@@ -1,6 +1,10 @@
-<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel flex flex-column gap-3">
-  @for (item of filterList.items; track item.value; let i =  $index) {
-    <input type="checkbox" [name]="filterList.name" [id]="filterList.name + i" (change)="filterChanged($event)" [checked]="item?.checked" [value]="item.value" class="p-checkbox">
-    <label for="filterList.name + i">{{item.label}}</label>
-  }
+<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down"
+  collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel">
+  <div class="flex flex-column">
+    @for (item of filterList.items; track item.value; let i = $index) {
+      <div class="flex align-items-center">
+        <p-checkbox [label]="item.label" [value]="item.value" [(ngModel)]="optSelecteds"></p-checkbox>
+      </div>
+    }
+  </div>
 </p-panel>

@@ -36,8 +36,6 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
 })
 export class ProductComponent implements OnInit {
     // For dialog
-    // addDialogVisible: boolean = false;
-    // updateDiaVisible: boolean = false;
     productDiaVisible: boolean = false;
     editDialogVisible: boolean = false;
     importFileDialogVisible: boolean = false;
@@ -45,6 +43,7 @@ export class ProductComponent implements OnInit {
     deleteProductsDialogVisible: boolean = false;
     // -- end for dialog
     // For filter
+    @ViewChild('filterSection') filterSection: ElementRef;
     slcInvenStatus = {
         name: 'invenFilter',
         items: [
@@ -75,6 +74,24 @@ export class ProductComponent implements OnInit {
             },
         ]
     };
+    slcSellStatus = {
+        name: 'invenFilter',
+        items: [
+            {
+                label: 'Tất cả',
+                value: 0
+            },
+            {
+                label: 'Hàng đang kinh doanh',
+                checked: true,
+                value: 1
+            },
+            {
+                label: 'Hàng ngừng kinh doanh',
+                value: 2
+            }
+        ]
+    };
     proTypeFilter = {
         name: 'typeFilter',
         items: [
@@ -93,9 +110,26 @@ export class ProductComponent implements OnInit {
             }
         ]
     };
-    slcSellStatus: string = '0';
+    positionFilter = [
+        {
+            name: 'Nguyên xá',
+            checked: true,
+            value: 0
+        },
+        {
+            name: 'Trường đại học Công nghiệp Hà Nội',
+            value: 1
+        },
+        {
+            name: 'Ngõ 11, Nguyên Xá Quận Bắc Từ Liêm, Hà Nội',
+            value: 2
+        }
+    ];
+    catFilter: any[];
     search: string | undefined;
     selectedCat: SelectItem = { value: '' };
+    // for date filter
+    minDateFilter: Date = new Date();
     // --  end for filter
     // for interact with product
     products: any[] = [];
@@ -114,7 +148,6 @@ export class ProductComponent implements OnInit {
     rows = 10;
     totalRecords!: number;
     errorMessage = '';
-    categories: SelectItem[];
     // For upload files
     uploadedFiles: File[] = [];
     selectedFiles: File[] = [];
@@ -187,13 +220,13 @@ export class ProductComponent implements OnInit {
             },
         ];
 
-        this.categories = [
+        this.catFilter = [
             {
-                label: 'Abc',
+                name: 'Abc',
                 value: 'abc',
             },
             {
-                label: 'cc',
+                name: 'cc',
                 value: 'cc',
             },
         ];
@@ -289,7 +322,6 @@ export class ProductComponent implements OnInit {
 
         //     return event.order * result;
         // });
-        console.log($event);
     }
     // pagination end
 
@@ -451,6 +483,9 @@ export class ProductComponent implements OnInit {
     }
 
     slcTypeOpt(options: any) {
+        console.log(options);
+    }
+    slcPosOpt(options: any) {
         console.log(options);
     }
 }

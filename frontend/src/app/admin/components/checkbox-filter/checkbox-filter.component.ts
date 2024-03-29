@@ -3,36 +3,27 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PanelModule } from 'primeng/panel';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-checkbox-filter',
   standalone: true,
-  imports: [PanelModule, CommonModule, CheckboxModule],
+  imports: [PanelModule, CommonModule, FormsModule, CheckboxModule],
   templateUrl: './checkbox-filter.component.html',
   styleUrl: './checkbox-filter.component.scss'
 })
-export class CheckboxFilterComponent implements OnInit, OnChanges {
+export class CheckboxFilterComponent implements OnInit {
   @Input() filterList!: any;
   @Input() title!: string;
   @Input() name: string = '';
   @Output() filterSelected = new EventEmitter<any[]>();
-  optSelecteds: Array<any>;
+  optSelecteds: string[] = [];
   
   ngOnInit(): void {
     this.updateOptSelecteds();
   }
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['filterList']) {
-      this.updateOptSelecteds();
-    }
-    
-  }
   updateOptSelecteds(): void {
-    console.log([0]);
-    
     this.filterList.items.map(item => {
-      console.log(item);
-      
       if(item?.checked) {
         this.optSelecteds.push(item?.value);
       }

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { PanelModule } from 'primeng/panel';
@@ -9,6 +10,7 @@ import { PanelModule } from 'primeng/panel';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     PanelModule,
     MultiSelectModule,
     ButtonModule,
@@ -16,15 +18,29 @@ import { PanelModule } from 'primeng/panel';
   templateUrl: './multi-select-filter.component.html',
   styleUrl: './multi-select-filter.component.scss'
 })
-export class MultiSelectFilterComponent {
+export class MultiSelectFilterComponent implements OnInit {
 
   @Input() label: string;
   @Input() placeholder: string;
   @Input() options: any[];
-  @Output() select = new EventEmitter<any>();
+  @Output() changeEvent = new EventEmitter<any>();
+  optSelecteds: any[] = [];
+
+  ngOnInit(): void {
+    this.updateOptSelecteds();
+  }
+  updateOptSelecteds(): void {
+    this.options.map(item => {
+      if(item?.checked) {
+        this.optSelecteds.push(item);
+      }
+    });
+    
+    this.changeEvent.emit(this.optSelecteds);
+  }
 
   handleSelected(event: any) {
-    this.select.emit(event.value);
+    this.changeEvent.emit(this.optSelecteds);
   }
 
   openEditDialog(event: any, value: any) {
