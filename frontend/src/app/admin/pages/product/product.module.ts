@@ -33,6 +33,7 @@ import { ListboxModule } from 'primeng/listbox';
 import { RadioFilterComponent } from '../../components/radio-filter/radio-filter.component';
 import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkbox-filter.component';
 import { DateRangeFilterComponent } from '../../components/date-range-filter/date-range-filter.component';
+import { MultiSelectFilterComponent } from '../../components/multi-select-filter/multi-select-filter.component';
 
 @NgModule({
     imports: [
@@ -67,7 +68,8 @@ import { DateRangeFilterComponent } from '../../components/date-range-filter/dat
         ListboxModule,
         RadioFilterComponent,
         CheckboxFilterComponent,
-        DateRangeFilterComponent
+        DateRangeFilterComponent,
+        MultiSelectFilterComponent
     ],
     providers: [ProductService],
     declarations: [

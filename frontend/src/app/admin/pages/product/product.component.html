@@ -1,48 +1,14 @@
-<div class="layout-sidebar filter-section">
+<div class="layout-sidebar filter-section" #filterSection>
     <h3 class="page-title" class="text-3xl font-semibold">Hàng Hóa</h3>
     <app-checkbox-filter title="Loại hàng" [filterList]="proTypeFilter" (filterSelected)="slcTypeOpt($event)"></app-checkbox-filter>
-    <app-date-range-filter title="Ngày dự kiến hết hàng" [minDate]="03/28/2023"></app-date-range-filter>
+    <app-date-range-filter title="Ngày dự kiến hết hàng" [minDate]="minDateFilter" [appendTo]="filterSection"></app-date-range-filter>
     <p-panel header="Nhóm hàng" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel" >
-        <p-listbox name="filterCat" [options]="categories" [(ngModel)]="selectedCat" [filter]="true"></p-listbox>
+        <p-listbox name="filterCat" [options]="catFilter" optionLabel="name" [(ngModel)]="selectedCat" [filter]="true"></p-listbox>
     </p-panel>
-    <p-panel header="Ngày dự kiến hết hàng" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel">
-        
-    </p-panel>
-    <p-panel header="Nhà cung cấp" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel">
-        <p-multiSelect [options]="categories" [(ngModel)]="selectedCat" [filter]="true" optionLabel="name" placeholder="Nhà cung cấp"></p-multiSelect>
-    </p-panel>
-    <p-panel header="Vị trí" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel">
-        <p-multiSelect [options]="categories" [(ngModel)]="selectedCat" [filter]="true" optionLabel="name" placeholder="Nhà cung cấp"></p-multiSelect>
-    </p-panel>
-    <app-radio-filter [filterList]="slcInvenStatus" title="Tồn kho" (filterSelected)="selectInvenOpt($event)"></app-radio-filter>
-    <p-panel header="Tồn kho" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel">
-        <div class="field-radiobutton">
-            <p-radioButton name="inventory-status" value="0" inputId="inventOpt0" [(ngModel)]="slcInvenStatus"></p-radioButton>
-            <label for="inventOpt0">Tất cả</label>
-        </div>
-        <div class="field-radiobutton">
-            <p-radioButton name="inventory-status" value="1" inputId="inventOpt1" [(ngModel)]="slcInvenStatus"></p-radioButton>
-            <label for="inventOpt1">Còn hàng trong kho</label>
-        </div>
-        <div class="field-radiobutton">
-            <p-radioButton name="inventory-status" value="2" inputId="inventOpt2" [(ngModel)]="slcInvenStatus"></p-radioButton>
-            <label for="inventOpt2">Hết hàng trong kho</label>
-        </div>
-    </p-panel>
-    <p-panel header="Trạng thái" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel" >
-        <div class="field-radiobutton">
-            <p-radioButton name="sell-status" value="0" inputId="sellOpt1" [(ngModel)]="slcSellStatus"></p-radioButton>
-            <label for="sellOpt1">Hàng đang kinh doanh</label>
-        </div>
-        <div class="field-radiobutton">
-            <p-radioButton name="sell-status" value="1" inputId="sellOpt2" [(ngModel)]="slcSellStatus"></p-radioButton>
-            <label for="sellOpt2">Hàng ngừng kinh doanh</label>
-        </div>
-        <div class="field-radiobutton">
-            <p-radioButton name="sell-status" value="2" inputId="sellOpt0" [(ngModel)]="slcSellStatus"></p-radioButton>
-            <label for="sellOpt0">Tất cả</label>
-        </div>
-    </p-panel>  
+    <app-multi-select-filter label="Nhà cung cấp" [options]="catFilter" (changeEvent)="slcPosOpt($event)"></app-multi-select-filter>
+    <app-multi-select-filter label="Vị trí" [options]="positionFilter" (changeEvent)="slcPosOpt($event)"></app-multi-select-filter>
+    <app-radio-filter [filterList]="slcInvenStatus" title="Tồn kho" (changeEvent)="selectInvenOpt($event)"></app-radio-filter>
+    <app-radio-filter [filterList]="slcSellStatus" title="Trạng thái" (changeEvent)="selectInvenOpt($event)"></app-radio-filter>  
 </div>
 <div class="layout-main-container">
     <div class="layout-main">

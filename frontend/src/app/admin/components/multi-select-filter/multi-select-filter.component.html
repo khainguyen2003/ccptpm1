@@ -12,8 +12,11 @@
         [filter]="true"
         optionLabel="name"
         display="chip"
+        [(ngModel)]="optSelecteds"
         (onChange)="handleSelected($event)"
-        [showClear]="true">
+        [showClear]="true"
+        styleClass="w-full"
+        >
         <ng-template let-option pTemplate="item">
             <div class=" w-full flex align-items-center justify-content-between">
                 <div>{{ option.name }}</div>
