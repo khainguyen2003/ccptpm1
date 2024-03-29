@@ -1,6 +1,7 @@
 <div class="layout-sidebar filter-section">
     <h3 class="page-title" class="text-3xl font-semibold">Hàng Hóa</h3>
     <app-checkbox-filter title="Loại hàng" [filterList]="proTypeFilter" (filterSelected)="slcTypeOpt($event)"></app-checkbox-filter>
+    <app-date-range-filter title="Ngày dự kiến hết hàng" [minDate]="03/28/2023"></app-date-range-filter>
     <p-panel header="Nhóm hàng" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel" >
         <p-listbox name="filterCat" [options]="categories" [(ngModel)]="selectedCat" [filter]="true"></p-listbox>
     </p-panel>
