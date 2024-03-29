@@ -1,1 +1,12 @@
-<p>date-range-filter works!</p>
+<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel flex flex-column gap-3">
+  <p-calendar 
+    selectionMode="range" 
+    [readonlyInput]="true" 
+    numberOfMonths="2" 
+    [name]="name" 
+    dateFormat="dd/mm/yy" 
+    [iconDisplay]="'input'" [showIcon]="true"
+    [minDate]="minDate" [maxDate]="maxDate"
+    placeholder="Lựa chọn khác"
+  ></p-calendar>
+</p-panel>
