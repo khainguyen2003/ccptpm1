@@ -62,7 +62,7 @@
                     </p-toolbar> -->
                     <!-- Thêm khi muốn thêm lazy load  [lazy]="true" (onLazyLoad)="loadProductsPage($event)" [loading]="loading"  -->
                     <p-table #dt [value]="products" dataKey="id" 
-                        (sortFunction)="customSort($event)" [customSort]="true" 
+                        [lazy]="true" (onLazyLoad)="loadProductsPage($event)"
                         [paginator]="true" [rows]="10"
                         (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" 
                         currentPageReportTemplate="Hiển thị {first} - {last}/ Tổng số {totalRecords} hàng hóa"

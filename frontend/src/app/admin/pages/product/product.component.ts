@@ -42,7 +42,12 @@ export class ProductComponent implements OnInit {
     deleteProductDialogVisible: boolean = false;
     deleteProductsDialogVisible: boolean = false;
     // -- end for dialog
-    // For filter
+    //----------------- For filter
+    // http parameters
+    filter: string = '';
+    sort: string = '';
+
+    // -- For filter section
     @ViewChild('filterSection') filterSection: ElementRef;
     slcInvenStatus = {
         name: 'invenFilter',
@@ -141,7 +146,6 @@ export class ProductComponent implements OnInit {
     cols: any[] = [];
     expandedRows: expandedRows = {};
     isExpanded: boolean = false;
-    statuses: any[] = [];
     rowsPerPageOptions = [10, 25, 50];
     loading = false;
     first = 0;
@@ -158,7 +162,8 @@ export class ProductComponent implements OnInit {
         'https://th.bing.com/th?id=OSK.7c981adf524b78e11bf03e32204fcd68&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
         'https://th.bing.com/th?id=OSK.aa5618135e9f039c89b28eda34197ee1&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
     ];
-    defaultImg: number[] = [];
+    defaultImgs: string[] = [];
+    defaultImgUrl = "https://static.vecteezy.com/system/resources/previews/004/141/669/non_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg";
 
     lengthToDisplayDefault: number = 6;
     addForm!: FormGroup;
@@ -231,7 +236,7 @@ export class ProductComponent implements OnInit {
             },
         ];
 
-        this.generateIndexForDefault();
+        this.generateDefaultImgs();
     }
 
     onSelect(event: any) {
@@ -245,8 +250,7 @@ export class ProductComponent implements OnInit {
                 console.log(this.imgUploadedUrl);
                 if(this.imgUploadedUrl.indexOf(e.target.result) === -1) {
                     this.imgUploadedUrl.push(e.target.result);
-                    this.defaultImg.pop();
-                    console.log(this.defaultImg);
+                    this.defaultImgs.pop();
                 }
             };
             reader.readAsDataURL(file);
@@ -256,18 +260,16 @@ export class ProductComponent implements OnInit {
     removeImg(src: string) {
         this.imgUploadedUrl = this.imgUploadedUrl.filter(item => item !== src);
         if(this.imgUploadedUrl.length < this.lengthToDisplayDefault) {
-            this.defaultImg.push(1);
+            this.defaultImgs.push(this.defaultImgUrl);
         }
-        console.log(this.defaultImg);
-        console.log(this.imgUploadedUrl)
     }
-    generateIndexForDefault() {
+    generateDefaultImgs() {
         if(this.imgUploadedUrl.length < this.lengthToDisplayDefault){
             for(var i = this.imgUploadedUrl.length; i < 6; i++) {
-                this.defaultImg.push(1);
+                this.defaultImgs.push(this.defaultImgUrl);
             }
         } else {
-            this.defaultImg = [];
+            this.defaultImgs = [];
         }
     }
 
@@ -308,20 +310,9 @@ export class ProductComponent implements OnInit {
     }
 
     // Sort
-    customSort($event: LazyLoadEvent) {
-        // event.data.sort((data1, data2) => {
-        //     let value1 = data1[event.field];
-        //     let value2 = data2[event.field];
-        //     let result = null;
-
-        //     if (value1 == null && value2 != null) result = -1;
-        //     else if (value1 != null && value2 == null) result = 1;
-        //     else if (value1 == null && value2 == null) result = 0;
-        //     else if (typeof value1 === 'string' && typeof value2 === 'string') result = value1.localeCompare(value2);
-        //     else result = value1 < value2 ? -1 : value1 > value2 ? 1 : 0;
-
-        //     return event.order * result;
-        // });
+    customSort(event: LazyLoadEvent) {
+        console.log("sort: "+ event);
+        
     }
     // pagination end
 
@@ -438,16 +429,15 @@ export class ProductComponent implements OnInit {
         })
     }
 
-    loadProductsPage($event?: LazyLoadEvent) {
+    loadProductsPage(event?: LazyLoadEvent) {
         this.loading = true;
 
         this.productService
             .getProducts(
-                JSON.stringify($event?.filters) ?? '',
-                $event?.sortOrder ?? 1,
-                $event?.first ?? 0,
-                $event?.rows ?? 10,
-                $event?.sortField ?? 'id'
+                JSON.stringify(event?.filters) ?? '',
+                event?.sortOrder ?? 1,
+                event?.first ?? 0,
+                event?.rows ?? 10,
             )
             .pipe(
                 tap((res) => (this.products = res.products)),

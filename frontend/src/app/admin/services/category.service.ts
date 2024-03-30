@@ -42,12 +42,17 @@ export class CategoryService {
             headers: this.headerService.createAuthorizationHeader()
         });
     }
-
-    updateCategory(category: Category) : Observable<any> {
-        return this.http.put(`${this.categoryApi}/${category.id}`, category,{
+    updateCategory(form: any, id) : Observable<any> {
+        return this.http.put(`${this.categoryApi}/${id}`, form,{
                 headers: this.headerService.createAuthorizationHeader()
             }
         );
+    }
+    getCategoriesContainProduct(productId: number): Observable<any> {
+        return this.http.get(this.categoryApi, {
+            params: new HttpParams()
+                .set('pid', productId.toString())
+        })
     }
 
 }

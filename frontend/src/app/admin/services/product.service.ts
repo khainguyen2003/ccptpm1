@@ -1,4 +1,5 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { CategoryService } from './category.service';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Product } from '../../models/product';
 import { Observable, map } from 'rxjs';
@@ -10,64 +11,54 @@ import { environment } from 'src/environments/environment';
 })
 export class ProductService {
     private productApi = environment.testApiUrl + '/admin/products';
-    constructor(private http: HttpClient) {}
+    constructor(
+        private http: HttpClient,
+        private catService: CategoryService
+    ) {}
 
     getProducts(
-        filter = '',
-        sortOrder = 1,
-        pageNumber = 0,
-        pageSize = 3,
-        sortField = 'id'
+        filter: string,
+        sort: string,
+        page: number,
+        pageSize: number
     ): Observable<any> {
+        var params = new HttpParams();
+        if(filter && filter.trim() !== '') {
+            params.append('filter', filter);
+        }
+        if(sort && sort.trim() !== '') {
+            params.append('sort', sort);
+        }
+        if(page) {
+            params.append('page', page);
+        }
+        if(pageSize) {
+            params.append('size', pageSize);
+        }
+        var headers: HttpHeaders = new HttpHeaders({
+            'Content-Type':  'application/json',
+            Authorization: 'my-auth-token'
+        })
+
         return this.http
             .get(this.productApi, {
-                params: new HttpParams()
-                    // .set('f', filter)
-                    .set('so', sortOrder)
-                    .set('p', pageNumber.toString())
-                    .set('ps', pageSize.toString())
-                    .set('sort', sortField),
+                params, headers
             })
             .pipe(map((res) => res['payload']));
     }
 
-    findProductById(productId: number): Observable<Product> {
+    getProductById(productId: number): Observable<Product> {
         return this.http.get<Product>(this.productApi + '/' + productId);
     }
   
-    getAllProducts(): Observable<any> {
-        return this.http.get(this.productApi)
-            .pipe(
-                map(res => res['payload'])
-            );
-    }
-  
-    findAllProductCategories(catId:number): Observable<Category[]> {
-        return this.http.get('/api/categories', {
-            params: new HttpParams()
-                .set('cid', catId.toString())
-                .set('p', "0")
-                .set('ps', "1000")
-        }).pipe(
-            map(res =>  res["payload"])
-        );
-    }
-    // sortOrder = 'asc', pageNumber = 0, pageSize = 3, sortColumn = 'seqNo'
-    findProducts(sortOrder = 'asc', pageNumber = 0, pageSize = 3, sortColumn = 'seqNo'):  Observable<any> {       
-        return this.http.get(this.productApi, {
-            params: new HttpParams()
-                .set('o', sortOrder)
-                .set('p', pageNumber)
-                .set('ps', pageSize)
-                .set('s', sortColumn)
-        });
-    }
+    // findCategoriesContain(productId:number): Observable<any> {
+    //     return this.catService.
+    // }
     createProduct(form: any): Observable<any> {
         return this.http.post(this.productApi, form);
     }
 
     fakeData(
-        
     ) {
         return this.http.get<any>('assets/demo/data/products.json')
             .toPromise()
