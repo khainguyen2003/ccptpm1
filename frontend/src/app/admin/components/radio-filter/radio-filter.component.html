@@ -10,5 +10,12 @@
         <label for="filterList.name + i">{{item.label}}</label>
       </div>
     }
+    <div *ngIf="hasOtherOpt" class="field-radiobutton">
+      <p-radioButton [name]="filterList.name" [value]="-1" [(ngModel)]="filterSelected" (onClick)="filterChanged($event)" label="Lựu chọn khác"></p-radioButton>
+      <div *ngIf="filterSelected == -1" class="flex">
+        <p-dropdown [options]="operators" [(ngModel)]="operator" [showClear]="true"></p-dropdown>
+        <input type="text" pInputText [(ngModel)]="value" label="Giá trị"/>
+      </div>
+    </div>
   </div>
 </p-panel>

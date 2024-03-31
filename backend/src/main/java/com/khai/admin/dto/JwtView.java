@@ -1,7 +1,7 @@
 package com.khai.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.user.UserProfileDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,5 +18,5 @@ public class JwtView {
     @JsonProperty("refresh_token")
     private String refreshToken;
     @JsonProperty("user_details")
-    private UserView userDetails;
+    private UserProfileDto userDetails;
 }

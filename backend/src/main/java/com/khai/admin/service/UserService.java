@@ -2,7 +2,7 @@ package com.khai.admin.service;
 
 import com.khai.admin.dto.JwtView;
 import com.khai.admin.dto.user.UserCreateDto;
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.user.UserProfileDto;
 import com.khai.admin.entity.User;
 import com.khai.admin.entity.security.KeyStore;
 import com.khai.admin.exception.AlreadyExist;
@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +26,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.KeyPair;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,14 +64,14 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public UserView getUserInfo(int id) {
+    public UserProfileDto getUserInfo(int id) {
         Optional<User> user = userRepository.findUserById(id);
         if(user.isEmpty()) {
             throw new UsernameNotFoundException("Tên tài khoản không tồn tại");
         }
-        UserView userView = new UserView();
-        userView.loadFromUser(user.get());
-        return userView;
+        UserProfileDto userProfileDto = new UserProfileDto();
+        userProfileDto.loadFromUser(user.get());
+        return userProfileDto;
     }
     public User getUserById(int id) {
         Optional<User> user = userRepository.findUserById(id);
@@ -84,12 +81,12 @@ public class UserService {
         return user.get();
     }
 
-    public UserView getUserInfoByEmail(String email) {
+    public UserProfileDto getUserInfoByEmail(String email) {
         Optional<User> user = userRepository.findFirstByEmail(email);
         if(user.isPresent()) {
-            UserView userView = new UserView();
-            userView.loadFromUser(user.get());
-            return userView;
+            UserProfileDto userProfileDto = new UserProfileDto();
+            userProfileDto.loadFromUser(user.get());
+            return userProfileDto;
         } else {
             throw new UsernameNotFoundException("Không tồn tại người dùng có email " + email);
         }
@@ -185,10 +182,10 @@ public class UserService {
             KeyPair keyPair = keyTokenService.generateKeyPair();
             String accessToken = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
             String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
-            UserView userView = new UserView();
-            userView.loadFromUser(user);
+            UserProfileDto userProfileDto = new UserProfileDto();
+            userProfileDto.loadFromUser(user);
 
-            return new JwtView(accessToken, refreshToken, userView);
+            return new JwtView(accessToken, refreshToken, userProfileDto);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
         }
@@ -225,10 +222,10 @@ public class UserService {
             KeyPair keyPair = keyTokenService.generateKeyPair();
             String accessKey = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
             String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
-            UserView userView = new UserView();
-            userView.loadFromUser(user);
+            UserProfileDto userProfileDto = new UserProfileDto();
+            userProfileDto.loadFromUser(user);
 
-            return new JwtView(accessKey, refreshToken, userView);
+            return new JwtView(accessKey, refreshToken, userProfileDto);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
         }

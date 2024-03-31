@@ -2,7 +2,7 @@ package com.khai.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.khai.admin.constants.UserRole;
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.user.UserProfileDto;
 import com.khai.admin.entity.security.KeyStore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +39,8 @@ public class User {
     private String job;
     @Column(name = "user_position")
     private String position;
+    @Column(name = "user_jobarea")
+    private String jobArea;
     private String avatar;
     @Column(name = "created_at")
     private Date createdAt;
@@ -69,24 +71,24 @@ public class User {
     @PrimaryKeyJoinColumn
     private KeyStore keyStore;
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator")
     @JsonIgnore
     private List<Log> logCreatedList;
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator")
     @JsonIgnore
     private List<Product> createdProduct;
 
-    @OneToMany(mappedBy = "last_modified_by", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "last_modified_by")
     @JsonIgnore
     private List<Workplace> lastModifiedWorkplace;
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator")
     @JsonIgnore
     private List<Workplace> createdWorkplace;
 
-    public UserView toUserview() {
-        UserView userView = new UserView();
-        userView.loadFromUser(this);
-        return userView;
+    public UserProfileDto toUserview() {
+        UserProfileDto userProfileDto = new UserProfileDto();
+        userProfileDto.loadFromUser(this);
+        return userProfileDto;
     }
 }
