@@ -1,10 +1,9 @@
 package com.khai.admin.dto;
 
-import com.khai.admin.dto.user.UserView;
-import com.khai.admin.entity.Category;
+import com.khai.admin.dto.category.CategoryViewDto;
+import com.khai.admin.dto.user.UserProfileDto;
+import com.khai.admin.dto.user.UserViewDto;
 import com.khai.admin.entity.Product;
-import com.khai.admin.entity.WorkplaceDetail;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +18,7 @@ public class ProductDto {
     private String desc;
     private String images;
     private Date createdDate;
-    private UserView createdBy;
+    private UserViewDto createdBy;
     private boolean deleted;
     private boolean stopCell;
     private boolean isDirectCell;
@@ -27,7 +26,7 @@ public class ProductDto {
     private String code;
     private float rate;
     private String attr;
-    private Category category;
+    private CategoryViewDto category;
     private List<WorkplaceDetailDto> wpd;
 
     public ProductDto() {
@@ -47,7 +46,7 @@ public class ProductDto {
         this.code = product.getCode();
         this.rate = product.getRate();
         this.attr = product.getAttr();
-        this.category = product.getCategory();
+        this.category = new CategoryViewDto(product.getCategory());
     }
 
     private void loadFromProduct(Product product) {
@@ -64,7 +63,7 @@ public class ProductDto {
         this.code = product.getCode();
         this.rate = product.getRate();
         this.attr = product.getAttr();
-        this.category = product.getCategory();
+        this.category = new CategoryViewDto(product.getCategory());
     }
 
     public void updateToProduct(Product product) {
@@ -79,6 +78,6 @@ public class ProductDto {
         product.setCode(code);
         product.setWeight(weight);
         product.setDirectCell(isDirectCell);
-        product.setCategory(category);
+        product.setCategory(category.convertToCategory());
     }
 }

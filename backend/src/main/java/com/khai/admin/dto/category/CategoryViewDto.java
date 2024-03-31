@@ -1,25 +1,31 @@
 package com.khai.admin.dto.category;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.khai.admin.entity.Product;
-import jakarta.persistence.*;
+import com.khai.admin.entity.Category;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-import java.util.List;
-
 @Setter
 @Getter
-public class CategoryDto {
+public class CategoryViewDto {
     private int id;
     private String name;
 
-    public CategoryDto() {
+    public CategoryViewDto() {
     }
 
-    public CategoryDto(int id, String name) {
+    public CategoryViewDto(int id, String name) {
         this.id = id;
         this.name = name;
+    }
+    public CategoryViewDto(Category category) {
+        this.id = category.getId();
+        this.name = category.getName();
+    }
+    public Category convertToCategory(){
+        Category category = new Category();
+        category.setId(this.id);
+        category.setName(this.name);
+
+        return category;
     }
 }

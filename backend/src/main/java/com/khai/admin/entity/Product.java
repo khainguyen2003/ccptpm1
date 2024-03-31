@@ -2,12 +2,9 @@ package com.khai.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.khai.admin.dto.ProductDto;
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.user.UserProfileDto;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
@@ -30,7 +27,7 @@ public class Product {
     @CreatedDate
     @Column(name = "product_created_date")
     private Date createdDate;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_created_id", referencedColumnName = "user_id", nullable = false)
     @JsonProperty("created_by")
     private User creator;
@@ -50,7 +47,7 @@ public class Product {
     private float rate;
     // Các thuộc tính của sản phẩm
     private String attr;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "pc_id")
     private Category category;
 
@@ -74,7 +71,7 @@ public class Product {
     }
 
     public ProductDto toDto() {
-        UserView createdBy = new UserView();
+        UserProfileDto createdBy = new UserProfileDto();
         createdBy.loadFromUser(creator);
         return new ProductDto(this);
     }

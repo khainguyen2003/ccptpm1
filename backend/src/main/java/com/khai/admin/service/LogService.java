@@ -1,8 +1,7 @@
 package com.khai.admin.service;
 
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.user.UserProfileDto;
 import com.khai.admin.entity.Log;
-import com.khai.admin.exception.NoSuchElementException;
 import com.khai.admin.repository.LogDetailRepository;
 import com.khai.admin.repository.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ public class LogService {
 
     public void updateReadStatus(int id) {
         String username = UserService.getCurrentUsername();
-        UserView user = userService.getUserInfoByEmail(username);
+        UserProfileDto user = userService.getUserInfoByEmail(username);
         try {
             logDetailRepository.updateReadById(id, user.getId(), true);
         } catch (Exception e) {

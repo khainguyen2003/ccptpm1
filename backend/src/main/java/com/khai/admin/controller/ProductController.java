@@ -57,15 +57,24 @@ public class ProductController {
     }
     @GetMapping
     public ResponseEntity<Map<String, Object>> getProducts(
-            @RequestParam(required = false) String name,
-            @RequestParam(value = "search", required = false) String search,
             @RequestParam(defaultValue = "0") short page,
             @RequestParam(defaultValue = "5") short size,
-            @RequestParam(defaultValue = "id:asc") String sort
+            @RequestParam(defaultValue = "id:asc") String sort,
+            @RequestParam(value = "q", required = false) String search,
+            @RequestParam(defaultValue = "1", required = false) byte allowSale,
+            @RequestParam(defaultValue = "alltime") String stockOutDate,
+            @RequestParam(value = "stockoutStartDate", defaultValue = "") String stockoutStartDate,
+            @RequestParam(value = "stockoutEndDate", defaultValue = "") String stockoutEndDate,
+            @RequestParam(defaultValue = "0", required = false) byte onHandFilter,
+            @RequestParam(defaultValue = "", required = false) String onHandFilterStr,
+            @RequestParam(defaultValue = "", required = false) int[] branchIds,
+            @RequestParam(defaultValue = "0", required = false) byte directSell,
+            @RequestParam(defaultValue = "0", required = false) byte relateToChanel
+
     ) {
         List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
-        Map<String, Object> response = productService.getProducts(name, pageable);
+        Map<String, Object> response = productService.getProducts(pageable, search, allowSale, stockOutDate, stockoutStartDate, stockoutEndDate, onHandFilter, onHandFilterStr, branchIds, directSell, relateToChanel);
         return ResponseEntity.status(200).body(response);
     }
     @GetMapping("/{id}")
