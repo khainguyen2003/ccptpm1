@@ -7,7 +7,7 @@
     </p-panel>
     <app-multi-select-filter label="Nhà cung cấp" [options]="catFilter" (changeEvent)="slcPosOpt($event)"></app-multi-select-filter>
     <app-multi-select-filter label="Vị trí" [options]="positionFilter" (changeEvent)="slcPosOpt($event)"></app-multi-select-filter>
-    <app-radio-filter [filterList]="slcInvenStatus" title="Tồn kho" (changeEvent)="selectInvenOpt($event)"></app-radio-filter>
+    <app-radio-filter [filterList]="slcInvenStatus" title="Tồn kho" (changeEvent)="selectInvenOpt($event)" hasOtherOpt="true"></app-radio-filter>
     <app-radio-filter [filterList]="slcSellStatus" title="Trạng thái" (changeEvent)="selectInvenOpt($event)"></app-radio-filter>  
 </div>
 <div class="layout-main-container">

@@ -44,7 +44,7 @@ export class ProductComponent implements OnInit {
     // -- end for dialog
     //----------------- For filter
     // http parameters
-    filter: string = '';
+    filter: Filter;
     sort: string = '';
 
     // -- For filter section
@@ -431,11 +431,19 @@ export class ProductComponent implements OnInit {
 
     loadProductsPage(event?: LazyLoadEvent) {
         this.loading = true;
+        var sort: string = event?.sortField ?? '';
+        if(sort !== '') {
+            if(event.sortOrder === -1) {
+                sort += 'desc';
+            } else {
+                sort += 'asc';
+            }
+        }
 
         this.productService
             .getProducts(
                 JSON.stringify(event?.filters) ?? '',
-                event?.sortOrder ?? 1,
+                sort,
                 event?.first ?? 0,
                 event?.rows ?? 10,
             )
@@ -467,15 +475,16 @@ export class ProductComponent implements OnInit {
      * 
      * @param option Là giá trị nhận từ emit của thằng con
      */
-    selectInvenOpt(option: any) {
+    selectInvenOpt(option: string[]) {
         // gọi http service để tạo request filter
         console.log(option);
+        this.filter.onHandFilter = option[0];
     }
 
-    slcTypeOpt(options: any) {
+    slcTypeOpt(options: any[]) {
         console.log(options);
     }
-    slcPosOpt(options: any) {
+    slcPosOpt(options: any[]) {
         console.log(options);
     }
 }
@@ -487,4 +496,19 @@ interface UploadEvent {
 
 interface expandedRows {
     [key: string]: boolean;
+}
+interface Filter {
+    categories:  number[],
+    attrFilter: string[],
+    supplierIds: number[],
+    allowSale: number, // 0 -> all, 1 -> Đang kinh doanh, -1 -> Ngừng kinh doanh
+    // alltime: toàn thời gian | other để chỉ định thời gian bắt đầu và kết thúc | thời gian chỉ định, ví dụ afterThreeDay, ...
+    stockOutDate: string, 
+    stockoutStartDate: string, // thời gian bắt đầu
+    stockOutEndDate: string, // thời gian kết thúc
+    onHandFilter: number, // theo thứ tự từ  0-4 | -1 để nhập giá trị
+    onHandFilterStr: string, // >= 10 => str= >=:10
+    branchIds: number[],
+    directSell: number, // 0 -> all, 1 -> bán trực tiếp, -1 -> ko bán trực tiếp
+    relateToChanel: number, // tương tự như trên 
 }

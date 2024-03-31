@@ -57,6 +57,12 @@ export class ProductService {
     createProduct(form: any): Observable<any> {
         return this.http.post(this.productApi, form);
     }
+    updateProduct(productId: number, form: any): Observable<any> {
+        return this.http.put(this.productApi + '/' + productId, form);
+    }
+    deleteProduct(productId: number): Observable<any> {
+        return this.http.delete(this.productApi + '/' + productId);
+    }
 
     fakeData(
     ) {
