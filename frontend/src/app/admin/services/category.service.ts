@@ -42,7 +42,7 @@ export class CategoryService {
             headers: this.headerService.createAuthorizationHeader()
         });
     }
-    updateCategory(form: any, id) : Observable<any> {
+    updateCategory(form: any, id: number) : Observable<any> {
         return this.http.put(`${this.categoryApi}/${id}`, form,{
                 headers: this.headerService.createAuthorizationHeader()
             }
