@@ -52,5 +52,7 @@ public class Employee {
     private String address;
     @Column(name = "employee_notes")
     private String notes;
+    @Column(name = "employee_image")
+    private String image;
 
 }
