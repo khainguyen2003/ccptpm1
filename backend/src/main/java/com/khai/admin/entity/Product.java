@@ -1,7 +1,7 @@
 package com.khai.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.khai.admin.dto.ProductDto;
+import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.dto.user.UserProfileDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,6 +12,24 @@ import java.util.List;
 
 @Entity
 @Table(name = "tblproduct")
+//@NamedEntityGraph(
+//        name = "Product.list",
+//        attributeNodes = {
+//                @NamedAttributeNode(value = "creator", subgraph = "creator"),
+//                @NamedAttributeNode(value = "category", subgraph = "category")
+//        },
+//        subgraphs = {
+//                @NamedSubgraph(name = "creator", attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("firstname"),
+//                        @NamedAttributeNode("lastname")
+//                }),
+//                @NamedSubgraph(name = "category", attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("name")
+//                })
+//        }
+//)
 @Data
 public class Product {
     @Id
@@ -51,8 +69,26 @@ public class Product {
     @JoinColumn(name = "category_id", referencedColumnName = "pc_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<WorkplaceDetail> wpd;
+
+    public Product(int id, String name, String description, String images, Date createdDate, User creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, Category category, List<WorkplaceDetail> wpd) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.images = images;
+        this.createdDate = createdDate;
+        this.creator = creator;
+        this.deleted = deleted;
+        this.isStopCell = isStopCell;
+        this.isDirectCell = isDirectCell;
+        this.weight = weight;
+        this.code = code;
+        this.rate = rate;
+        this.attr = attr;
+        this.category = category;
+        this.wpd = wpd;
+    }
 
     public void applyToProduct(Product product) {
         if(!product.getName().isBlank()) {

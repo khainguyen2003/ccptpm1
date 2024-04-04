@@ -1,12 +1,10 @@
 package com.khai.admin.controller;
 
-import com.khai.admin.dto.ProductDto;
-import com.khai.admin.entity.Category;
+import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.entity.Product;
 import com.khai.admin.service.HttpServices;
 import com.khai.admin.service.ProductService;
 import com.khai.admin.util.Utilities;
-import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.print.Printable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +48,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestHeader Map<String, String> headers, @RequestBody Product product) {
+    public ResponseEntity<ProductDto> createProduct(@RequestHeader Map<String, String> headers, @RequestBody Product product, @RequestParam("files") MultipartFile file) {
+
         ProductDto result = productService.create(headers, product);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }

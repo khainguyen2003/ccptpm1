@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tbl_log_detail")
+@Table(name = "tbllog_detail")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -14,16 +14,16 @@ import java.util.Objects;
 public class LogDetail {
     @EmbeddedId
     private LogDetailKey key;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "log_id", referencedColumnName = "log_id")
     private Log log;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 
-    @Column(columnDefinition = "BIT(1) DEFAULT '0'")
+    @Column(columnDefinition = "BIT(1) DEFAULT b'0'")
     private boolean readed;
-    @Column(columnDefinition = "BIT(1) DEFAULT '0'")
+    @Column(columnDefinition = "BIT(1) DEFAULT b'0'")
     private boolean deleted;
 }
 

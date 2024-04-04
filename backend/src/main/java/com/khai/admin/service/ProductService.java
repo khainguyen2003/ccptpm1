@@ -1,8 +1,8 @@
 package com.khai.admin.service;
 
-import com.khai.admin.dto.category.CategoryViewDto;
-import com.khai.admin.dto.ProductDto;
-import com.khai.admin.dto.user.UserViewDto;
+import com.khai.admin.dto.Product.ProductDto;
+import com.khai.admin.dto.Product.ProductRecord;
+import com.khai.admin.dto.Product.ProductSumary;
 import com.khai.admin.entity.Category;
 import com.khai.admin.entity.Product;
 import com.khai.admin.entity.User;
@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,30 +105,14 @@ public class ProductService {
         try {
             List<Product> products = new ArrayList<>();
             List<ProductDto> productDtoList = new ArrayList<>();
-//            Page<Object[]> pageProducts = productRepository.getProducts(Specification.where(ProductSpecifications.hasSearch(search)), pageable);;
-            /*for (Object[] objects : pageProducts.getContent()) {
-                ProductDto p = new ProductDto((Product)objects[0]);
-                UserViewDto u = new UserViewDto((Integer)objects[1], String.valueOf(objects[2]), String.valueOf(objects[3]), String.valueOf(objects[4]), String.valueOf(objects[5]));
-                p.setCreatedBy(u);
-                CategoryViewDto c = new CategoryViewDto((Integer)objects[6], String.valueOf(objects[7]));
-                p.setCategory(c);
-                productDtoList.add(p);
-            }*/
-            Specification<Product> searchSpec = ProductSpecifications.hasSearch(search);
-            Specification<Product> selectSpec = ProductSpecifications.selectFields();
-            // Kết hợp hai Specification thành một
-            Specification<Product> combinedSpec = Specification.where(searchSpec).and(selectSpec);
 
-            Page<Product> pageProducts = productRepository.findAll(
-                    ProductSpecifications.selectFields()
-                    .and(ProductSpecifications.hasSearch(search)),
-                    pageable
-            );
+            Page<ProductSumary> pageProducts = productRepository.findBy(pageable);
 
-            products = pageProducts.getContent();
+
+//            products = pageProducts.getContent();
             products.stream().map(ProductDto::new).forEach(productDtoList::add);
             Map<String, Object> response = new HashMap<>();
-            response.put("products", productDtoList);
+            response.put("products", pageProducts.getContent());
             response.put("curPage", pageProducts.getNumber());
             response.put("totalPage", pageProducts.getTotalPages());
             response.put("totalElements", pageProducts.getTotalElements());

@@ -1,2 +1,4 @@
-package com.khai.admin.dto.user;public class UserRecord {
+package com.khai.admin.dto.user;
+
+public record UserRecord() {
 }
