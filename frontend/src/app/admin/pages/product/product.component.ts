@@ -478,7 +478,7 @@ export class ProductComponent implements OnInit {
     selectInvenOpt(option: string[]) {
         // gọi http service để tạo request filter
         console.log(option);
-        this.filter.onHandFilter = option[0];
+        //this.filter.onHandFilter = option[0];
     }
 
     slcTypeOpt(options: any[]) {

@@ -28,7 +28,6 @@ public class Employee {
     private Date contract_expire;
     @Column(name="employee_status", columnDefinition = "smallint(2) unsigned NOT NULL DEFAULT '0' COMMENT 'Trạng thái nhân viên (1-Đang làm; 0-Đã nghỉ )\\r\\n'")
     private byte status;
-
     @Column(name="employee_workplace_start_time")
     private LocalTime start_time;
     @Column(name="employee_workplace_end_time")
@@ -37,5 +36,21 @@ public class Employee {
     private byte role;
     @Column(name="employee_created_date", columnDefinition = "DATETIME(6) NOT NULL COMMENT 'Ngày khởi tạo nhân viên'")
     private Date created_date;
+    @Column(name="employee_modified_date", columnDefinition = "DATETIME(6) NOT NULL COMMENT 'Ngày chỉnh sửa thông tin nhân viên'")
+    private Date modified_date;
+    @Column(name="employee_deleted", columnDefinition = "BIT(1) DEFAULT b'0'")
+    private boolean deleted;
+    @Column(name = "employee_fullname")
+    private String fullname;
+    @Column(name="employee_birthday", columnDefinition = "DATETIME(6) NOT NULL COMMENT 'Ngày sinh'")
+    private Date birthday;
+    @Column(name = "employee_email")
+    private String email;
+    @Column(name = "employee_phone")
+    private String phoneNumber;
+    @Column(name = "employee_address")
+    private String address;
+    @Column(name = "employee_notes")
+    private String notes;
 
 }
