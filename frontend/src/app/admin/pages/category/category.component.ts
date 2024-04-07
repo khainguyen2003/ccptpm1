@@ -70,7 +70,7 @@ export class CategoryComponent implements OnInit {
 
     saveCategory() {
         this.categoryDialog = false;
-        this.categoryService.updateCategory(this.category).subscribe({
+        this.categoryService.updateCategory(this.category, this.category.id).subscribe({
             next: res => {
                 this.categories = [this.category, ...this.categories.filter(item => item.id !== this.category.id)];
                 this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Cập nhật thành công.', life: 3000 });

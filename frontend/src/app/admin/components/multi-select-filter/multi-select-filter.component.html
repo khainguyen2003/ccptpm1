@@ -18,10 +18,10 @@
         styleClass="w-full"
         >
         <ng-template let-option pTemplate="item">
-            <div class=" w-full flex align-items-center justify-content-between">
-                <div>{{ option.name }}</div>
-                <i class="pi pi-pencil edit-icon" (click)="openEditDialog($event, option)"></i>
+            <div class="select-item-label">
+                {{ option.name }}
             </div>
+            <i class="pi pi-pencil edit-icon" (click)="openEditDialog($event, option)"></i>
         </ng-template>
     </p-multiSelect>
 </p-panel>
