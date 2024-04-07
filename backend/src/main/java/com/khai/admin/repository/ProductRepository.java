@@ -11,17 +11,18 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
-//@Repository
+@Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
 
 //    @Query("SELECT p, p.creator.id, p.creator.firstname, p.creator.lastname, p.creator.job, p.creator.position, p.category.id, p.category.name FROM Product p")
-//    @Query(value = "SELECT p.* FFOM tblproduct p LEFT JOIN tblcategory c ON p.category_id=c.pc_id LEFT JOIN tbluser u ON p.", nativeQuery = true)
+//    @Query(value = "SELECT p FROM tblproduct p JOIN p.category c")
 //    @Query("SELECT new com.khai.admin.dto.Product.ProductDto(p, new com.khai.admin.dto.category( p FROM Product p")
 //    @EntityGraph(value = "Product.list", type = EntityGraph.EntityGraphType.LOAD)
 
-    Page<ProductSumary> findBy(Pageable pageable);
+    Page<ProductDto> findBy(Pageable pageable);
 
     Page<ProductDto> findAllBy(Pageable pageable);
 

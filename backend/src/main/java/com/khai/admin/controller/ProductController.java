@@ -35,7 +35,7 @@ public class ProductController {
     }
 
 //    public ResponseEntity<Page<Product>> getProducts()
-    @PostMapping("/import-json")
+    @PostMapping("/import/json")
     public ResponseEntity<String> importJsonData(@RequestParam("file") MultipartFile jsonData) {
         try {
             List<Product> productData = Utilities.convertJSONToEntity(jsonData);
@@ -48,9 +48,8 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestHeader Map<String, String> headers, @RequestBody Product product, @RequestParam("files") MultipartFile file) {
-
-        ProductDto result = productService.create(headers, product);
+    public ResponseEntity<ProductDto> createProduct(@RequestHeader Map<String, String> headers, @ModelAttribute ProductDto updatedProduct) {
+        ProductDto result = productService.create(headers, updatedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
     @GetMapping
@@ -86,7 +85,7 @@ public class ProductController {
         return ResponseEntity.ok("Xóa sản phẩm thành công");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") int id, @RequestBody Product product) {
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDto product) {
         ProductDto updatedProduct = productService.updateProduct(id, product);
         return ResponseEntity.ok(updatedProduct);
     }

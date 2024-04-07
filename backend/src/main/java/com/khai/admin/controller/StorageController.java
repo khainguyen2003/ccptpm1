@@ -31,7 +31,6 @@ public class StorageController {
     public ResponseEntity<List<String>> getFileUploaded() {
         String testFolder = storageService.getTestFolder();
         Path testPath = Paths.get(testFolder);
-        System.out.println("testPath: " + testPath);
         List<String> files = storageService.loadAll(testPath).map(
                         path -> MvcUriComponentsBuilder.fromMethodName(StorageController.class,
                                 "serveFile", path.getFileName().toString()).build().toUri().toString())
@@ -43,7 +42,7 @@ public class StorageController {
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
         String testFolder = storageService.getTestFolder();
-        Resource file = storageService.loadFileAsResource(testFolder + File.separator + filename);
+        Resource file = storageService.loadFileAsResource(testFolder + "/" + filename);
         if (file == null)
             return ResponseEntity.notFound().build();
 
@@ -53,7 +52,7 @@ public class StorageController {
 
     @PostMapping("/convert")
     public ResponseEntity<String> converImgToText(@RequestParam("files") MultipartFile file) {
-        String filePath = storageService.getTestFolder() + File.separator + file.getOriginalFilename();
+        String filePath = storageService.getTestFolder() + "/" + file.getOriginalFilename();
         storageService.uploadFileToSystem(file, filePath);
         String result = storageService.convertImageToText(filePath);
 
@@ -62,9 +61,19 @@ public class StorageController {
 
     @PostMapping
     public ResponseEntity<String> handleFileUpload(@RequestParam("files") MultipartFile[] files) {
-        List<String> fileNames = storageService.uploadMultipleFilesToSystem(files);
+        String testFolder = storageService.getTestFolder();
+        List<String> fileNames = storageService.uploadMultipleFilesToSystem(files, testFolder);
 
         return new ResponseEntity<>("upload thành công: " + fileNames, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{filename:.+}")
+    public ResponseEntity<String> deleteFile(@PathVariable String filename) {
+        String testFolder = storageService.getTestFolder();
+        Path filePath = Path.of(testFolder + "/" + filename);
+
+        storageService.deleteFileFromSystem(filePath);
+        return new ResponseEntity<>("Xóa file " + filename + " thành công", HttpStatus.OK);
     }
 
 

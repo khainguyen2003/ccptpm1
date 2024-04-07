@@ -5,8 +5,10 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,38 +31,44 @@ import java.util.stream.Stream;
 @Slf4j
 public class StorageService {
 
+    private final ResourceLoader rsloader;
     @Value("${folder.absPath}")
-    private String folderPath;
+    private String dataFolderPath;
     private final String TEST = "test";
+    private final String PRODUCT = "product";
 
-    public StorageService() {
+    @Autowired
+    public StorageService(ResourceLoader rsloader) {
+        this.rsloader = rsloader;
     }
 
     @PostConstruct
     public void init() {
         try {
-            Path testPath = Path.of(folderPath + File.separator + TEST);
+            Path testPath = Path.of(dataFolderPath + "/" + TEST);
+            Path productPath = Path.of(dataFolderPath + "/" + PRODUCT);
             Files.createDirectories(testPath);
+            Files.createDirectories(productPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    public byte[] getFileFromSystem(String fileName) {
+    public byte[] getFileFromSystem(Path path) {
 
         try {
-            byte[] file = Files.readAllBytes(Path.of(folderPath + fileName));
+            byte[] file = Files.readAllBytes(path);
             return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public boolean deleteFileFromFileSystem(String fileName) {
+    public boolean deleteFileFromSystem(Path path) {
         boolean isDeleted = false;
         try {
-            Files.delete(Path.of(folderPath + fileName));
+            Files.delete(path);
             isDeleted = true;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -68,41 +76,74 @@ public class StorageService {
             return isDeleted;
         }
     }
+    public boolean deleteFileFromSystem(String path) {
+        return this.deleteFileFromSystem(Path.of(path));
+    }
+
+    public void deleteFilesFromSystem(List<Path> paths) {
+        try {
+            paths.stream().forEach(path -> deleteFileFromSystem(path));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public boolean uploadFileToSystem(MultipartFile file, String filePath) {
 
         boolean isSaveToFileSystem = false;
-
         try {
+            File newfile = new File(filePath);
             if(file.isEmpty()) {
                 throw new StorageException("File lỗi");
             }
             // save file to file system
-            file.transferTo(new File(filePath));
+            file.transferTo(newfile);
             isSaveToFileSystem = true;
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, e.getMessage());
+        } catch( IllegalStateException e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, e.getMessage());
         } finally {
             return isSaveToFileSystem;
         }
     }
 
-    public List<String> uploadMultipleFilesToSystem(MultipartFile[] files) {
+    /**
+     * Phương thức upload nhiều file được tải lên từ client
+     * @param files
+     * @param folderPath
+     * @return đường dẫn của file để chuyển thành api localhost://8080/api/files/<file-name>
+     */
+    public List<String> uploadMultipleFilesToSystem(MultipartFile[] files, String folderPath) {
+        List<String> resultList = new ArrayList<>();
         try {
-            List<String> fileNames = new ArrayList<>();
-            Arrays.asList(files).stream().forEach(file -> {
-                String filePath = this.getTestFolder() + File.separator + file.getOriginalFilename();
-                this.uploadFileToSystem(file, filePath);
-                fileNames.add(file.getOriginalFilename());
-            });
-            return fileNames;
+            if(files != null && files.length > 0) {
+                Arrays.asList(files).stream().forEach(file -> {
+                    String filePath = folderPath + "/" + file.getOriginalFilename();
+                    boolean uploaded = this.uploadFileToSystem(file, filePath);
+                    if(uploaded) {
+                        resultList.add(filePath);
+                    } else {
+                        System.out.println("Tải files "+file.getOriginalFilename()+" lên không thành công");
+                    }
+                });
+            }
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "Tải files không thành công");
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "Tải files lên không thành công");
+        } finally {
+            return resultList;
         }
     }
 
     public String getTestFolder() {
-        return folderPath + File.separator + TEST;
+        return dataFolderPath + "/" + TEST;
+    }
+    public String getProductFolder() {
+        return dataFolderPath + "/" + PRODUCT;
     }
 
     /**
@@ -147,5 +188,40 @@ public class StorageService {
         }
 
         return "";
+    }
+    public List<String> getImageUrls(String imagePaths) {
+        List<String> imgUrls = new ArrayList<>();
+        Arrays.asList(imagePaths.split(",")).forEach(image -> {
+            try {
+                Resource resources = rsloader.getResource(image);
+                imgUrls.add(resources.getURL().toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return imgUrls;
+    }
+
+    public List<String> getImageUrls(List<String> imagePath) {
+        List<String> imgUrls = new ArrayList<>();
+        imagePath.forEach(image -> {
+            try {
+                Resource resources = rsloader.getResource(image);
+                imgUrls.add(resources.getURL().toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return imgUrls;
+    }
+
+    public void updateFileInSystem(List<String> oldPath, List<String> newPath) {
+        oldPath.forEach(path -> {
+            if(!newPath.contains(path)) {
+                this.deleteFileFromSystem(path);
+            }
+        });
     }
 }

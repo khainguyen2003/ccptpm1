@@ -1,5 +1,6 @@
 package com.khai.admin.dto.user;
 
+import com.khai.admin.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +15,13 @@ public class UserViewDto implements Serializable {
     private String position;
 
     public UserViewDto() {
+    }
+    public UserViewDto(User user) {
+        this.id = user.getId();
+        this.firstName = user.getFirstname();
+        this.lastname = user.getLastname();
+        this.jobarea = user.getJobArea();
+        this.position = user.getPosition();
     }
 
     public UserViewDto(int id, String firstName, String lastname, String jobarea, String position) {

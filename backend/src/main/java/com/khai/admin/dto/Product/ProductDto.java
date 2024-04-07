@@ -3,7 +3,10 @@ package com.khai.admin.dto.Product;
 import com.khai.admin.dto.workplace.WorkplaceDetailDto;
 import com.khai.admin.dto.category.CategoryViewDto;
 import com.khai.admin.dto.user.UserViewDto;
+import com.khai.admin.entity.Category;
 import com.khai.admin.entity.Product;
+import com.khai.admin.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,7 +16,8 @@ public class ProductDto implements Serializable {
     private int id;
     private String name;
     private String description;
-    private String images;
+    private List<String> images;
+    private MultipartFile[] files;
     private Date createdDate;
     private UserViewDto creator;
     private boolean deleted;
@@ -34,13 +38,13 @@ public class ProductDto implements Serializable {
 
     We must also define equals and hashCode implementations; they allow Spring Data to process projection objects in a collection.
      */
-    public ProductDto(int id, String name, String description, String images, Date createdDate, UserViewDto creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, CategoryViewDto category) {
+    public ProductDto(int id, String name, String description, List<String> images, Date createdDate, User creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.images = images;
         this.createdDate = createdDate;
-        this.creator = creator;
+        this.creator = new UserViewDto(creator);
         this.deleted = deleted;
         this.isStopCell = isStopCell;
         this.isDirectCell = isDirectCell;
@@ -48,7 +52,7 @@ public class ProductDto implements Serializable {
         this.code = code;
         this.rate = rate;
         this.attr = attr;
-        this.category = category;
+        this.category = new CategoryViewDto(category);
 //        this.wpd = wpd;
     }
 
@@ -66,7 +70,9 @@ public class ProductDto implements Serializable {
         this.code = product.getCode();
         this.rate = product.getRate();
         this.attr = product.getAttr();
-        this.category = new CategoryViewDto(product.getCategory());
+        if(product.getCategory() != null) {
+            this.category = new CategoryViewDto(product.getCategory());
+        }
     }
 
     public int getId() {
@@ -93,11 +99,11 @@ public class ProductDto implements Serializable {
         this.description = description;
     }
 
-    public String getImages() {
+    public List<String> getImages() {
         return images;
     }
 
-    public void setImages(String images) {
+    public void setImages(List<String> images) {
         this.images = images;
     }
 
@@ -189,24 +195,32 @@ public class ProductDto implements Serializable {
 //        this.wpd = wpd;
 //    }
 
-    private void loadFromProduct(Product product) {
-        this.id = product.getId();
-        if(!product.getName().isBlank()) {
-            this.name = product.getName();
-        }
-        this.description = product.getDescription();
-        this.images = product.getImages();
-        this.deleted = product.isDeleted();
-        this.isStopCell = product.isStopCell();
-        this.isDirectCell = product.isDirectCell();
-        this.weight = product.getWeight();
-        this.code = product.getCode();
-        this.rate = product.getRate();
-        this.attr = product.getAttr();
-        this.category = new CategoryViewDto(product.getCategory());
+
+    public MultipartFile[] getFiles() {
+        return files;
     }
 
-    public void updateToProduct(Product product) {
+    public void setFiles(MultipartFile[] files) {
+        this.files = files;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public UserViewDto getCreator() {
+        return creator;
+    }
+
+    public void setCreator(UserViewDto creator) {
+        this.creator = creator;
+    }
+
+    public void applyToProduct(Product product) {
         product.setId(id);
         if(!this.getName().isBlank()) {
             product.setName(name);
@@ -218,7 +232,10 @@ public class ProductDto implements Serializable {
         product.setCode(code);
         product.setWeight(weight);
         product.setDirectCell(isDirectCell);
-        product.setCategory(category.convertToCategory());
+        product.setImages(this.images);
+        if(category != null) {
+            product.setCategory(category.convertToCategory());
+        }
     }
 
     @Override

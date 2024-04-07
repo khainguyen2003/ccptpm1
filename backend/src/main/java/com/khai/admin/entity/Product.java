@@ -41,7 +41,7 @@ public class Product {
     @Column(name = "product_desc", length = 500)
     private String description;
     @Column(name = "product_images")
-    private String images;
+    private List<String> images;
     @CreatedDate
     @Column(name = "product_created_date")
     private Date createdDate;
@@ -66,29 +66,11 @@ public class Product {
     // Các thuộc tính của sản phẩm
     private String attr;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", referencedColumnName = "pc_id")
+    @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = true)
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<WorkplaceDetail> wpd;
-
-    public Product(int id, String name, String description, String images, Date createdDate, User creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, Category category, List<WorkplaceDetail> wpd) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.images = images;
-        this.createdDate = createdDate;
-        this.creator = creator;
-        this.deleted = deleted;
-        this.isStopCell = isStopCell;
-        this.isDirectCell = isDirectCell;
-        this.weight = weight;
-        this.code = code;
-        this.rate = rate;
-        this.attr = attr;
-        this.category = category;
-        this.wpd = wpd;
-    }
 
     public void applyToProduct(Product product) {
         if(!product.getName().isBlank()) {

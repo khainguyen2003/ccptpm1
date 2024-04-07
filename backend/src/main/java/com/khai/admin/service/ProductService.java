@@ -18,25 +18,31 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
 @Service
 public class ProductService {
+    @Autowired
     private ProductRepository productRepository;
+    @Autowired
     private UserService userService;
     private final CategoryRepository categoryRepository;
+    private final StorageService storageService;
 
     @Autowired
     public ProductService(
         ProductRepository productRepository,
         CategoryRepository categoryRepository,
-        UserService userService
+        UserService userService,
+        StorageService storageService
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
+        this.storageService = storageService;
     }
 
     public ProductDto getProductInfo(int id) {
@@ -67,23 +73,31 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto create(Map<String, String> headers, Product product) {
+    public ProductDto create(Map<String, String> headers, ProductDto updatedProduct) {
         try {
             Date now = new Date();
-            if(productRepository.isExist(product.getName(), product.getCode()).isPresent()) {
+            if(productRepository.isExist(updatedProduct.getName(), updatedProduct.getCode()).isPresent()) {
                 throw new AlreadyExist("Sản phẩm");
             }
             User user = userService.getUserById(1);
+            Product newproduct = new Product();
+            updatedProduct.applyToProduct(newproduct);
 
-            product.setDeleted(false);
-            product.setCreatedDate(now);
-            Category category = categoryRepository.findById(product.getCategory().getId()).orElse(null);
-            if(category != null)
-                product.setCategory(category);
-            product.setCreator(user);
-            productRepository.save(product);
+            newproduct.setDeleted(false);
+            newproduct.setCreatedDate(now);
+            if(updatedProduct.getCategory() != null) {
+                Category category = categoryRepository.findById(updatedProduct.getCategory().getId()).orElse(null);
+                if(category != null)
+                    newproduct.setCategory(category);
+            }
+            newproduct.setCreator(user);
+            String productFolder = storageService.getProductFolder();
+            List<String> uploadedPath = storageService.uploadMultipleFilesToSystem(updatedProduct.getFiles(), productFolder);
 
-            return product.toDto();
+            newproduct.setImages(uploadedPath);
+            productRepository.save(newproduct);
+
+            return new ProductDto(newproduct);
         } catch(Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -106,13 +120,16 @@ public class ProductService {
             List<Product> products = new ArrayList<>();
             List<ProductDto> productDtoList = new ArrayList<>();
 
-            Page<ProductSumary> pageProducts = productRepository.findBy(pageable);
+            Page<Product> pageProducts = productRepository.findAll(pageable);
 
 
-//            products = pageProducts.getContent();
-            products.stream().map(ProductDto::new).forEach(productDtoList::add);
+            products = pageProducts.getContent();
+            products.forEach(product -> {
+                ProductDto item = new ProductDto(product);
+                productDtoList.add(item);
+            });
             Map<String, Object> response = new HashMap<>();
-            response.put("products", pageProducts.getContent());
+            response.put("products", productDtoList);
             response.put("curPage", pageProducts.getNumber());
             response.put("totalPage", pageProducts.getTotalPages());
             response.put("totalElements", pageProducts.getTotalElements());
@@ -145,12 +162,21 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto updateProduct(int id, Product updatedProduct) {
+    public ProductDto updateProduct(int id, ProductDto updatedProduct) {
         try {
+
             Optional<Product> optProduct = productRepository.findById(id);
             if(optProduct.isPresent()) {
                 Product product = optProduct.get();
                 updatedProduct.applyToProduct(product);
+                List<String> updateImages = updatedProduct.getImages();
+                storageService.updateFileInSystem(product.getImages(), updateImages);
+                String productFolder = storageService.getProductFolder();
+                List<String> uploadedImgPath = storageService.uploadMultipleFilesToSystem(updatedProduct.getFiles(), productFolder);
+                if(!uploadedImgPath.isEmpty()) {
+                    updateImages.addAll(uploadedImgPath);
+                    product.setImages(updateImages);
+                }
                 productRepository.save(product);
                 return product.toDto();
             } else {
