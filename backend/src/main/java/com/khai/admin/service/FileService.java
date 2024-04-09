@@ -123,7 +123,12 @@ public class StorageService {
         try {
             if(files != null && files.length > 0) {
                 Arrays.asList(files).stream().forEach(file -> {
-                    String filePath = folderPath + "/" + file.getOriginalFilename();
+                    String fileName = file.getOriginalFilename();
+                    int extensionIndex = fileName.lastIndexOf(".");
+                    String extensionFile = fileName.substring(extensionIndex);
+                    if(extensionFile.equalsIgnoreCase("png") || extensionFile.equalsIgnoreCase("jpg") || extensionFile.equalsIgnoreCase("jpeg") || )
+                    String name = fileName.substring(0, extensionIndex);
+                    String filePath = folderPath + "/" + name + "_" + System.currentTimeMillis() + extensionFile;
                     boolean uploaded = this.uploadFileToSystem(file, filePath);
                     if(uploaded) {
                         resultList.add(filePath);
