@@ -29,6 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     @Query("SELECT p FROM Product p WHERE p.name=:name OR p.code=:code")
     Optional<Product> isExist(@Param("name") String name, @Param("code") String code);
 
+
+
     @Query("UPDATE Product p set p.deleted=:deleted WHERE id=:id")
     @Modifying
     void updateDeletedById(@Param("id") int id, @Param("deleted") boolean deleted);

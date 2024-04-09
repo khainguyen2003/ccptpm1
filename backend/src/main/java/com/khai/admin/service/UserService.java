@@ -36,7 +36,7 @@ public class UserService {
     private final JwtService jwtService;
     private final JwtServiceV2 jwtServiceV2;
     private final AuthenticationManager authenticationManager;
-    private final StorageService storageService;
+    private final FileService fileService;
     private final KeyTokenService keyTokenService;
 
     private HttpSession session;
@@ -50,7 +50,7 @@ public class UserService {
             JwtService jwtService,
             JwtServiceV2 jwtServiceV2,
             AuthenticationManager authenticationManager,
-            StorageService storageService,
+            FileService fileService,
             HttpSession session,
             KeyTokenService keyTokenService
     ) {
@@ -58,7 +58,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.jwtServiceV2 = jwtServiceV2;
         this.authenticationManager = authenticationManager;
-        this.storageService = storageService;
+        this.fileService = fileService;
         this.session = session;
         this.keyTokenService = keyTokenService;
         this.jwtService = jwtService;

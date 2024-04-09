@@ -34,6 +34,7 @@ import { RadioFilterComponent } from '../../components/radio-filter/radio-filter
 import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkbox-filter.component';
 import { DateRangeFilterComponent } from '../../components/date-range-filter/date-range-filter.component';
 import { MultiSelectFilterComponent } from '../../components/multi-select-filter/multi-select-filter.component';
+import { PrintLabelComponent } from '../../components/print-label/print-label.component';
 
 @NgModule({
     imports: [
@@ -69,7 +70,8 @@ import { MultiSelectFilterComponent } from '../../components/multi-select-filter
         RadioFilterComponent,
         CheckboxFilterComponent,
         DateRangeFilterComponent,
-        MultiSelectFilterComponent
+        MultiSelectFilterComponent,
+        PrintLabelComponent
     ],
     providers: [ProductService],
     declarations: [

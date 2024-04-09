@@ -28,6 +28,7 @@ import {
     Validators,
 } from '@angular/forms';
 import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
+import { BarcodeData } from '../../components/print-label/print-label.component';
 
 @Component({
     templateUrl: './product.component.html',
@@ -136,6 +137,11 @@ export class ProductComponent implements OnInit {
     // for date filter
     minDateFilter: Date = new Date();
     // --  end for filter
+
+    // for print barcode
+    barcodeData: BarcodeData[];
+    // -- end for print barcode
+
     // for interact with product
     products: any[] = [];
     product: Product = {};
@@ -164,7 +170,6 @@ export class ProductComponent implements OnInit {
     ];
     defaultImgs: string[] = [];
     defaultImgUrl = "https://static.vecteezy.com/system/resources/previews/004/141/669/non_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg";
-
     lengthToDisplayDefault: number = 6;
     addForm!: FormGroup;
 
@@ -199,6 +204,58 @@ export class ProductComponent implements OnInit {
 
         // fake dữ liệu danh sách sản phẩm
         this.fakeData();
+
+        // bar code data init
+        this.barcodeData = [
+            {
+                code: '1233333',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1233333abc',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 9
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 5
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 8
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+        ]
 
         this.cols = [
             { field: 'product', header: 'Product' },
