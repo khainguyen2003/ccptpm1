@@ -1,0 +1,14 @@
+<div class="print-section" id="print-section">
+  <div class="print-container">
+    @for (row of data; track $index) {
+      <div *ngFor="let item of generateBarcodeArray(row)" class="barcode-item">
+        <h5 class="barcode-item-creator">{{item.creator}}</h5>
+        <p class="barcode-item-name">{{item.title}}</p>
+        <ngx-barcode6 [bc-value]="item.code" [bc-display-value]="true" [bc-display-value]="true" bc-height="18"
+          [bc-font-size]="14" [bc-width]="1" [bc-margin]="0" [bc-margin-top]="0"></ngx-barcode6>
+      </div>
+    }
+  </div>
+</div>
+
+<button printSectionId="print-section" printTitle="In tem mã" [useExistingCss]="true" ngxPrint>print</button>

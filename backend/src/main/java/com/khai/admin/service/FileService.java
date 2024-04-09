@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 @Service
 @Slf4j
-public class StorageService {
+public class FileService {
 
     private final ResourceLoader rsloader;
     @Value("${folder.absPath}")
@@ -38,7 +38,7 @@ public class StorageService {
     private final String PRODUCT = "product";
 
     @Autowired
-    public StorageService(ResourceLoader rsloader) {
+    public FileService(ResourceLoader rsloader) {
         this.rsloader = rsloader;
     }
 
@@ -123,7 +123,14 @@ public class StorageService {
         try {
             if(files != null && files.length > 0) {
                 Arrays.asList(files).stream().forEach(file -> {
-                    String filePath = folderPath + "/" + file.getOriginalFilename();
+                    String fileName = file.getOriginalFilename();
+                    if(!isImageFile(fileName)) {
+                        throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "File không phải định dạng hình ảnh");
+                    }
+                    int extensionIndex = fileName.lastIndexOf(".");
+                    String extensionFile = fileName.substring(extensionIndex);
+                    String name = fileName.substring(0, extensionIndex);
+                    String filePath = folderPath + "/" + name + "_" + System.currentTimeMillis() + extensionFile;
                     boolean uploaded = this.uploadFileToSystem(file, filePath);
                     if(uploaded) {
                         resultList.add(filePath);
@@ -223,5 +230,17 @@ public class StorageService {
                 this.deleteFileFromSystem(path);
             }
         });
+    }
+
+    public boolean isImageFile(String filename) {
+        String[] imageExtensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".svg", ".webp", "heif"};
+        for (String extension : imageExtensions) {
+            if (filename.endsWith(extension)) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 }

@@ -1,8 +1,7 @@
 package com.khai.admin.service;
 
+import com.khai.admin.dto.Product.ProductBarcode;
 import com.khai.admin.dto.Product.ProductDto;
-import com.khai.admin.dto.Product.ProductRecord;
-import com.khai.admin.dto.Product.ProductSumary;
 import com.khai.admin.entity.Category;
 import com.khai.admin.entity.Product;
 import com.khai.admin.entity.User;
@@ -10,7 +9,6 @@ import com.khai.admin.exception.AlreadyExist;
 import com.khai.admin.exception.NoSuchElementException;
 import com.khai.admin.repository.CategoryRepository;
 import com.khai.admin.repository.ProductRepository;
-import com.khai.admin.repository.impl.ProductSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -30,19 +27,19 @@ public class ProductService {
     @Autowired
     private UserService userService;
     private final CategoryRepository categoryRepository;
-    private final StorageService storageService;
+    private final FileService fileService;
 
     @Autowired
     public ProductService(
         ProductRepository productRepository,
         CategoryRepository categoryRepository,
         UserService userService,
-        StorageService storageService
+        FileService fileService
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
-        this.storageService = storageService;
+        this.fileService = fileService;
     }
 
     public ProductDto getProductInfo(int id) {
@@ -91,8 +88,8 @@ public class ProductService {
                     newproduct.setCategory(category);
             }
             newproduct.setCreator(user);
-            String productFolder = storageService.getProductFolder();
-            List<String> uploadedPath = storageService.uploadMultipleFilesToSystem(updatedProduct.getFiles(), productFolder);
+            String productFolder = fileService.getProductFolder();
+            List<String> uploadedPath = fileService.uploadMultipleFilesToSystem(updatedProduct.getFiles(), productFolder);
 
             newproduct.setImages(uploadedPath);
             productRepository.save(newproduct);
@@ -170,9 +167,9 @@ public class ProductService {
                 Product product = optProduct.get();
                 updatedProduct.applyToProduct(product);
                 List<String> updateImages = updatedProduct.getImages();
-                storageService.updateFileInSystem(product.getImages(), updateImages);
-                String productFolder = storageService.getProductFolder();
-                List<String> uploadedImgPath = storageService.uploadMultipleFilesToSystem(updatedProduct.getFiles(), productFolder);
+                fileService.updateFileInSystem(product.getImages(), updateImages);
+                String productFolder = fileService.getProductFolder();
+                List<String> uploadedImgPath = fileService.uploadMultipleFilesToSystem(updatedProduct.getFiles(), productFolder);
                 if(!uploadedImgPath.isEmpty()) {
                     updateImages.addAll(uploadedImgPath);
                     product.setImages(updateImages);
@@ -200,6 +197,12 @@ public class ProductService {
             return updatedProduct.toDto();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    public List<ProductBarcode> printBarcode(int[] ids) {
+        try {
+            Page<ProductBarcode> productBarcodePage = this.productRepository.findAll()
         }
     }
 }

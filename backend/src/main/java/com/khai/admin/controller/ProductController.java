@@ -1,5 +1,6 @@
 package com.khai.admin.controller;
 
+import com.khai.admin.dto.Product.ProductBarcode;
 import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.entity.Product;
 import com.khai.admin.service.HttpServices;
@@ -97,4 +98,12 @@ public class ProductController {
         ProductDto res = productService.updateSellStatus(id, productDto);
         return ResponseEntity.ok(res);
     }
+
+    @PostMapping("/print/barcode")
+    public ResponseEntity<List<ProductBarcode>> printBarcode(@RequestParam("ids") int[] ids) {
+
+
+    }
+
+
 }
