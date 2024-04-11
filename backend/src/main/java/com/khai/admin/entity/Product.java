@@ -1,7 +1,7 @@
 package com.khai.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.khai.admin.dto.ProductDto;
+import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.dto.user.UserProfileDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,6 +12,24 @@ import java.util.List;
 
 @Entity
 @Table(name = "tblproduct")
+//@NamedEntityGraph(
+//        name = "Product.list",
+//        attributeNodes = {
+//                @NamedAttributeNode(value = "creator", subgraph = "creator"),
+//                @NamedAttributeNode(value = "category", subgraph = "category")
+//        },
+//        subgraphs = {
+//                @NamedSubgraph(name = "creator", attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("firstname"),
+//                        @NamedAttributeNode("lastname")
+//                }),
+//                @NamedSubgraph(name = "category", attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("name")
+//                })
+//        }
+//)
 @Data
 public class Product {
     @Id
@@ -23,7 +41,7 @@ public class Product {
     @Column(name = "product_desc", length = 500)
     private String description;
     @Column(name = "product_images")
-    private String images;
+    private List<String> images;
     @CreatedDate
     @Column(name = "product_created_date")
     private Date createdDate;
@@ -48,10 +66,10 @@ public class Product {
     // Các thuộc tính của sản phẩm
     private String attr;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", referencedColumnName = "pc_id")
+    @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = true)
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<WorkplaceDetail> wpd;
 
     public void applyToProduct(Product product) {

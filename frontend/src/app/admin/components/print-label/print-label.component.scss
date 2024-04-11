@@ -1,0 +1,66 @@
+.print-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.5rem;
+  margin-left: -0.5rem;
+  margin-top: -0.5rem;
+}
+.barcode-item {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 20%;
+}
+.barcode-item .barcode-item-creator{
+  margin-bottom: 5px;
+  line-height: 1;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+}
+.barcode-item .barcode-item-name {
+  margin-bottom: 5px;
+  line-height: 1;
+  font-size: 12px;
+  text-align: center;
+}
+.barcode-item .barcode svg {
+  width: 100%;
+}
+
+@page {
+  size: A4;
+}
+
+@media print {
+  .print-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -0.5rem;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+  }
+  .barcode-item {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 20%;
+  }
+  .barcode-item .barcode-item-creator{
+    margin-bottom: 5px;
+    line-height: 1;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+  }
+  .barcode-item .barcode-item-name {
+    margin-bottom: 5px;
+    line-height: 1;
+    font-size: 12px;
+    text-align: center;
+  }
+  .barcode-item .barcode {
+    display: flex;
+    align-items: center;
+  }
+}

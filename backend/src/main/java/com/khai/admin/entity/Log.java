@@ -18,19 +18,6 @@ import java.util.List;
 @Data
 @Builder
 public class Log {
-
-    /*
-    `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `log_creator_id` varchar(45) NOT NULL COMMENT 'ID người khởi tạo',
-  `log_user_permission` smallint(1) unsigned NOT NULL COMMENT 'Quyền của người dùng',
-  `log_username` varchar(45) NOT NULL COMMENT 'Tên người dùng',
-  `log_action` smallint(1) unsigned NOT NULL COMMENT '1-Add, 2- Edit, 3-Del',
-  `log_position` smallint(50) unsigned NOT NULL COMMENT 'Vị trí bảng (1-bill, 2-bd, 3-employee. 4-guarantee, 5-product, 6-provider, 7-user, 8-workplace, 9-wsd)',
-  `log_name` text COMMENT 'Tên log',
-  `log_notes` text COMMENT 'Ghi chú của log',
-  `log_created_date` varchar(45) DEFAULT NULL COMMENT 'Ngày khởi tạo Log',
-  `log_readed` bit(1) DEFAULT '0' COMMENT 'Log đã đọc chưa'
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "log_id", updatable = false)

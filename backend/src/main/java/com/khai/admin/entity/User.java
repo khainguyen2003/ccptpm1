@@ -64,7 +64,7 @@ public class User {
     private UserRole role;
 
 //    mappedBy = "<Tên thuộc tính của LogDetail"
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<LogDetail> logDetailList;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
