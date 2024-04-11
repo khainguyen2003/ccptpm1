@@ -1,20 +1,16 @@
 package com.khai.admin.dto;
 
 import com.khai.admin.entity.User;
-import com.khai.admin.entity.Workplace;
-import com.khai.admin.entity.WorkplaceDetail;
-import jakarta.persistence.*;
+import com.khai.admin.entity.Branch;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
-public class WorkplaceDto {
+public class BranchDto {
     private int id;
     private String name;
     private byte type;
@@ -36,21 +32,21 @@ public class WorkplaceDto {
     private User creator;
     private List<WorkplaceDetailDto> wpdList;
 
-    public WorkplaceDto(Workplace workplace){
-        this.id = workplace.getId();
-        if (!workplace.getName().isBlank()){
-            this.name = workplace.getName();
+    public BranchDto(Branch branch){
+        this.id = branch.getId();
+        if (!branch.getName().isBlank()){
+            this.name = branch.getName();
         }
-        this.type = workplace.getType();
+        this.type = branch.getType();
 
     }
 
-    public WorkplaceDto() {
+    public BranchDto() {
     }
 
-    public void applyToEntity(Workplace workplace){
+    public void applyToEntity(Branch branch){
         if (!this.name.isBlank()){
-            workplace.setName(this.name);
+            branch.setName(this.name);
         }
     }
 }

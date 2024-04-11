@@ -78,11 +78,11 @@ public class User {
 
     @OneToMany(mappedBy = "last_modified_by", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Workplace> lastModifiedWorkplace;
+    private List<Branch> lastModifiedBranch;
 
     @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Workplace> createdWorkplace;
+    private List<Branch> createdBranch;
 
     public UserView toUserview() {
         UserView userView = new UserView();
