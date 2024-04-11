@@ -1,0 +1,145 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <p-toast></p-toast>
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <button pButton pRipple label="Thêm mới" icon="pi pi-plus" class="p-button-success mr-2" (click)="showAddCategoryDialog()"></button>
+                        <button pButton pRipple label="Xóa" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedCategories()" [disabled]="!selectedCategories || !selectedCategories.length"></button>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="right">
+                    <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Nhập" chooseLabel="Nhập" class="mr-2 inline-block"></p-fileUpload>
+                    <button pButton pRipple label="Xuất" icon="pi pi-upload" class="p-button-help" (click)="dt.exportCSV()"></button>
+                </ng-template>
+            </p-toolbar>
+
+            <p-table #dt [value]="categories"
+                dataKey="id"
+                [columns]="cols"
+                responsiveLayout="scroll"
+                [rows]="pageSize"
+                [globalFilterFields]="['name']"
+                [paginator]="true"
+                [rowsPerPageOptions]="[10,20,30]"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [(selection)]="selectedCategories"
+                selectionMode="multiple"
+                [rowHover]="true"
+                dataKey="id">
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">Quản lý thể loại</h5>
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Tìm kiếm..."  class="w-full sm:w-auto"/>
+                        </span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 3rem">
+                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                        </th>
+                        <th pSortableColumn="id">ID <p-sortIcon field="id"></p-sortIcon></th>
+                        <th pSortableColumn="name">Tên thể loại <p-sortIcon field="name"></p-sortIcon></th>
+                        <th>Hiển thị</th>
+                        <th pSortableColumn="last_modified">Lần sửa cuối <p-sortIcon field="last_modified"></p-sortIcon></th>
+                        <th>Thực hiện</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-category>
+                    <tr>
+                        <td>
+                            <p-tableCheckbox [value]="category"></p-tableCheckbox>
+                        </td>
+                        <td>
+                            <span class="p-column-title">ID</span>
+                            {{ category.id }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Tên loại</span>
+                            {{category.name}}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Hiển thị</span>
+                            {{ category.enabled ? 'Hiển thị' : 'Không hiển thị' }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Lần sửa cuối</span>
+                            {{ category.last_modified | date:'dd/MM/yyyy' }}
+                        </td>
+                        <td>
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editCategory(category)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteCategory(category)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <p-dialog [(visible)]="categoryDialog" [style]="{width: '450px'}" header="Chi tiết thể loại" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <!-- <img [src]="'assets/demo/images/product/' + product.image" [alt]="product.image" width="150" class="mt-0 mx-auto mb-5 block shadow-2" *ngIf="product.image"> -->
+                <div class="field">
+                    <label for="name">Tên thể loại</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="category.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !category.name}"/>
+                    <small class="ng-dirty ng-invalid" *ngIf="submitted && !category.name">Tên thể loại không được bỏ trống.</small>
+                </div>
+                <div class="field">
+                    <label for="description">Ghi chú</label>
+                    <textarea id="description" pInputTextarea [(ngModel)]="category.notes" required rows="3" cols="20"></textarea>
+                </div>
+                <div class="field row" style="
+                        display: flex;
+                        align-items: center;">
+                    <label for="enabled" style="margin-right: 1rem;">Hiển thị lên trình duyệt:</label>
+                    <p-inputSwitch [(ngModel)]="category.enabled"></p-inputSwitch>
+                </div>
+                <div class="formgrid grid">
+                    <div class="field col">
+                        <label for="created_date">Ngày tạo</label>
+                        <input pInputText id="created_date" [value]="category.created_date.toLocaleDateString('en-GB')" disabled/>
+                    </div>
+                    <div class="field col">
+                        <label for="last_modified">Lần sửa cuối</label>
+                        <input pInputText id="last_modified" [value]="category.last_modified.toLocaleDateString('en-GB')" disabled/>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Hủy" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-text" (click)="saveCategory()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <p-dialog [(visible)]="deleteCategoryDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="category">Chắc chắn bạn muốn xóa thể loại <b>{{category.name}}</b>?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Hủy" (click)="deleteCategoryDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Xóa" (click)="confirmDelete()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <p-dialog [(visible)]="deleteCategoriesDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span>Bạn chắc chắn muốn xóa những thể loại được chọn?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Hủy" (click)="deleteCategoryDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Xóa" (click)="confirmDeleteSelected()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>
+<add-category-modal #addCategory></add-category-modal>

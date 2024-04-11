@@ -1,0 +1,414 @@
+<div class="layout-sidebar filter-section" #filterSection>
+    <h3 class="page-title" class="text-3xl font-semibold">Hàng Hóa</h3>
+    <app-checkbox-filter title="Loại hàng" [filterList]="proTypeFilter" (filterSelected)="slcTypeOpt($event)"></app-checkbox-filter>
+    <app-date-range-filter title="Ngày dự kiến hết hàng" [minDate]="minDateFilter" [appendTo]="filterSection"></app-date-range-filter>
+    <p-panel header="Nhóm hàng" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel" >
+        <p-listbox name="filterCat" [options]="catFilter" optionLabel="name" [(ngModel)]="selectedCat" [filter]="true"></p-listbox>
+    </p-panel>
+    <app-multi-select-filter label="Nhà cung cấp" [options]="catFilter" (changeEvent)="slcPosOpt($event)"></app-multi-select-filter>
+    <app-multi-select-filter label="Vị trí" [options]="positionFilter" (changeEvent)="slcPosOpt($event)"></app-multi-select-filter>
+    <app-radio-filter [filterList]="slcInvenStatus" title="Tồn kho" (changeEvent)="selectInvenOpt($event)" hasOtherOpt="true"></app-radio-filter>
+    <app-radio-filter [filterList]="slcSellStatus" title="Trạng thái" (changeEvent)="selectInvenOpt($event)"></app-radio-filter>  
+</div>
+<div class="layout-main-container">
+    <div class="layout-main">
+        <div class="grid">
+            <div class="col-12">
+                <div class="card">
+                    <app-print-label [data]="barcodeData"></app-print-label>
+                    <p-toast></p-toast>
+                    <div class="flex align-items-center justify-content-between">
+                        <div class="my-2">
+                            <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..."
+                                    class="w-full sm:w-auto" />
+                            </span>
+                        </div>
+                        <div class="right">
+                            <button pButton pRipple label="Thêm" icon="pi pi-plus" class="p-button-success mr-2"
+                                (click)="openNew()"></button>
+                            <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger"
+                                (click)="deleteSelectedProducts()"
+                                [disabled]="!selectedProducts || !selectedProducts.length"></button>
+                            <button pButton type="button" (click)="menu.toggle($event)" (hover)="menu.toggle($event)"
+                            icon="pi pi-file-import" label="Nhập dữ liệu" class="mr-3"></button>
+                            <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help"
+                            (click)="dt.exportCSV()"></button>
+                            <p-menu #menu [model]="importOptions" [popup]="true">
+                            </p-menu>
+                            <p-dialog header="Nhập dữ liệu" [(visible)]="importFileDialogVisible" [modal]="true"
+                                [style]="{ width: '50vw' }" [breakpoints]="{ '960px': '75vw' }" [draggable]="true"
+                                [resizable]="true">
+                                <p-fileUpload name="fileData" [maxFileSize]="1000000" label="Import" chooseLabel="Import"
+                                    class="inline-block" (onUpload)="onUploadJson($event)"
+                                    url="http://localhost:8080/admin/api/products/file-upload">
+                                    <ng-template pTemplate="content">
+                                        <!-- <ul *ngIf="uploadedFiles.length">
+                                            <li *ngFor="let file of uploadedFiles">{{ file.name }} - {{ file.size }} bytes</li>
+                                        </ul> -->
+                                    </ng-template>
+                                </p-fileUpload>
+                            </p-dialog>
+                        </div>
+                    </div>
+                    <!-- <p-toolbar styleClass="mb-4">
+                        <ng-template pTemplate="left" class="mr-2">
+                            
+                        </ng-template>
+        
+                        <ng-template pTemplate="right">
+                            
+                        </ng-template>
+                    </p-toolbar> -->
+                    <!-- Thêm khi muốn thêm lazy load  [lazy]="true" (onLazyLoad)="loadProductsPage($event)" [loading]="loading"  -->
+                    <p-table #dt [value]="products" dataKey="id" 
+                        [lazy]="true" (onLazyLoad)="loadProductsPage($event)"
+                        [paginator]="true" [rows]="10"
+                        (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" 
+                        currentPageReportTemplate="Hiển thị {first} - {last}/ Tổng số {totalRecords} hàng hóa"
+                        responsiveLayout="scroll" [scrollable]="true" 
+                        [resizableColumns]="true"  columnResizeMode="expand"
+                        [tableStyle]="{'min-width': '50rem'}"
+                        scrollHeight="500px"
+                        [showCurrentPageReport]="true" 
+                        [(selection)]="selectedProducts" selectionMode="multiple" 
+                        [rowHover]="true"
+                        sortField="id"
+                        styleClass="p-datatable-striped"
+                        rowExpandMode="single"
+                        >
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>
+                                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                </th>
+                                <th></th>
+                                <th pSortableColumn="id">Mã hàng <p-sortIcon field="id"></p-sortIcon></th>
+                                <th pSortableColumn="code">Mã vạch <p-sortIcon field="code"></p-sortIcon></th>
+                                <th pSortableColumn="name">Tên hàng <p-sortIcon field="name"></p-sortIcon></th>
+                                <th pSortableColumn="importPrice">Giá vốn<p-sortIcon field="importPrice"></p-sortIcon></th>
+                                <th pSortableColumn="sellPrice">Giá bán<p-sortIcon field="sellPrice"></p-sortIcon></th>
+                                <th pSortableColumn="category">Nhóm hàng<p-sortIcon field="category"></p-sortIcon></th>
+                                <th pSortableColumn="inventory">Tồn kho<p-sortIcon field="inventory"></p-sortIcon></th>
+                                <th pSortableColumn="position">Vị trí<p-sortIcon field="position"></p-sortIcon></th>
+                                <th pSortableColumn="status">Trạng thái<p-sortIcon field="status"></p-sortIcon>
+                                </th>
+                                <th></th>
+                            </tr>
+                        </ng-template>
+        
+                        <ng-template pTemplate="body" let-product let-expanded="expanded">
+                            <tr [pRowToggler]="product">
+                                <td>
+                                    <p-tableCheckbox [value]="product"></p-tableCheckbox>
+                                </td>
+                                <td >
+                                    <img [src]="product.image" [alt]="product.name" width="50"
+                                        class="shadow-4" />
+                                </td>
+                                <td ><span class="p-column-title">Mã hàng</span>
+                                    {{product.id}}
+                                </td>
+                                <td ><span class="p-column-title">Mã vạch</span>
+                                    {{product.code}}
+                                </td>
+                                <td >
+                                    <span class="p-column-title">Tên hàng</span>
+                                    {{product.name}}
+                                </td>
+                                <td style="width:14%; min-width:8rem;">
+                                    <span class="p-column-title">Giá vốn</span>
+                                    {{product.importPrice}}
+                                </td>
+                                <td >
+                                    <span class="p-column-title">Giá bán</span>
+                                    {{product.sellPrice}}
+                                </td>
+                                <td ><span class="p-column-title">Nhóm hàng</span>
+                                    <span [ngModel]="product.category" [readonly]="true" [cancel]="false"></span>
+                                </td>
+                                <td ><span class="p-column-title">Tồn kho</span>
+                                    <span [ngModel]="product.inventory" [readonly]="true" [cancel]="false"></span>
+                                </td>
+                                <td ><span class="p-column-title">Vị trí</span>
+                                    <span [ngModel]="product.position" [readonly]="true" [cancel]="false"></span>
+                                </td>
+                                <td><span class="p-column-title">Trạng thái</span>
+                                    <span>{{product.status}}</span>
+                                </td>
+                                <td>
+                                    <div class="flex">
+                                        <button pButton pRipple icon="pi pi-pencil"
+                                            class="p-button-rounded p-button-success mr-2"
+                                            (click)="editProduct(product)"></button>
+                                        <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                                            (click)="deleteProduct(product)"></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <!-- expansion details -->
+                        <ng-template pTemplate="rowexpansion" let-product>
+                            <tr>
+                                <td colspan="99">
+                                    <form action="">
+                                        <p-tabView>
+                                            <p-tabPanel header="Thông tin">
+                                                <div>
+                                                    <h3 class="font-xl font-semibold">{{product.name}}</h3>
+                                                    <div class="grid">
+                                                        <div class="lg:col-4 col-12">
+                                                            <p-carousel [value]="imgUploadedUrl" [numVisible]="1" [numScroll]="1" [circular]="false" [responsiveOptions]="responsiveOptions" [circular]="true" autoplayInterval="3000">
+                                                                <ng-template let-image pTemplate="item">
+                                                                    <div class="border-1 surface-border border-round m-2 text-center py-5 px-3">
+                                                                        <div class="mb-3">
+                                                                            <img src="image" alt="Xem ảnh phóng to" class="w-6 shadow-2" />
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </p-carousel>
+                                                        </div>
+                                                        <div class="lg:col-4 col-12">
+                                                            <div class="grid">
+                                                                <p style="width: 100px;" class="col-fix">Mã hàng</p>
+                                                                <p class="col">{{product.id}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p style="width: 100px;" class="col-fix">Mã vạch</p>
+                                                                <p class="col">{{product.code}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p style="width: 100px;" class="col-fix">Tên hàng</p>
+                                                                <p class="col">{{product.name}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p style="width: 100px;" class="col-fix">Nhóm hàng</p>
+                                                                <p class="col">{{product.category}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p style="width: 100px;" class="col-fix">Giá bán</p>
+                                                                <p class="col">{{product.sellPrice}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p style="width: 100px;" class="col-fix">Giá vốn</p>
+                                                                <p class="col">{{product.importPrice}}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="lg:col-4 col-12">
+                                                            <div>
+                                                                <p>Mô tả</p>
+                                                                <p>{{product.desc}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </p-tabPanel>
+                                            <div class="action">
+                                                <button 
+                                                    pButton pRipple label="Cập nhật" icon="pi pi-file-edit" class="p-button-success mr-2"
+                                                    (click)="openNew()"
+                                                ></button>
+                                                <button 
+                                                    *ngIf="product.status == 'Đang kinh doanh'"
+                                                    pButton pRipple label="Ngừng kinh doanh" icon="pi pi-ban" class="p-button-danger mr-2"
+                                                    (click)="deleteProduct()"
+                                                ></button>
+                                                <button 
+                                                    *ngIf="product.status == 'Ngừng kinh doanh'"
+                                                    pButton pRipple label="Cho phép kinh doanh" icon="pi pi-file-edit" class="p-button-danger mr-2"
+                                                    (click)="openNew()"
+                                                ></button>
+                                            </div>
+                                        </p-tabView>
+                                    </form>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <!-- Skeleton-loading -->
+                        <ng-template pTemplate="loadingbody" let-columns="columns">
+                            <tr style="height:46px">
+                                <td *ngFor="let col of columns; let even = even">
+                                    <p-skeleton
+                                        [ngStyle]="{'width': even ? (col.field === 'year' ? '30%' : '40%') : '60%'}"></p-skeleton>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <!-- empty result search -->
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="99" *ngIf="errorMessage != ''">Không tìm thấy sản phẩm phù hợp</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+        
+                <!-- Add product dialog -->
+                <p-dialog [(visible)]="productDiaVisible" [(header)]="headerProductDia" [modal]="true" class="p-fluid"
+                    [breakpoints]="{ '960px': '90vw' }" [style]="{ width: '75vw'}" [maximizable]="true">
+                    <ng-template pTemplate="content">
+                        <form [formGroup]="addForm">
+                            <p-tabView>
+                                <p-tabPanel header="Thông tin">
+                                    <div class="grid">
+                                        <div class="lg:col-8">
+                                            <div class="field grid">
+                                                <label for="code" class="col-fixed" style="width:100px; padding-left: 0;">Mã vạch</label>
+                                                <div class="col">
+                                                    <input id="code" type="text" pInputText formControlName="code" />
+                                                </div>
+                                            </div>
+                                            <div class="field grid">
+                                                <label for="name" class="col-fixed" style="width:100px; padding-left: 0;">Tên hàng</label>
+                                                <div class="col">
+                                                    <input id="name" type="text" pInputText formControlName="name" />
+                                                </div>
+                                            </div>
+                                            <div class="field grid">
+                                                <label for="cate" class="col-fixed" style="width:100px; padding-left: 0;">Nhóm hàng</label>
+                                                <div class="col flex">
+                                                    <p-multiSelect [options]="categories" id="cate" formControlName="categories"
+                                                        optionLabel="name" placeholder="Thể loại" scrollHeight="250px"
+                                                        display="chip" class="flex-1"></p-multiSelect>
+                                                    <p-button icon="pi pi-plus" [text]="true" [rounded]="true" class="ml-1" (click)="showAddCategoryDialog()"></p-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="lg:col-4">
+                                            <div class="field grid">
+                                                <label for="importPrice" class="col-fixed" style="width: 100px;">Giá
+                                                    nhập</label>
+                                                <div class="col">
+                                                    <p-inputNumber 
+                                                        id="importPrice" dir="rtl" formControlName="importPrice"
+                                                    ></p-inputNumber>
+                                                </div>
+                                            </div>
+                                            <div class="field grid">
+                                                <label for="sellPrice" class="col-fixed" style="width:100px">Giá xuất</label>
+                                                <div class="col">
+                                                    <p-inputNumber id="sellPrice" dir="rtl" formControlName="sellPrice"></p-inputNumber>
+                                                </div>
+                                            </div>
+                                            <div class="field grid">
+                                                <label for="inventory" class="col-fixed" style="width:100px">Tồn kho</label>
+                                                <div class="col">
+                                                    <p-inputNumber id="inventory" dir="rtl" formControlName="inventory"></p-inputNumber>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex align-items-center image-section">
+                                        <input 
+                                            id="file" 
+                                            type="file" 
+                                            multiple="true" 
+                                            (change)="onSelect($event)"
+                                            hidden="true"
+                                            accept="image/*"
+                                            #inputImage
+                                        />
+                                        <div class="flex align-items-center gap-3 flex-wrap">
+                                            <div *ngFor='let preview of imgUploadedUrl' class="relative preview-box">
+                                                <img  [src]="preview" class="preview">
+                                                <i class="pi pi-minus rm-img-btn" (click)="removeImg(preview)"></i>
+                                            </div>
+                                            @if(imgUploadedUrl.length < 6) {
+                                                <label *ngFor='let i of defaultImg' for="file" class="preview-box">
+                                                    <img src="https://static.vecteezy.com/system/resources/previews/004/141/669/non_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg" class="preview"/>
+                                                </label>
+                                            }
+                                        </div>
+                                        <label for="file" pripple class="p-ripple p-element p-button p-component p-button-icon-only p-button-rounded ml-5">
+                                            <i class="pi pi-plus"></i>
+                                        </label>
+                                    </div>
+                                    <p-panel header="Thuộc tính" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mt-5 mb-5 shadow-2">
+                                        <button 
+                                            pButton pRipple label="Thêm thuộc tính" icon="pi pi-plus" class="p-button-outlined"
+                                            style="width: fit-content;"
+                                            (click)="saveProduct()"
+                                        ></button>
+                                    </p-panel>
+                                    <p-panel header="Đơn vị tính" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-5 shadow-2">     
+                                        <button 
+                                            pButton pRipple label="Thêm đơn vị" icon="pi pi-plus" class="p-button-outlined"
+                                            style="width: fit-content;"
+                                            (click)="saveProduct()"
+                                        ></button>
+                                    </p-panel>
+                                </p-tabPanel>
+                                <p-tabPanel header="Mô tả">
+                                    <div class="formgrid grid">
+                                        <div class="field col grid">
+                                            <label for="price" class="col-fixed" style="width:100px">Giá nhập</label>
+                                            <div class="col">
+                                                <p-inputNumber id="price" dir="rtl" class="text-right"
+                                                    formControlName="minInventory"></p-inputNumber>
+                                            </div>
+                                        </div>
+                                        <div class="field col grid">
+                                            <label for="inventory"  style="width:100px">Giá xuất</label>
+                                            <div class="col">
+                                                <p-inputNumber id="inventory" dir="rtl" class="text-right"
+                                                    formControlName="maxInventory"></p-inputNumber>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <label for="desc">Mô tả chi tiết</label>
+                                        <p-editor id="desc" formControlName="desc" [style]="{ height: '250px' }"></p-editor>
+                                    </div>
+                                </p-tabPanel>
+                            </p-tabView>
+                        </form>
+                    </ng-template>
+        
+                    <ng-template pTemplate="footer">
+                        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-raised p-button-secondary"
+                            (click)="hideDialog()"></button>
+                        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-raised"
+                            (click)="saveProduct()"></button>
+                    </ng-template>
+                </p-dialog>
+        
+                <!-- Delete dialog -->
+                <p-dialog [(visible)]="deleteProductDialogVisible" header="Xác nhận" [modal]="true" [style]="{width:'450px'}">
+                    
+                    <div>
+                        <div class="flex align-items-center">
+                            <i class="pi pi-exclamation-triangle mr-3 text-red-600" style="font-size: 2rem"></i>
+                            <span  *ngIf="product" class="text-lg">Bạn có chắc muốn xóa sản phẩm <b>{{product.name}}</b>?</span>
+                        </div>
+                        <div class="small danger-captions mt-2 ml-4">Sản phẩm có thể phục hồi trong 30 ngày</div>
+                    </div>
+                    <ng-template pTemplate="footer">
+                        <button pButton pRipple icon="pi pi-times" class="p-button-secondary" label="No"
+                            (click)="deleteProductDialog = false"></button>
+                        <button pButton pRipple icon="pi pi-check" class="p-button-danger" label="Yes"
+                            (click)="confirmDelete()"></button>
+                    </ng-template>
+                </p-dialog>
+        
+                <p-dialog [(visible)]="deleteProductsDialogVisible" header="Xác nhận xóa" [modal]="true" [style]="{width:'450px'}">
+                    <div>
+                        <div class="flex align-items-center">
+                            <i class="pi pi-exclamation-triangle mr-3 text-red-600" style="font-size: 2rem"></i>
+                            <span class="text-lg">Bạn có chắc muốn xóa những sản phẩm đã chọn?</span>
+                        </div>
+                        <div class="small danger-captions mt-2 ml-4">Sản phẩm có thể phục hồi trong 30 ngày</div>
+                    </div>
+                    <ng-template pTemplate="footer">
+                        <button pButton pRipple icon="pi pi-times" class="p-button-secondary" label="Không"
+                            (click)="deleteProductsDialog = false"></button>
+                        <button pButton pRipple icon="pi pi-check" class="p-button-danger" label="Có"
+                            (click)="confirmDeleteSelected()"></button>
+                    </ng-template>
+                </p-dialog>
+            </div>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<add-category-modal #addCategory ></add-category-modal>

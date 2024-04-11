@@ -1,0 +1,41 @@
+<!-- Add product dialog -->
+<p-dialog [(visible)]="visible" [modal]="true" class="p-fluid"
+    [breakpoints]="{ '960px': '75vw', '682px': '90vw' }" [style]="{ width: '50vw'}" [maximizable]="true" position="top">
+    <ng-template pTemplate="header">
+        <h4 class="font-semibold font-xl mb-0">Thêm phòng ban</h4>
+    </ng-template>
+    <ng-template pTemplate="content">
+        <form [formGroup]="addForm" (ngSubmit)="save()">
+            <div class="field grid pl-2">
+                <label for="name" class="col-fixed font-semibold" style="width:150px; padding-left: 0;">Tên phòng ban</label>
+                <div class="col">
+                    <input id="name" type="text" pInputText formControlName="name" />
+                </div>
+            </div>
+            <div class="field grid pl-2">
+                <label for="desc" class="col-fixed font-semibold" style="width:150px; padding-left: 0;">Mô tả</label>
+                <div class="col">
+                    <input id="desc" type="text" pInputText formControlName="desc" />
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-3 pl-2">
+                <div class="flex align-items-center">
+                    <p-radioButton name="active" value="1" formControlName="status" inputId="active" selected="true"></p-radioButton>
+                    <label for="active" class="ml-2">Hoạt động</label>
+                </div>
+                
+                <div class="flex align-items-center">
+                    <p-radioButton name="inactive" value="0" formControlName="status" inputId="inactive"></p-radioButton>
+                    <label for="inactive" class="ml-2">Ngừng hoạt động</label>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Lưu" icon="pi pi-save" class="p-button-raised"
+        (click)="save()"></button>
+        <button pButton pRipple label="Bỏ qua" icon="pi pi-fw pi-times" class="p-button-raised p-button-secondary"
+            (click)="hideDialog()"></button>
+    </ng-template>
+</p-dialog>

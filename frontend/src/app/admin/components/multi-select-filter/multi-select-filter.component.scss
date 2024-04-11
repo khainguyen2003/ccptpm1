@@ -1,0 +1,21 @@
+.select-item-label {
+    // white-space: break-spaces;
+    text-wrap: wrap;
+    text-align: left;
+}
+
+.edit-icon {
+    display: flex;  
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.edit-icon:hover {
+    background-color: #0002;
+}
+
+
