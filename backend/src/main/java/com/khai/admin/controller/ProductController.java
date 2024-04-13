@@ -1,5 +1,6 @@
 package com.khai.admin.controller;
 
+import com.khai.admin.dto.Product.BulkUpdateSellProduct;
 import com.khai.admin.dto.Product.ProductBarcode;
 import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.entity.Product;
@@ -7,6 +8,7 @@ import com.khai.admin.service.HttpServices;
 import com.khai.admin.service.ProductService;
 import com.khai.admin.util.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @CrossOrigin("*")
 @RestController
@@ -53,6 +56,12 @@ public class ProductController {
         ProductDto result = productService.create(headers, updatedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
+
+    @PostMapping("/insert/batch")
+    public ResponseEntity<?> insertProducts(List<Product> data) {
+        productService.batchInsertProducts(data);
+        return new ResponseEntity<>("Import thành công", HttpStatus.OK);
+    }
     @GetMapping
     public ResponseEntity<Map<String, Object>> getProducts(
             @RequestParam(defaultValue = "0") short page,
@@ -76,33 +85,39 @@ public class ProductController {
         return ResponseEntity.status(200).body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") int id) {
+    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") UUID id) {
         ProductDto response = productService.getProductInfo(id);
         return ResponseEntity.ok(response);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("id") int id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable("id") UUID id) {
         productService.deleteById(id);
         return ResponseEntity.ok("Xóa sản phẩm thành công");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDto product) {
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") UUID id, @ModelAttribute ProductDto product) {
         ProductDto updatedProduct = productService.updateProduct(id, product);
         return ResponseEntity.ok(updatedProduct);
     }
 
     @PutMapping("/sellstatus/{id}")
-    public ResponseEntity<ProductDto> updateSellStatus(@RequestHeader Map<String, String> headers, @PathVariable("id") int id, @RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> updateSellStatus(@RequestHeader Map<String, String> headers, @PathVariable("id") UUID id, @RequestBody ProductDto productDto) {
         String apiKey = headers.get("x-api-key");
 
         ProductDto res = productService.updateSellStatus(id, productDto);
         return ResponseEntity.ok(res);
     }
 
+    @PutMapping("/sellstatus/bulk")
+    public ResponseEntity<String> bulkUpdateSellStatus(@RequestBody BulkUpdateSellProduct request) {
+        productService.bulkUpdateSellStatus(request.getIds(), request.isSellStatus());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/print/barcode")
-    public ResponseEntity<List<ProductBarcode>> printBarcode(@RequestParam("ids") int[] ids) {
-
-
+    public ResponseEntity<List<ProductBarcode>> printBarcode(@RequestBody UUID[] ids) {
+        List<ProductBarcode> data = productService.printBarcode(ids);
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
 
