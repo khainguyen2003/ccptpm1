@@ -1,4 +1,6 @@
 package com.khai.admin.dto.Product;
 
-public record ProductBarcode(int id, String name, String code, int price, int sl) {
+import java.util.UUID;
+
+public record ProductBarcode(UUID id, String name, String code, int price, int sl) {
 }

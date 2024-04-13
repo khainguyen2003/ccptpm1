@@ -12,8 +12,10 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+
 public class ProductDto implements Serializable {
-    private int id;
+    private UUID id;
     private String name;
     private String description;
     private List<String> images;
@@ -38,7 +40,7 @@ public class ProductDto implements Serializable {
 
     We must also define equals and hashCode implementations; they allow Spring Data to process projection objects in a collection.
      */
-    public ProductDto(int id, String name, String description, List<String> images, Date createdDate, User creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, Category category) {
+    public ProductDto(UUID id, String name, String description, List<String> images, Date createdDate, User creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -75,11 +77,11 @@ public class ProductDto implements Serializable {
         }
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
