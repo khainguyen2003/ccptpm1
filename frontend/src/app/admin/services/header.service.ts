@@ -14,9 +14,9 @@ export class HeaderService {
    * @returns Bearer token
    */
   createAuthorizationHeader() : HttpHeaders {
-    return new HttpHeaders().set(
-      'Authorization', `Bearer ${this.storageService.getAccessToken}`
-    )
+    return new HttpHeaders()
+            .set('Content-Type',  'application/json')
+            .set('Authorization', this.storageService.getAccessToken());
   }
 
 }

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
@@ -14,22 +14,36 @@ import { DropdownModule } from 'primeng/dropdown';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
-import { InputSwitchModule } from 'primeng/inputswitch';
+import { SkeletonModule } from 'primeng/skeleton';
+import { MenubarModule } from 'primeng/menubar';
+import { MenuModule } from 'primeng/menu';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { TabViewModule } from 'primeng/tabview';
+import { EditorModule } from 'primeng/editor';
+import { AddDepartmentModalComponent } from '../../components/add-department-modal/add-department-modal.component';
+import { CarouselModule } from 'primeng/carousel';
+import { BadgeModule } from 'primeng/badge';
+import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
+import { PanelModule } from 'primeng/panel';
+import { ListboxModule } from 'primeng/listbox';
+import { RadioFilterComponent } from '../../components/radio-filter/radio-filter.component';
+import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkbox-filter.component';
+import { DateRangeFilterComponent } from '../../components/date-range-filter/date-range-filter.component';
+import { MultiSelectFilterComponent } from '../../components/multi-select-filter/multi-select-filter.component';
 import { EmployeeComponent } from './employee.component';
 import { EmployeeRoutingModule } from './employee-routing.module';
-import { ListBoxFilterComponent } from '../../components/list-box-filter/list-box-filter.component';
-import { MultiSelectFilterComponent } from '../../components/multi-select-filter/multi-select-filter.component';
+import { MessageService } from 'primeng/api';
 
 @NgModule({
-    declarations: [
-        EmployeeComponent
-    ],
     imports: [
         CommonModule,
         TableModule,
+        BadgeModule,
         FileUploadModule,
         FormsModule,
+        ReactiveFormsModule,
         ButtonModule,
+        MenuModule,
         RippleModule,
         ToastModule,
         ToolbarModule,
@@ -40,10 +54,27 @@ import { MultiSelectFilterComponent } from '../../components/multi-select-filter
         RadioButtonModule,
         InputNumberModule,
         DialogModule,
-        InputSwitchModule,
         EmployeeRoutingModule,
-        ListBoxFilterComponent,
-        MultiSelectFilterComponent,
+        SkeletonModule,
+        MenubarModule,
+        MultiSelectModule,
+        TabViewModule,
+        EditorModule,
+        AddDepartmentModalComponent,
+        AddCategoryModalComponent,
+        CarouselModule,
+        PanelModule,
+        ListboxModule,
+        RadioFilterComponent,
+        CheckboxFilterComponent,
+        DateRangeFilterComponent,
+        MultiSelectFilterComponent
+    ],
+    declarations: [
+        EmployeeComponent,
+    ],
+    providers: [
+        MessageService,
     ]
 })
 export class EmployeeModule { }

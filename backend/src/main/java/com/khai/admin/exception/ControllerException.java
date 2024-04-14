@@ -8,7 +8,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ControllerException {
-    @ExceptionHandler({AlreadyExist.class, NoSuchElementException.class})
+    @ExceptionHandler({
+        AlreadyExist.class,
+        NoSuchElementException.class,
+        EmployeeException.class,
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleResourceFoundedException(AlreadyExist ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
