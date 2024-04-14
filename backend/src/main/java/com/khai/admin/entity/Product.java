@@ -5,10 +5,13 @@ import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.dto.user.UserProfileDto;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblproduct")
@@ -30,12 +33,13 @@ import java.util.List;
 //                })
 //        }
 //)
-@Data
+@Getter
+@Setter
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "product_id")
-    private int id;
+    private UUID id;
     @Column(name = "product_name")
     private String name;
     @Column(name = "product_desc", length = 500)
@@ -65,6 +69,11 @@ public class Product {
     private float rate;
     // Các thuộc tính của sản phẩm
     private String attr;
+
+    // pessimitic locking
+    @Version
+    private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = true)
     private Category category;

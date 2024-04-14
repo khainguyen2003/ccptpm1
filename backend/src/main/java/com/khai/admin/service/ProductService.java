@@ -9,7 +9,12 @@ import com.khai.admin.exception.AlreadyExist;
 import com.khai.admin.exception.NoSuchElementException;
 import com.khai.admin.repository.CategoryRepository;
 import com.khai.admin.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,13 +26,18 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 @Service
+@Slf4j
+@Transactional
 public class ProductService {
+    @PersistenceContext
+    private EntityManager entityManager;
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
     private UserService userService;
     private final CategoryRepository categoryRepository;
     private final FileService fileService;
+
+    private final int BATCH_SIZE = 10;
 
     @Autowired
     public ProductService(
@@ -42,7 +52,7 @@ public class ProductService {
         this.fileService = fileService;
     }
 
-    public ProductDto getProductInfo(int id) {
+    public ProductDto getProductInfo(UUID id) {
         Optional<Product> product = productRepository.findById(id);
         if(product.isPresent()) {
             return product.get().toDto();
@@ -140,7 +150,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteById(int id) {
+    public void deleteById(UUID id) {
         try {
             Optional<Product> productOpt = productRepository.findById(id);
             if(!productOpt.isPresent()) {
@@ -159,7 +169,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto updateProduct(int id, ProductDto updatedProduct) {
+    public ProductDto updateProduct(UUID id, ProductDto updatedProduct) {
         try {
 
             Optional<Product> optProduct = productRepository.findById(id);
@@ -185,7 +195,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto updateSellStatus(int id, ProductDto productDto) {
+    public ProductDto updateSellStatus(UUID id, ProductDto productDto) {
         try {
             Optional<Product> product = productRepository.findById(id);
             if(!product.isPresent()) {
@@ -200,9 +210,51 @@ public class ProductService {
         }
     }
 
-    public List<ProductBarcode> printBarcode(int[] ids) {
+    public boolean bulkUpdateSellStatus(UUID[] ids, boolean sellStatus) {
+        boolean success = false;
         try {
-            Page<ProductBarcode> productBarcodePage = this.productRepository.findAll()
+            productRepository.updateSellStatusByIdIn(ids, sellStatus);
+            success = true;
+        } catch (DataAccessException e) {
+            success = false;
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (Exception e) {
+            success = false;
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        } finally {
+            return success;
+        }
+    }
+
+    @Transactional
+    public boolean batchInsertProducts(List<Product> data) {
+        for (int i = 0; i < data.size(); i++) {
+            if (i > 0 && i % BATCH_SIZE == 0) {
+                entityManager.flush();
+                entityManager.clear();
+            }
+
+            entityManager.persist(data.get(i));
+
+        }
+        entityManager.flush();
+        entityManager.clear();
+        return false;
+    }
+
+
+    public List<ProductBarcode> printBarcode(UUID[] ids) {
+        try {
+            List<ProductBarcode> data = this.productRepository.findByIdIn(ids);
+            return data;
+        } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }catch(Exception e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }
