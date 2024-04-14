@@ -14,4 +14,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
     @Query("SELECT e FORM Employee e WHERE e.name=?")
     Optional<Employee> findByName(String name);
 
+    
+
 }

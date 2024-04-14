@@ -1,8 +1,14 @@
 package com.khai.admin.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.khai.admin.dto.EmployeeDto;
@@ -17,6 +23,22 @@ import lombok.RequiredArgsConstructor;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+
+    public Map<String, Object> getEmployees(Pageable pageable) {
+        Map<String, Object> map = new HashMap<>();
+        List<EmployeeDto> employeeDtos = new ArrayList<>();
+        Page<Employee> employees = employeeRepository.findAll(pageable);
+        employees.getContent().forEach(item -> {
+            employeeDtos.add(item.getDto());
+        });
+        map.put("employees", employeeDtos);
+        map.put("curPage", employees.getNumber());
+        map.put("totalPage", employees.getTotalPages());
+        map.put("totalElements", employees.getTotalElements());
+        map.put("pageSize", employees.getSize());
+        map.put("numberOfElements", employees.getNumberOfElements());
+        return map;
+    }
 
     public EmployeeDto createEmployee(EmployeeDto employeeDto) throws EmployeeException {
         Employee e = new Employee();
