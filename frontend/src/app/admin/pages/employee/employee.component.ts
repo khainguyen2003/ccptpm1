@@ -3,8 +3,9 @@ import { Department } from 'src/app/models/Department';
 import { Position } from 'src/app/models/Position';
 import { FAKE_DEPARTMENT, FAKE_EMPLOYEE, FAKE_POSITION } from './fake-data';
 import { FormGroup } from '@angular/forms';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { Employee } from 'src/app/models/employee';
+import { EmployeeService } from '../../services/employee.service';
 
 @Component({
   selector: 'app-employee',
@@ -21,17 +22,24 @@ export class EmployeeComponent implements OnInit {
   importFileDialogVisible: boolean = false;
   deleteEmployeesDialogVisible: boolean = false;
   urlUpload = "http://localhost:8080/admin/api/employees/file-upload";
-  employees: Employee[] = FAKE_EMPLOYEE;
+  employees: Employee[];
   selectedEmployees: any = [];
   employee: any;
-  rowsPerPageOptions = [10, 25, 50];
+  rowsPerPageOptions = [5, 10, 20];
   errorMessage = '';
   headerEmployeeDialog: any;
   addForm: FormGroup;
   submited: boolean = false;
   uploadedFiles: any = [];
+  page: number = 0;
+  sort = 'id:desc';
+  size: 5 | 10 | 20 = 5;
+  search: string;
 
-  constructor() {}
+  constructor(
+    private employeeService: EmployeeService,
+    private message: MessageService,
+  ) {}
 
   ngOnInit() {
     this.addForm = new FormGroup({
@@ -54,6 +62,32 @@ export class EmployeeComponent implements OnInit {
             },
         },
     ];
+
+    this.loadEmployees();
+
+  }
+
+  loadEmployees() {
+    this.employeeService.getEmployees({
+      search: this.search,
+      position: 0,
+      departmant: 0,
+      page: this.page, 
+      size: this.size, 
+      sort: this.sort}).subscribe({
+        next: res => {
+          console.log(res);
+          this.employees = res.employees;
+        },
+        error: err => {
+          console.log(err);
+          this.message.add({severity: 'error', detail: 'Không lấy được dữ liệu!'});
+          this.message.add({severity: 'warn', detail: 'Dữ liệu được hiển thị là dữ liệu mẫu được chuẩn bị sẵn.'});
+          this.employees = FAKE_EMPLOYEE;
+        }
+      }).add(() => {
+
+      });
   }
 
   handleDepartmentSelected(event: any) {
@@ -106,22 +140,47 @@ export class EmployeeComponent implements OnInit {
   }
 
   saveEmployee() {
+    const newEmployee = this.addForm.value;
+    this.employeeService.createEmployee(newEmployee).subscribe({
+      next: res => {
+        console.log(res);
+      },
+      error: err => {
+        console.log(err);
+      }
+    }).add(() => {
 
+    });
   }
-
+  
   hideDialog() {
     this.employeeDialogVisible = false;
     this.submited = false;
   }
 
   confirmDelete() {
-    this.employees = this.employees.filter(item => item.id != this.employee.id);
-    this.employee = null;
-    this.deleteEmployeeDialogVisible = false;
+    this.employeeService.deleteEmployee(this.employee.id).subscribe({
+      next: res => {
+        console.log(res);
+        this.employees = this.employees.filter(item => item.id != this.employee.id);
+        this.message.add({ severity: 'info', detail: res.data });
+      },
+      error: err => {
+        console.log(err);
+        this.message.add({ severity: 'error', detail: err.message })
+      },
+      complete: () => {},
+    }).add(() => {
+      this.employee = null;
+      this.deleteEmployeeDialogVisible = false;
+    });
   }
 
   confirmDeleteSelected() {
-
+    this.selectedEmployees.array.forEach(element => {
+      this.employees = this.employees.filter(item => item.id != element.id);
+    });
+    this.deleteEmployeesDialogVisible = false;
   }
 
   showImportFileDialog() {

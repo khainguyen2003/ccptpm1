@@ -4,11 +4,9 @@ import { Position } from "./Position";
 export interface Employee {
     id: number;
     contract_expire?: Date;
-    code?: number;
-    status: boolean;
-    start_time?: Time;
-    end_time?: Time;
-    role?: string;
+    status?: boolean;
+    start_date?: Date;
+    role?: number;
     created_date?: Date;
     modified_date?: Date;
     deleted?: boolean;
@@ -18,6 +16,16 @@ export interface Employee {
     phoneNumber?: string;
     address?: string;
     notes?: string;
-    position?: Position;
-    image?: string;
+    image: string;
+    name?: string;
+    pass?: string;
+}
+
+export interface EmployeeResponse {
+    employees: Employee[];
+    curPage: number;
+    totalPage: number;
+    totalElements: number;
+    pageSize: number;
+    numberOfElements: number;
 }

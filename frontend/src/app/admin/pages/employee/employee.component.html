@@ -53,7 +53,7 @@
                     </div>
                     <p-table #dt [value]="employees" dataKey="id" 
                         [lazy]="true" (onLazyLoad)="loadEmployeesPage($event)"
-                        [paginator]="true" [rows]="10"
+                        [paginator]="true" [rows]="5"
                         (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" 
                         currentPageReportTemplate="Hiển thị {first} - {last}/ Tổng số {totalRecords} nhân viên"
                         responsiveLayout="scroll" [scrollable]="true" 
@@ -174,8 +174,12 @@
                                                 ></button>
                                                 <button 
                                                     *ngIf="!employee.status"
-                                                    pButton pRipple label="Làm việc" icon="pi pi-file-edit" class="p-button-danger mr-2"
+                                                    pButton pRipple label="Cho làm việc" icon="pi pi-file-edit" class="p-button-success mr-2"
                                                     (click)="openAddEmployeeDialog()"
+                                                ></button>
+                                                <button 
+                                                    pButton pRipple label="Xóa" icon="pi pi-trash" class="p-button-warning mr-2"
+                                                    (click)="deleteEmployee(employee, $event)"
                                                 ></button>
                                             </div>
                                         </p-tabView>
@@ -195,7 +199,7 @@
                         <!-- empty result search -->
                         <ng-template pTemplate="emptymessage">
                             <tr>
-                                <td colspan="99" *ngIf="errorMessage != ''">Không tìm thấy sản phẩm phù hợp</td>
+                                <td colspan="99" *ngIf="errorMessage != ''">Không tìm thấy dữ liệu phù hợp</td>
                             </tr>
                         </ng-template>
                     </p-table>
@@ -206,92 +210,7 @@
                     <ng-template pTemplate="content">
                         <form [formGroup]="addForm">
                             <p-tabView>
-                                <p-tabPanel header="Thông tin">
-                                    <div class="grid">
-                                        <div class="lg:col-8">
-                                            <div class="field grid">
-                                                <label for="code" class="col-fixed" style="width:100px; padding-left: 0;">Mã vạch</label>
-                                                <div class="col">
-                                                    <input id="code" type="text" pInputText formControlName="code" />
-                                                </div>
-                                            </div>
-                                            <div class="field grid">
-                                                <label for="name" class="col-fixed" style="width:100px; padding-left: 0;">Tên hàng</label>
-                                                <div class="col">
-                                                    <input id="name" type="text" pInputText formControlName="name" />
-                                                </div>
-                                            </div>
-                                            <div class="field grid">
-                                                <label for="cate" class="col-fixed" style="width:100px; padding-left: 0;">Nhóm hàng</label>
-                                                <div class="col flex">
-                                                    <p-multiSelect [options]="categories" id="cate" formControlName="categories"
-                                                        optionLabel="name" placeholder="Thể loại" scrollHeight="250px"
-                                                        display="chip" class="flex-1"></p-multiSelect>
-                                                    <p-button icon="pi pi-plus" [text]="true" [rounded]="true" class="ml-1" (click)="showAddCategoryDialog()"></p-button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="lg:col-4">
-                                            <div class="field grid">
-                                                <label for="importPrice" class="col-fixed" >Giá
-                                                    nhập</label>
-                                                <div class="col">
-                                                    <p-inputNumber 
-                                                        id="importPrice" dir="rtl" formControlName="importPrice"
-                                                    ></p-inputNumber>
-                                                </div>
-                                            </div>
-                                            <div class="field grid">
-                                                <label for="sellPrice" class="col-fixed" style="width:100px">Giá xuất</label>
-                                                <div class="col">
-                                                    <p-inputNumber id="sellPrice" dir="rtl" formControlName="sellPrice"></p-inputNumber>
-                                                </div>
-                                            </div>
-                                            <div class="field grid">
-                                                <label for="inventory" class="col-fixed" style="width:100px">Tồn kho</label>
-                                                <div class="col">
-                                                    <p-inputNumber id="inventory" dir="rtl" formControlName="inventory"></p-inputNumber>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p-panel header="Thuộc tính" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mt-5 mb-5 shadow-2">
-                                        <button 
-                                            pButton pRipple label="Thêm thuộc tính" icon="pi pi-plus" class="p-button-outlined"
-                                            style="width: fit-content;"
-                                            (click)="saveEmployee()"
-                                        ></button>
-                                    </p-panel>
-                                    <p-panel header="Đơn vị tính" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-5 shadow-2">     
-                                        <button 
-                                            pButton pRipple label="Thêm đơn vị" icon="pi pi-plus" class="p-button-outlined"
-                                            style="width: fit-content;"
-                                            (click)="saveEmployee()"
-                                        ></button>
-                                    </p-panel>
-                                </p-tabPanel>
-                                <p-tabPanel header="Mô tả">
-                                    <div class="formgrid grid">
-                                        <div class="field col grid">
-                                            <label for="price" class="col-fixed" style="width:100px">Giá nhập</label>
-                                            <div class="col">
-                                                <p-inputNumber id="price" dir="rtl" class="text-right"
-                                                    formControlName="minInventory"></p-inputNumber>
-                                            </div>
-                                        </div>
-                                        <div class="field col grid">
-                                            <label for="inventory"  style="width:100px">Giá xuất</label>
-                                            <div class="col">
-                                                <p-inputNumber id="inventory" dir="rtl" class="text-right"
-                                                    formControlName="maxInventory"></p-inputNumber>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="field">
-                                        <label for="desc">Mô tả chi tiết</label>
-                                        <p-editor id="desc" formControlName="desc" [style]="{ height: '250px' }"></p-editor>
-                                    </div>
-                                </p-tabPanel>
+                                
                             </p-tabView>
                         </form>
                     </ng-template>

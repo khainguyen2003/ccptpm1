@@ -70,7 +70,7 @@ public class EmployeeService {
     }
 
     private boolean isExisting(String name) {
-        return this.employeeRepository.findByName(name).isPresent();
+        return this.employeeRepository.findFirstByName(name).isPresent();
     }
 
     public EmployeeDto updateEmployee(int id, EmployeeDto employeeDto) throws EmployeeException {
