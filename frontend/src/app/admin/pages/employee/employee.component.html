@@ -8,12 +8,252 @@
     <app-multi-select-filter
         [label]="'Chức vụ'"
         [placeholder]="'Chọn chức vụ'"
-        [options]="optJobtitle"
-        (select)="handleJobtitleSelected($event)">
+        [options]="optPosition"
+        (select)="handlePositionSelected($event)">
     </app-multi-select-filter>
 </div>
 <div class="layout-main-container">
     <div class="layout-main">
-        <p>Employees work</p>
+        <div class="grid">
+            <div class="col-12">
+                <div class="card">
+                    <p-toast></p-toast>
+                    <div class="flex align-items-center justify-content-between">
+                        <div class="my-2">
+                            <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..."
+                                    class="w-full sm:w-auto" />
+                            </span>
+                        </div>
+                        <div class="right">
+                            <button pButton pRipple label="Thêm" icon="pi pi-plus" class="p-button-success mr-2"
+                                (click)="openAddEmployeeDialog()"></button>
+                            <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger mr-2"
+                                (click)="deleteSelectedEmployees()"
+                                [disabled]="!selectedEmployees || !selectedEmployees.length"></button>
+                            <button pButton type="button" (click)="menu.toggle($event)" (hover)="menu.toggle($event)"
+                            icon="pi pi-file-import" label="Nhập dữ liệu" class="mr-2"></button>
+                            <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help"
+                            (click)="dt.exportCSV()"></button>
+                            <p-menu #menu [model]="importOptions" [popup]="true"></p-menu>
+                            <p-dialog header="Nhập dữ liệu" [(visible)]="importFileDialogVisible" [modal]="true"
+                                [draggable]="true" [resizable]="true">
+                                <p-fileUpload name="fileData" [maxFileSize]="1000000" label="Import" chooseLabel="Import"
+                                    class="inline-block" (onUpload)="onUploadJson($event)"
+                                    [url]="urlUpload">
+                                    <ng-template pTemplate="content">
+                                        <ul *ngIf="uploadedFiles.length">
+                                            <li *ngFor="let file of uploadedFiles">{{ file.name }} - {{ file.size }} bytes</li>
+                                        </ul>
+                                    </ng-template>
+                                </p-fileUpload>
+                            </p-dialog>
+                        </div>
+                    </div>
+                    <p-table #dt [value]="employees" dataKey="id" 
+                        [lazy]="true" (onLazyLoad)="loadEmployeesPage($event)"
+                        [paginator]="true" [rows]="5"
+                        (onPage)="pageChange($event)" [rowsPerPageOptions]="rowsPerPageOptions" 
+                        currentPageReportTemplate="Hiển thị {first} - {last}/ Tổng số {totalRecords} nhân viên"
+                        responsiveLayout="scroll" [scrollable]="true" 
+                        [resizableColumns]="true"  columnResizeMode="expand"
+                        [tableStyle]="{'min-width': '50rem'}"
+                        scrollHeight="500px"
+                        [showCurrentPageReport]="true" 
+                        [(selection)]="selectedEmployees" selectionMode="multiple" 
+                        [rowHover]="true"
+                        sortField="id"
+                        styleClass="p-datatable-striped"
+                        rowExpandMode="single"
+                        >
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>
+                                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                </th>
+                                <th></th>
+                                <th pSortableColumn="id">Mã nhân viên <p-sortIcon field="id"></p-sortIcon></th>
+                                <th pSortableColumn="fullname">Tên nhân viên <p-sortIcon field="fullname"></p-sortIcon></th>
+                                <th pSortableColumn="phoneNumber">Số điện thoại <p-sortIcon field="phoneNumber"></p-sortIcon></th>
+                                <th pSortableColumn="status">Trạng thái<p-sortIcon field="status"></p-sortIcon>
+                                </th>
+                                <th>Thực hiện</th>
+                            </tr>
+                        </ng-template>
+        
+                        <ng-template pTemplate="body" let-employee let-expanded="expanded">
+                            <tr [pRowToggler]="employee">
+                                <td>
+                                    <p-tableCheckbox [value]="employee" (click)="clickTableCheckbox($event)"></p-tableCheckbox>
+                                </td>
+                                <td >
+                                    <img [src]="employee.image" [alt]="employee.fullname" width="50"
+                                        class="shadow-4" />
+                                </td>
+                                <td ><span class="p-column-title">Mã nhân viên</span>
+                                    {{employee.id}}
+                                </td>
+                                <td >
+                                    <span class="p-column-title">Tên nhân vien</span>
+                                    {{employee.fullname}}
+                                </td>
+                                <td style="width:14%; min-width:8rem;">
+                                    <span class="p-column-title">Số điện thoại</span>
+                                    {{employee.phoneNumber}}
+                                </td>
+                                <td><span class="p-column-title">Trạng thái</span>
+                                    <span>{{employee.status ? 'Đang làm' : 'Đã nghỉ'}}</span>
+                                </td>
+                                <td>
+                                    <div class="flex">
+                                        <button pButton pRipple icon="pi pi-pencil"
+                                            class="p-button-rounded p-button-success mr-2"
+                                            (click)="editEmployee(employee, $event)"></button>
+                                        <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                                            (click)="deleteEmployee(employee, $event)"></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <!-- expansion details -->
+                        <ng-template pTemplate="rowexpansion" let-employee>
+                            <tr>
+                                <td colspan="99">
+                                    <form action="">
+                                        <p-tabView>
+                                            <p-tabPanel header="Thông tin">
+                                                <div>
+                                                    <h3 class="font-xl font-semibold">{{employee.fullname}}</h3>
+                                                    <div class="grid">
+                                                        <div class="lg:col-4 col-12">
+                                                            <img [src]="employee.image" alt="" width="200">
+                                                        </div>
+                                                        <div class="lg:col-8 col-12">
+                                                            <div class="grid">
+                                                                <p class="col-3">Mã nhân viên:</p>
+                                                                <p class="col-9">{{employee.id}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p class="col-3">Mã chấm công:</p>
+                                                                <p class="col-9">{{employee.code}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p class="col-3">Tên nhân viên:</p>
+                                                                <p class="col-9">{{employee.fullname}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p class="col-3">Email:</p>
+                                                                <p class="col-9">{{employee.email}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p class="col-3">Số điện thoại:</p>
+                                                                <p class="col-9">{{employee.phoneNumber}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p class="col-3">Nợ lương nhân viên:</p>
+                                                                <p class="col-9">{{employee.oweSalary}}</p>
+                                                            </div>
+                                                            <div class="grid">
+                                                                <p class="col-3">Ghi chú:</p>
+                                                                <p class="col-9">{{employee.notes}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </p-tabPanel>
+                                            <div class="action">
+                                                <button 
+                                                    pButton pRipple label="Cập nhật" icon="pi pi-file-edit" class="p-button-success mr-2"
+                                                    (click)="openAddEmployeeDialog()"
+                                                ></button>
+                                                <button 
+                                                    *ngIf="employee.status"
+                                                    pButton pRipple label="Cho nghỉ" icon="pi pi-ban" class="p-button-danger mr-2"
+                                                    (click)="deleteEmployee()"
+                                                ></button>
+                                                <button 
+                                                    *ngIf="!employee.status"
+                                                    pButton pRipple label="Cho làm việc" icon="pi pi-file-edit" class="p-button-success mr-2"
+                                                    (click)="openAddEmployeeDialog()"
+                                                ></button>
+                                                <button 
+                                                    pButton pRipple label="Xóa" icon="pi pi-trash" class="p-button-warning mr-2"
+                                                    (click)="deleteEmployee(employee, $event)"
+                                                ></button>
+                                            </div>
+                                        </p-tabView>
+                                    </form>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <!-- Skeleton-loading -->
+                        <ng-template pTemplate="loadingbody" let-columns="columns">
+                            <tr style="height:46px">
+                                <td *ngFor="let col of columns; let even = even">
+                                    <p-skeleton
+                                        [ngStyle]="{'width': even ? (col.field === 'year' ? '30%' : '40%') : '60%'}"></p-skeleton>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <!-- empty result search -->
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="99" *ngIf="errorMessage != ''">Không tìm thấy dữ liệu phù hợp</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+                <!-- Add employee dialog -->
+                <p-dialog [(visible)]="employeeDialogVisible" [(header)]="headerEmployeeDialog" [modal]="true" class="p-fluid"
+                    [breakpoints]="{ '960px': '90vw' }" [style]="{ width: '75vw'}" [maximizable]="true">
+                    <ng-template pTemplate="content">
+                        <form [formGroup]="addForm">
+                            <p-tabView>
+                                
+                            </p-tabView>
+                        </form>
+                    </ng-template>
+        
+                    <ng-template pTemplate="footer">
+                        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-raised p-button-secondary"
+                            (click)="hideDialog()"></button>
+                        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-raised"
+                            (click)="saveEmployee()"></button>
+                    </ng-template>
+                </p-dialog>
+                <!-- Delete dialog -->
+                <p-dialog [(visible)]="deleteEmployeeDialogVisible" header="Xác nhận" [modal]="true" [style]="{width:'450px'}">
+                    <div>
+                        <div class="flex align-items-center">
+                            <i class="pi pi-exclamation-triangle mr-3 text-red-600" style="font-size: 2rem"></i>
+                            <span  *ngIf="employee" class="text-lg">Bạn có chắc muốn xóa nhân viên <b>{{employee.fullname}}</b>?</span>
+                        </div>
+                        <div class="small danger-captions mt-2 ml-4">Nhân viên có thể phục hồi trong 30 ngày</div>
+                    </div>
+                    <ng-template pTemplate="footer">
+                        <button pButton pRipple icon="pi pi-times" class="p-button-secondary" label="No"
+                            (click)="deleteEmployeeDialogVisible = false"></button>
+                        <button pButton pRipple icon="pi pi-check" class="p-button-danger" label="Yes"
+                            (click)="confirmDelete()"></button>
+                    </ng-template>
+                </p-dialog>
+                <p-dialog [(visible)]="deleteEmployeesDialogVisible" header="Xác nhận xóa" [modal]="true" [style]="{width:'450px'}">
+                    <div>
+                        <div class="flex align-items-center">
+                            <i class="pi pi-exclamation-triangle mr-3 text-red-600" style="font-size: 2rem"></i>
+                            <span class="text-lg">Bạn có chắc muốn xóa những nhân viên đã chọn?</span>
+                        </div>
+                        <div class="small danger-captions mt-2 ml-4">Nhân viên có thể phục hồi trong 30 ngày</div>
+                    </div>
+                    <ng-template pTemplate="footer">
+                        <button pButton pRipple icon="pi pi-times" class="p-button-secondary" label="Không"
+                            (click)="deleteEmployeesDialogVisible = false"></button>
+                        <button pButton pRipple icon="pi pi-check" class="p-button-danger" label="Có"
+                            (click)="confirmDeleteSelected()"></button>
+                    </ng-template>
+                </p-dialog>
+            </div>
+        </div>
     </div>
 </div>
