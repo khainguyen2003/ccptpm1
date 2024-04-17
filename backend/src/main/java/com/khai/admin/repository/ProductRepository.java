@@ -32,7 +32,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     @Query("SELECT p FROM Product p WHERE p.name=:name OR p.code=:code")
     Optional<Product> isExist(@Param("name") String name, @Param("code") String code);
 
-//    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
     List<ProductBarcode> findByIdIn(UUID[] ids);
 
     @Query("UPDATE Product p set p.isStopCell=:status WHERE p.id IN(:ids)")

@@ -1,4 +1,4 @@
-package com.group4.HaUISocialMedia_server.config;
+package com.khai.admin.config;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

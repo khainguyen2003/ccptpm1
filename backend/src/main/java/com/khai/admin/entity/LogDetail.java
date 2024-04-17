@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tbllog_detail")
@@ -30,31 +31,31 @@ public class LogDetail {
 @Embeddable
 class LogDetailKey {
     @Column(name = "ld_id")
-    private int logId;
+    private UUID logId;
     @Column(name = "lg_user_id")
-    private int userId;
+    private UUID userId;
 
     public LogDetailKey() {
     }
 
-    public LogDetailKey(int logId, int userId) {
+    public LogDetailKey(UUID logId, UUID userId) {
         this.logId = logId;
         this.userId = userId;
     }
 
-    public int getLogId() {
+    public UUID getLogId() {
         return logId;
     }
 
-    public void setLogId(int logId) {
+    public void setLogId(UUID logId) {
         this.logId = logId;
     }
 
-    public int getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

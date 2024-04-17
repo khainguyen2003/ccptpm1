@@ -6,11 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
 public class UserProfileDto {
-    private int id;
+    private UUID id;
     private String firstName;
     private String lastname;
     private Date birthday;

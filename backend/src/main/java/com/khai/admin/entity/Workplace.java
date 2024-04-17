@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /** Thiết kế lớp
  * `workplace_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -41,9 +42,9 @@ import java.util.List;
 @NoArgsConstructor
 public class Workplace {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "workplace_id")
-    private int id;
+    private UUID id;
     @Column(name = "workplace_name", columnDefinition = "varchar(255) CHARACTER SET utf8 NOT NULL COMMENT 'Tên gian hàng'")
     private String name;
     @Column(name = "workplace_type", columnDefinition = "smallint(1) NOT NULL DEFAULT '0' COMMENT '1 là kho hàng, 2 là cửa hàng'")

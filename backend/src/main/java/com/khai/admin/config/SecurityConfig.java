@@ -1,12 +1,12 @@
 package com.khai.admin.config;
 
 import com.khai.admin.constants.UserRole;
-import com.khai.admin.service.AuthorizationFilter;
-import com.khai.admin.service.JwtService;
+import com.khai.admin.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,20 +31,23 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
+    private final JwtServiceV2 jwtServiceV2;
+
+    private final KeyTokenService keyTokenService;
 
     @Value("${app.client.url}")
     private String appClientUrl;
 
     @Autowired
-    public SecurityConfig(UserDetailsService userDetailsService, JwtService jwtService) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtServiceV2 jwtServiceV2, KeyTokenService keyTokenService) {
         this.userDetailsService = userDetailsService;
-        this.jwtService = jwtService;
+        this.jwtServiceV2 = jwtServiceV2;
+        this.keyTokenService = keyTokenService;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        AuthorizationFilter authorizationFilter = new AuthorizationFilter(jwtService, userDetailsService);
+        AuthenticationFilterV2 authenticationFilterV2 = new AuthenticationFilterV2(jwtServiceV2, userDetailsService, keyTokenService);
         http
                 // disable CSRF protection
                 .csrf((csrf) -> csrf.disable())
@@ -52,26 +56,30 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(
-                                        "/login", "/signup", "/error", "/api/auth/**", "/test/**", "/admin/**"
+                                        "/error", "/api/auth/admin/signup", "/api/auth/admin/login", "/test/**"
                                 )
                                 .permitAll() // Các trang trên sẽ không được bảo vệ
-                                .requestMatchers(
+
+                                .requestMatchers(HttpMethod.GET,
                                          "/api/user/**", "/api/refresh-token"
-                                )
-                                .hasRole(UserRole.USER.getRole())
+                                ).hasAnyRole(UserRole.USER.getRole(), UserRole.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PATCH, "/api/user/**", "/api/refresh-token").hasAnyRole(UserRole.USER.getRole(), UserRole.ADMIN.getRole())
                                 .requestMatchers("/api/admin/**", "/api/admin/refresh-token")
                                 .hasRole(UserRole.ADMIN.getRole())
 
                                 .anyRequest()
                                 .authenticated()
                 )
+                .logout((logout) -> {
+                    logout.logoutUrl("/api/auth/logout");
+                })
                 .sessionManagement((sessionManagement) ->
                         sessionManagement
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authenticationFilterV2, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

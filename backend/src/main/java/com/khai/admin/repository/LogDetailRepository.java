@@ -9,10 +9,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface LogDetailRepository extends JpaRepository<LogDetail, Integer> {
+public interface LogDetailRepository extends JpaRepository<LogDetail, UUID> {
     @Modifying
     @Query("UPDATE LogDetail l SET l.readed=:isRead WHERE l.key.logId=:logId AND l.key.userId=:userId")
-    Optional<Log> updateReadById(@Param("logId") int logId, @Param("logId") int userId, @Param("isRead") boolean isRead);
+    Optional<Log> updateReadById(@Param("logId") UUID logId, @Param("logId") UUID userId, @Param("isRead") boolean isRead);
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalTime;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblemployee")
@@ -21,9 +22,9 @@ public class Employee {
   `employee_created_date` varchar(45) NOT NULL COMMENT 'Ngày khởi tạo nhân viên',
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "employee_id", columnDefinition = "INT(11)")
-    private int id;
+    private UUID id;
     @Column(name="employee_contract_expired_date", columnDefinition = "DATETIME(6) DEFAULT NULL COMMENT 'Ngày kết thúc hợp đồng'")
     private Date contract_expire;
     @Column(name="employee_status", columnDefinition = "smallint(2) unsigned NOT NULL DEFAULT '0' COMMENT 'Trạng thái nhân viên (1-Đang làm; 0-Đã nghỉ )\\r\\n'")

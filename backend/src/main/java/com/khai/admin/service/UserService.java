@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,12 +24,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Key;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -64,7 +72,7 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public UserProfileDto getUserInfo(int id) {
+    public UserProfileDto getUserInfo(UUID id) {
         Optional<User> user = userRepository.findUserById(id);
         if(user.isEmpty()) {
             throw new UsernameNotFoundException("Tên tài khoản không tồn tại");
@@ -73,7 +81,7 @@ public class UserService {
         userProfileDto.loadFromUser(user.get());
         return userProfileDto;
     }
-    public User getUserById(int id) {
+    public User getUserById(UUID id) {
         Optional<User> user = userRepository.findUserById(id);
         if(user.isEmpty()) {
             throw new UsernameNotFoundException("Tên tài khoản không tồn tại");
@@ -108,7 +116,7 @@ public class UserService {
      * @return
      *      email của người dùng đã đươc xác thưc
      */
-    public static String getCurrentUsername() {
+    public String getCurrentUserEmail() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
         // Nếu người dùng đã đăng nhập thì lấy thông tin chi tiết
@@ -121,6 +129,14 @@ public class UserService {
         }
 
         return username;
+    }
+
+    public User getCurrentLogin() {
+        String email = getCurrentUserEmail();
+        if(email == null) {
+            return null;
+        }
+        return userRepository.findFirstByEmail(email).get();
     }
 
     // chuyển lại bằng cách bỏ signinKey và chuyển thành jwtService
@@ -162,26 +178,32 @@ public class UserService {
      * 3. Tạo AT và RT và lừu
      * 4. Generate token
      * 5. get data return login
-     * @param user
+     * @param request
      * @return
      */
-    public JwtView loginV2(User user) {
+    public JwtView loginV2(UserCreateDto request) {
 
         try {
-            // 1.
-            Optional<User> optUser = userRepository.findFirstByEmail(user.getEmail());
-            if(optUser.isEmpty()) {
-                throw new UsernameNotFoundException("Tên đăng nhập hoặc mật khẩu không đúng");
-            }
-            // 2.
-            boolean match = BCrypt.checkpw(user.getPassword(), optUser.get().getPassword());
-            if(!match) {
-                throw new UsernameNotFoundException("Tên đăng nhập hoặc mật khẩu không đúng");
-            }
-
+            // vertify user
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = userRepository.findFirstByEmail(request.getEmail()).get();
+            // update security context
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // generate AT and RT
             KeyPair keyPair = keyTokenService.generateKeyPair();
-            String accessToken = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
-            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
+            String accessToken = jwtServiceV2.generateAccessToken(user, keyPair.getPrivate());
+            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate());
+            // save to dbs
+            KeyStore keyStore = new KeyStore();
+            keyStore.setPrivateKey(keyPair.getPrivate().getEncoded());
+            keyStore.setPublicKey(keyPair.getPublic().getEncoded());
+            keyStore.setUser(user);
+            keyStore.setRefreshToken(refreshToken);
+            keyTokenService.save(keyStore);
+            // convert to response
             UserProfileDto userProfileDto = new UserProfileDto();
             userProfileDto.loadFromUser(user);
 
@@ -202,7 +224,7 @@ public class UserService {
      * @return
      */
     public JwtView authenticate(Map<String, String> headers, User user) {
-        Integer userId = Integer.valueOf(headers.get("userId"));
+        UUID userId = UUID.fromString(headers.get("userId"));
         if(userId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
         }
@@ -215,39 +237,47 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
             }
 
-            Claims claims = jwtServiceV2.parseToken(accessToken, keyStore.getPublicKey());
-            if(userId != Integer.valueOf(claims.getId())) {
+            Claims claims = jwtServiceV2.parseToken(accessToken, keyTokenService.decodePublicKey(keyStore.getPublicKey()));
+            if(userId != UUID.fromString(claims.getId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi xác thực");
             }
             KeyPair keyPair = keyTokenService.generateKeyPair();
-            String accessKey = jwtServiceV2.generateAccessToken(user, keyPair.getPublic().toString());
-            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate().toString());
+            String accessKey = jwtServiceV2.generateAccessToken(user, keyPair.getPrivate());
+            String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate());
+            // save to dbs
+            keyStore.setPrivateKey(keyPair.getPrivate().getEncoded());
+            keyStore.setPublicKey(keyPair.getPublic().getEncoded());
+            keyTokenService.save(keyStore);
+            // convert to response
             UserProfileDto userProfileDto = new UserProfileDto();
             userProfileDto.loadFromUser(user);
 
-            return new JwtView(accessKey, refreshToken, userProfileDto);
+            return new JwtView(accessKey, refreshToken);
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sai tên tài khoản hoặc mật khẩu");
+        } catch (InvalidKeySpecException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "public key không hợp lệ");
         }
     }
 
-//    public JwtView refreshToken(JwtView jwtView, String signinKey) {
-//        boolean isExpiredAccessToken = jwtServiceV2.isExpired(jwtView.getAccessToken(), signinKey);
-//        Claims claims = jwtServiceV2.parseToken(jwtView.getAccessToken(), signinKey);
-//
-//        String newAccessToken = jwtView.getAccessToken();
-//        if (isExpiredAccessToken) {
-//            newAccessToken = jwtServiceV2.generateAccessToken(username, signinKey);
-//        }
-//
-//        JwtView res = JwtView.builder()
-//                .accessToken(newAccessToken)
-//                .build();
-//
-//        return res;
-//    }
+    public JwtView refreshToken(JwtView jwtView, PublicKey publicKey, PrivateKey privateKey) {
+        boolean isExpiredAccessToken = jwtServiceV2.isExpired(jwtView.getAccessToken(), publicKey);
+        Claims claims = jwtServiceV2.parseToken(jwtView.getAccessToken(), publicKey);
+        String newAccessToken = jwtView.getAccessToken();
+        if (isExpiredAccessToken) {
+            String username = claims.getSubject();
+            User user = userRepository.findFirstByEmail(username).get();
+            newAccessToken = jwtServiceV2.generateAccessToken(user, privateKey);
+        }
 
-//    public boolean create(UserCreateDto userCreateDto) {
+        JwtView res = JwtView.builder()
+                .accessToken(newAccessToken)
+                .build();
+
+        return res;
+    }
+
+//    public UserProfileDto create(UserCreateDto userCreateDto) {
 //        if(userRepository.findFirstByEmail(userCreateDto.getEmail()).isPresent() ) {
 //            throw new AlreadyExist("Email", userCreateDto.getEmail());
 //        } else {
@@ -265,10 +295,10 @@ public class UserService {
 //                    .build();
 //            try {
 //                userRepository.save(user);
-//                String accessToken = jwtService.generateAccessToken(userCreateDto.getEmail());
-//                UserView userView = new UserView();
+//                String accessToken = jwtServiceV2.generateAccessToken(userCreateDto.getEmail());
+//                UserProfileDto userView = new UserProfileDto();
 //                userView.loadFromUser(user);
-//                return true;
+//                return userView;
 //            } catch (DataAccessException e) {
 //                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 //            } catch (Exception e) {
@@ -278,7 +308,11 @@ public class UserService {
 //        }
 //    }
 
-    public boolean createV2(UserCreateDto userCreateDto) {
+    public void logout(UUID userId) {
+        keyTokenService.deleteTokenById(userId);
+    }
+
+    public UserProfileDto createV2(UserCreateDto userCreateDto) {
         if(userRepository.findFirstByEmail(userCreateDto.getEmail()).isPresent() ) {
             throw new AlreadyExist("Email", userCreateDto.getEmail());
         } else {
@@ -297,14 +331,10 @@ public class UserService {
                     .role(userCreateDto.getUserRole())
                     .build();
             try {
-                User newUser = userRepository.save(user);
-                KeyPair keyPair = keyTokenService.generateKeyPair();
-                String publicKeyString = keyTokenService.createToken(newUser.getId(), keyPair.getPublic());
-                String accessToken = jwtServiceV2.generateAccessToken(newUser, publicKeyString);
-                String refreshToken = jwtServiceV2.generateRefreshToken(newUser, keyPair.getPrivate().toString());
-                System.out.println("accessToken: " + accessToken);
-                System.out.println("refreshToken: " + refreshToken);
-                return true;
+                userRepository.save(user);
+                UserProfileDto userView = new UserProfileDto();
+                userView.loadFromUser(user);
+                return userView;
             } catch (DataAccessException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
             } catch (Exception e) {

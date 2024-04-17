@@ -13,16 +13,25 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -36,6 +45,11 @@ public class ProductService {
     private UserService userService;
     private final CategoryRepository categoryRepository;
     private final FileService fileService;
+
+//    @Autowired
+//    private JobLauncher jobLauncher;
+//    @Autowired
+//    private Job job;
 
     private final int BATCH_SIZE = 10;
 
@@ -86,7 +100,8 @@ public class ProductService {
             if(productRepository.isExist(updatedProduct.getName(), updatedProduct.getCode()).isPresent()) {
                 throw new AlreadyExist("Sản phẩm");
             }
-            User user = userService.getUserById(1);
+
+            User user = userService.getCurrentLogin();
             Product newproduct = new Product();
             updatedProduct.applyToProduct(newproduct);
 
@@ -94,7 +109,7 @@ public class ProductService {
             newproduct.setCreatedDate(now);
             if(updatedProduct.getCategory() != null) {
                 Category category = categoryRepository.findById(updatedProduct.getCategory().getId()).orElse(null);
-                if(category != null)
+                if (category != null)
                     newproduct.setCategory(category);
             }
             newproduct.setCreator(user);
@@ -230,6 +245,7 @@ public class ProductService {
 
     @Transactional
     public boolean batchInsertProducts(List<Product> data) {
+
         for (int i = 0; i < data.size(); i++) {
             if (i > 0 && i % BATCH_SIZE == 0) {
                 entityManager.flush();
@@ -243,6 +259,32 @@ public class ProductService {
         entityManager.clear();
         return false;
     }
+
+//    public boolean batchInsertProducts(MultipartFile file) {
+//        boolean success = false;
+//        try {
+//            // Lưu tệp vào một vị trí tạm thời trên máy chủ
+//            String testFolder = fileService.getTestFolder();
+//            String fileName = testFolder + file.getOriginalFilename();
+//            file.transferTo(new File(fileName));
+//
+//            // Khởi chạy batch job để xử lý tệp
+//            JobParameters jobParameters = new JobParametersBuilder()
+//                    .addString("fileName", fileName)
+//                    .toJobParameters();
+//            JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+//            if(jobExecution.getExitStatus().getExitCode().equals(ExitStatus.COMPLETED)) {
+//                // delete temp file
+//                Files.deleteIfExists(Paths.get(fileName));
+//            }
+//            success = true;
+//        } catch (IOException | JobExecutionException e) {
+//            success = false;
+//            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//        } finally {
+//            return success;
+//        }
+//    }
 
 
     public List<ProductBarcode> printBarcode(UUID[] ids) {

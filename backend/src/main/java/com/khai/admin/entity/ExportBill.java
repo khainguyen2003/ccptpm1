@@ -4,14 +4,15 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblbe")
 public class ExportBill {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "be_id")
-    private int id;
+    private UUID id;
     @Column(name = "be_status", columnDefinition = "smallint(1) default 0")
     private byte status;
 
@@ -29,7 +30,7 @@ public class ExportBill {
     @JoinColumn(name = "be_customer_id", referencedColumnName = "user_id")
     private User be_customer_id;
     @Column(name = "be_current_workplace_id")
-    private int be_current_workplace_id;
+    private UUID be_current_workplace_id;
     @Column(name = "be_target_address")
     private String be_target_address;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

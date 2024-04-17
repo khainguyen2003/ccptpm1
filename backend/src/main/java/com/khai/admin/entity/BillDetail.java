@@ -3,16 +3,17 @@ package com.khai.admin.entity;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblbd")
 public class BillDetail {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "bd_id")
-    private int id;
+    private UUID id;
     @Column(name = "bd_bill_id")
-    private int bill_id;
+    private UUID bill_id;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "bd_product_id", referencedColumnName = "product_id")

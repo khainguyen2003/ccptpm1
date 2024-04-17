@@ -12,9 +12,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, UUID> {
     /**
      * SELECT c FROM <Tên entity> c WHERE
      * @param name

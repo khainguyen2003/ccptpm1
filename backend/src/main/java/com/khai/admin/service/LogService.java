@@ -39,8 +39,8 @@ public class LogService {
         }
     }
 
-    public void updateReadStatus(int id) {
-        String username = UserService.getCurrentUsername();
+    public void updateReadStatus(UUID id) {
+        String username = userService.getCurrentUserEmail();
         UserProfileDto user = userService.getUserInfoByEmail(username);
         try {
             logDetailRepository.updateReadById(id, user.getId(), true);

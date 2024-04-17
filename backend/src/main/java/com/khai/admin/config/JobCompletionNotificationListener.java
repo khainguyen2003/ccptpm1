@@ -1,6 +1,6 @@
-package com.khai.javaspring.BatchProcessing;
+package com.khai.admin.config;
 
-import com.khai.javaspring.entity.Person;
+import com.khai.admin.entity.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -26,8 +26,8 @@ public class JobCompletionNotificationListener implements JobExecutionListener {
             log.info("!!! JOB FINISHED! Time to verify the results");
 
             jdbcTemplate
-                    .query("SELECT first_name, last_name FROM people", new DataClassRowMapper<>(Person.class))
-                    .forEach(person -> log.info("Found <{{}}> in the database.", person));
+                    .query("SELECT product_name, product_desc FROM tblproduct", new DataClassRowMapper<>(Product.class))
+                    .forEach(product -> log.info("Found " + product + " in the database."));
         }
     }
 }

@@ -50,6 +50,34 @@ private Long version;
 - Phân vùng (xử lý nhiều phiên bản của cùng một công việc cùng một lúc).
 - Sự kết hợp của các tùy chọn trước đó.
 
+4. partition
+![Qua trình phân vùng](https://docs.spring.io/spring-batch/reference/_images/partitioned.png)
+   4.1. Một số phương pháp phân vùng
+   1. Sự chia nhỏ cố định và đồng đều của bộ bản ghi
+   - Xác định số lượng phần tử xử lý ở các vùng là bằng nhau. Chẳng hạn có 100 bản ghi cần xử lý thì sẽ phân ra 10 vùng xử lý, mỗi vùng 10 bản ghi
+   - Để sử dụng phương pháp này, cần phải xử lý trước để phân chia bản ghi đã thiết lập. Kết quả của sự phân tách này là số vị trí giới hạn dưới và giới hạn trên mà bạn có thể sử dụng làm đầu vào cho ứng dụng batch/extract để hạn chế việc xử lý chỉ ở phần của nó.
+   - Quá trình tiền xử lý có thể tiêu tốn nhiều chi phí vì nó phải tính toán và xác định giới hạn của từng phần của tập bản ghi.
+   2. Chia tay bằng một cột Key
+    - chia nhỏ bản ghi đầu vào do một cột khóa thiết lập, chẳng hạn như mã vị trí và gán dữ liệu từ mỗi khóa cho một phiên bản lô. Để đạt được điều này, các giá trị cột có thể là:
+    - Được gán cho một phiên bản batch bằng bảng phân vùng (được mô tả sau trong phần này).
+    - Được gán cho một phiên bản lô theo một phần giá trị (chẳng hạn như 0000-0999, 1000 - 1999, v.v.).
+   3. Chia tay theo views
+   4. Thêm Processing Indicator:
+    - Thêm một cột mới vào bảng đầu vào, cột này hoạt động như một chỉ báo. 
+    - Là bước tiền xử lý, tất cả các chỉ báo được đánh dấu là chưa được xử lý. 
+    - Trong giai đoạn tìm nạp bản ghi của ứng dụng bó, các bản ghi được đọc với điều kiện một bản ghi riêng lẻ được đánh dấu là chưa được xử lý 
+    - Sau khi được đọc (có khóa), nó sẽ được đánh dấu là đang được xử lý. Khi bản ghi đó được hoàn thành, chỉ báo sẽ được cập nhật thành hoàn thành hoặc có lỗi. 
+    - Bạn có thể bắt đầu nhiều phiên bản của ứng dụng hàng loạt mà không cần thay đổi vì cột bổ sung đảm bảo rằng bản ghi chỉ được xử lý một lần.
+   5. Xuất bảng ra flat file
+   6. Sử dụng cột băm
+    - Lược đồ này liên quan đến việc bổ sung cột băm (khóa hoặc chỉ mục) vào các bảng cơ sở dữ liệu được sử dụng để truy xuất bản ghi trình điều khiển. Cột băm này có một chỉ báo để xác định phiên bản nào của ứng dụng bó xử lý hàng cụ thể này. Ví dụ: nếu có ba phiên bản lô được bắt đầu, chỉ báo 'A' đánh dấu một hàng để xử lý theo phiên bản 1, chỉ báo 'B' đánh dấu một hàng để xử lý theo phiên bản 2 và chỉ báo 'C' đánh dấu một hàng để xử lý theo ví dụ 3.
+    - Quy trình được sử dụng để truy xuất các bản ghi sau đó sẽ có một WHEREmệnh đề bổ sung để chọn tất cả các hàng được đánh dấu bằng một chỉ báo cụ thể. Việc chèn vào bảng này sẽ liên quan đến việc bổ sung trường đánh dấu, trường này sẽ được mặc định là một trong các trường hợp (chẳng hạn như 'A').
+    - Một ứng dụng hàng loạt đơn giản sẽ được sử dụng để cập nhật các chỉ báo, chẳng hạn như phân phối lại tải giữa các phiên bản khác nhau. Khi số lượng hàng mới đủ lớn đã được thêm vào, lô này có thể được chạy (bất kỳ lúc nào, ngoại trừ trong cửa sổ lô) để phân phối lại các hàng mới cho các phiên bản khác.
+    - Các phiên bản bổ sung của ứng dụng hàng loạt chỉ yêu cầu chạy ứng dụng hàng loạt (như được mô tả trong các đoạn trước) để phân phối lại các chỉ báo nhằm hoạt động với số lượng phiên bản mới.
+     
+   4.2 Nguyên tắc thiết kế ứng dụng và cơ sở dữ liệu
+   1. 
+
 ## Ứng dụng của batch
 - Conversion Applications(Ứng dụng chuyển đổi): Chuyển đổi file dữ liệu thành dữ liệu định dạng chuẩn để xử
 lý

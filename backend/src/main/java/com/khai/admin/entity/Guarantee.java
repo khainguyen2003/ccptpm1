@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name="tblguarantee")
@@ -15,7 +16,7 @@ import java.util.Date;
 public class Guarantee {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
 
     @Column(name="gu_start_time")
     private Date start_time;

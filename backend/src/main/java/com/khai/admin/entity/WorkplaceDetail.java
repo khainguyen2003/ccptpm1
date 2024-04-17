@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 /*
 `wsd_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID cặp khóa',
@@ -54,32 +55,32 @@ public class WorkplaceDetail {
 class WpdKey implements Serializable {
 
     @Column(name = "wpd_product_id")
-    int productId;
+    UUID productId;
 
     @Column(name = "wpd_workplace_id")
-    int workplaceId;
+    UUID workplaceId;
 
     public WpdKey() {
     }
 
-    public WpdKey(int productId, int workplaceId) {
+    public WpdKey(UUID productId, UUID workplaceId) {
         this.productId = productId;
         this.workplaceId = workplaceId;
     }
 
-    public int getStudentId() {
+    public UUID getStudentId() {
         return productId;
     }
 
-    public void setStudentId(int productId) {
+    public void setStudentId(UUID productId) {
         this.productId = productId;
     }
 
-    public int getWorkplace_id() {
+    public UUID getWorkplace_id() {
         return workplaceId;
     }
 
-    public void setWorkplace_id(int workplaceId) {
+    public void setWorkplace_id(UUID workplaceId) {
         this.workplaceId = workplaceId;
     }
 

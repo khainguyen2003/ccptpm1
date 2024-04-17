@@ -10,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tbllog")
@@ -19,9 +20,9 @@ import java.util.List;
 @Builder
 public class Log {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "log_id", updatable = false)
-    private int id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "log_creator_id")

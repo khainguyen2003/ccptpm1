@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -20,9 +21,9 @@ import java.util.List;
 @Table(name = "tbluser")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id", unique = true)
-    private int id;
+    private UUID id;
     @Column(name = "user_name", unique = true)
     private String username; // tên đăng nhập
     @Column(name = "user_email", unique = true)

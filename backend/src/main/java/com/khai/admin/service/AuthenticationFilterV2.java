@@ -2,14 +2,11 @@ package com.khai.admin.service;
 
 import com.khai.admin.constants.HeaderSecurity;
 import com.khai.admin.entity.security.KeyStore;
-import com.khai.admin.service.JwtServiceV2;
-import com.khai.admin.service.KeyTokenService;
-import io.jsonwebtoken.Claims;
+import com.khai.admin.util.HttpUtilities;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +15,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
-import java.util.Optional;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 // Execute Before Executing Spring Security Filters
@@ -30,14 +26,15 @@ import java.util.UUID;
 @Component
 public class AuthenticationFilterV2 extends OncePerRequestFilter {
 
-    private JwtServiceV2 jwtServiceV2;
+    private final JwtServiceV2 jwtServiceV2;
 
-    private UserDetailsService userDetailsService;
-    private KeyTokenService keyTokenService;
+    private final UserDetailsService userDetailsService;
+    private final KeyTokenService keyTokenService;
 
-    public AuthenticationFilterV2(JwtServiceV2 jwtServiceV2, UserDetailsService userDetailsService) {
+    public AuthenticationFilterV2(JwtServiceV2 jwtServiceV2, UserDetailsService userDetailsService, KeyTokenService keyTokenService) {
         this.jwtServiceV2 = jwtServiceV2;
         this.userDetailsService = userDetailsService;
+        this.keyTokenService = keyTokenService;
     }
 
     /**
@@ -57,63 +54,49 @@ public class AuthenticationFilterV2 extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         // 1 -
-        UUID userID = getClientId(request);
+        UUID userID = HttpUtilities.getClientId(request);
         if(userID == null) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("Không tồn tại user id trong request");
         } else {
-
+            // 2 - get Access token
             KeyStore keyStore = keyTokenService.getKeyStoreByUserId(userID);
 
             // Get JWT token from HTTP request
-            String token = getTokenFromRequest(request);
+            String token = HttpUtilities.getTokenFromRequest(request);
             if(token == null) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("Không tồn tại token trong request");
             } else {
-                // Validate Token
-                if(StringUtils.hasText(token) && jwtServiceV2.validateToken(token, keyStore.getPublicKey())){
-                    // get username from token
-                    String username = jwtServiceV2.extractUsernameFromToken(token, keyStore.getPublicKey());
+                // 3 - Validate Token
+                try {
+                    PublicKey publicKey = keyTokenService.decodePublicKey( keyStore.getPublicKey());
+                    if(StringUtils.hasText(token) && jwtServiceV2.validateToken(token, publicKey)) {
+                        // get username from token
+                        String username = jwtServiceV2.extractUsernameFromToken(token, publicKey);
 
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                        // 4 - check user trong dbs
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    }
+                } catch (InvalidKeySpecException e) {
+                    throw new RuntimeException(e);
+                } {
 
-                    filterChain.doFilter(request, response);
                 }
             }
 
         }
 
+        filterChain.doFilter(request, response);
 
     }
-
-    private String getTokenFromRequest(HttpServletRequest request){
-        String bearerToken = request.getHeader("Authorization");
-
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
-            return bearerToken.substring(7, bearerToken.length());
-        }
-
-        return null;
-    }
-
-    private UUID getClientId(HttpServletRequest request) {
-        String userId = request.getHeader(HeaderSecurity.CLIENT_ID.getValue());
-        if(StringUtils.hasText(userId)) {
-            return UUID.fromString(userId);
-        }
-        return null;
-    }
-
 
 }

@@ -13,10 +13,15 @@ import lombok.NoArgsConstructor;
 @Builder
 public class JwtView {
 
-    @JsonProperty("access_token")
+    @JsonProperty("x-access-token")
     private String accessToken;
-    @JsonProperty("refresh_token")
+    @JsonProperty("x-refresh-token")
     private String refreshToken;
     @JsonProperty("user_details")
     private UserProfileDto userDetails;
+
+    public JwtView(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+    }
 }

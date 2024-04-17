@@ -12,7 +12,7 @@ import net.htmlparser.jericho.*;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-public class HtppUtilities {
+public class HttpUtilities {
 	
 	// Lấy dữ liệu kiểu Byte từ Para
 	public static byte getByteParam(ServletRequest request, String name) {
@@ -93,7 +93,7 @@ public class HtppUtilities {
 		return entities;
 	}
 
-	private String getTokenFromRequest(HttpServletRequest request){
+	public static String getTokenFromRequest(HttpServletRequest request){
 		String bearerToken = request.getHeader("Authorization");
 
 		if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
@@ -103,7 +103,7 @@ public class HtppUtilities {
 		return null;
 	}
 
-	private UUID getClientId(HttpServletRequest request) {
+	public static UUID getClientId(HttpServletRequest request) {
 		String userId = request.getHeader(HeaderSecurity.CLIENT_ID.getValue());
 		if(StringUtils.hasText(userId)) {
 			return UUID.fromString(userId);

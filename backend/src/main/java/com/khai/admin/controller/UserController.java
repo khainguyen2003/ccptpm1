@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -17,7 +19,7 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<UserProfileDto> getProfile(@PathVariable int id) {
+    public ResponseEntity<UserProfileDto> getProfile(@PathVariable UUID id) {
         UserProfileDto user = userService.getUserInfo(id);
         return ResponseEntity.ok(user);
     }

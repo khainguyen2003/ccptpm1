@@ -35,7 +35,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public Category getCategoryById(int id) {
+    public Category getCategoryById(UUID id) {
         Optional<Category> optCategory = categoryRepository.findById(id);
         if(optCategory.isPresent()) {
             return optCategory.get();
@@ -67,7 +67,7 @@ public class CategoryService {
         }
     }
 
-    public void deleteById(int id) {
+    public void deleteById(UUID id) {
         try {
             categoryRepository.deleteById(id);
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class CategoryService {
         }
     }
 
-    public Category updateCategory(int id, Category updatedCategory) {
+    public Category updateCategory(UUID id, Category updatedCategory) {
         try {
             Optional<Category> optCategory = categoryRepository.findById(id);
             if(optCategory.isPresent()) {

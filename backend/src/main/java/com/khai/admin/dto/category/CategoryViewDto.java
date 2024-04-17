@@ -4,16 +4,18 @@ import com.khai.admin.entity.Category;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Setter
 @Getter
 public class CategoryViewDto {
-    private int id;
+    private UUID id;
     private String name;
 
     public CategoryViewDto() {
     }
 
-    public CategoryViewDto(int id, String name) {
+    public CategoryViewDto(UUID id, String name) {
         this.id = id;
         this.name = name;
     }

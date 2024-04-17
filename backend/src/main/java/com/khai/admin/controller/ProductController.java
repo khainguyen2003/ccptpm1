@@ -6,9 +6,8 @@ import com.khai.admin.dto.Product.ProductDto;
 import com.khai.admin.entity.Product;
 import com.khai.admin.service.HttpServices;
 import com.khai.admin.service.ProductService;
-import com.khai.admin.util.Utilities;
+import com.khai.admin.util.HttpUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +23,7 @@ import java.util.UUID;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/test/api/admin/products")
+@RequestMapping("/api/admin/products")
 public class ProductController {
     private ProductService productService;
     private final HttpServices httpServices;
@@ -42,7 +41,7 @@ public class ProductController {
     @PostMapping("/import/json")
     public ResponseEntity<String> importJsonData(@RequestParam("file") MultipartFile jsonData) {
         try {
-            List<Product> productData = Utilities.convertJSONToEntity(jsonData);
+            List<Product> productData = HttpUtilities.convertJSONToEntity(jsonData);
             productService.importData(productData);
             return ResponseEntity.ok("Import thành công!");
         } catch (IOException e) {
@@ -57,11 +56,11 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    @PostMapping("/insert/batch")
-    public ResponseEntity<?> insertProducts(List<Product> data) {
-        productService.batchInsertProducts(data);
-        return new ResponseEntity<>("Import thành công", HttpStatus.OK);
-    }
+//    @PostMapping("/insert/batch")
+//    public ResponseEntity<?> insertProducts(@RequestBody MultipartFile fileData) {
+//        productService.batchInsertProducts(fileData);
+//        return new ResponseEntity<>("Import thành công", HttpStatus.OK);
+//    }
     @GetMapping
     public ResponseEntity<Map<String, Object>> getProducts(
             @RequestParam(defaultValue = "0") short page,

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,26 +31,37 @@ public class JwtServiceV2 {
     // 1 năm
     private final long JWT_EXP_REFRESH = 1000L * 3600 * 24 * 365;
 
-    public String generateAccessToken(User user, String publicKey) {
-        return generateToken(user, JWT_EXP_ACCESS, publicKey);
+    public String extractUsernameFromToken(String token, PublicKey publicKey) {
+        String username;
+        try {
+            Claims claims = parseToken(token, publicKey);
+            username = String.valueOf(claims.getSubject());
+        } catch (Exception e) {
+            username = null;
+            log.error(e.getMessage());
+        }
+        if (username == null) {
+            log.warn("Can't extract username with token " + token);
+        }
+        return username;
     }
-    public String generateRefreshToken(User user, String privateKey) {
+
+    public String generateAccessToken(User user, PrivateKey privateKey) {
+        return generateToken(user, JWT_EXP_ACCESS, privateKey);
+    }
+    public String generateRefreshToken(User user, PrivateKey privateKey) {
         return generateToken(user, JWT_EXP_ACCESS, privateKey);
     }
 
-    private String generateToken(User user, long expiration, String signinKey) {
+    private String generateToken(User user, long expiration, PrivateKey privateKey) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("user_id", user.getId());
 
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(now)
-                .setId(String.valueOf(user.getId()))
-                .setPayload(String.valueOf(user.getId()))
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS256, signinKey)
+                .signWith(SignatureAlgorithm.HS256, privateKey)
                 .compact();
     }
 
@@ -57,18 +70,18 @@ public class JwtServiceV2 {
      * @param token
      * @return Các claims trong body token
      */
-    public Claims parseToken(String token, String signinKey) {
+    public Claims parseToken(String token, PublicKey publicKey) {
         return Jwts.parser()
-                .setSigningKey(signinKey)
+                .setSigningKey(publicKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    public boolean isExpired(String token, String signinKey) {
+    public boolean isExpired(String token, PublicKey publicKey) {
         boolean isExpire = false;
         try {
-            Claims claims = parseToken(token, signinKey);
+            Claims claims = parseToken(token, publicKey);
             Date currentDate = new Date();
             // check expiration date is before current date
             isExpire = claims.getExpiration().before(currentDate);
@@ -84,9 +97,9 @@ public class JwtServiceV2 {
      * @param token
      * @return
      */
-    public boolean validateToken(String token, String signinKey) {
+    public boolean validateToken(String token, PublicKey publicKey) {
         try {
-            parseToken(token, signinKey);
+            parseToken(token, publicKey);
             return true;
         } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());

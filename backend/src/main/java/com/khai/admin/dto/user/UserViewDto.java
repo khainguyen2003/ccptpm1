@@ -6,9 +6,10 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 public class UserViewDto implements Serializable {
-    private int id;
+    private UUID id;
     private String firstName;
     private String lastname;
     private String jobarea;
@@ -24,7 +25,7 @@ public class UserViewDto implements Serializable {
         this.position = user.getPosition();
     }
 
-    public UserViewDto(int id, String firstName, String lastname, String jobarea, String position) {
+    public UserViewDto(UUID id, String firstName, String lastname, String jobarea, String position) {
         this.id = id;
         this.firstName = firstName;
         this.lastname = lastname;
@@ -32,11 +33,11 @@ public class UserViewDto implements Serializable {
         this.position = position;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

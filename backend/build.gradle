@@ -15,10 +15,17 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+
 }
 
 repositories {
 	mavenCentral()
+	flatDir {
+		dirs 'libs'
+	}
+	maven {
+		url 'file://' + new File('libs').absolutePath
+	}
 }
 
 dependencies {
@@ -30,6 +37,12 @@ dependencies {
 	// https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j
 	implementation 'net.sourceforge.tess4j:tess4j:5.11.0'
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	// https://mvnrepository.com/artifact/org.apache.poi/poi
+	implementation 'org.apache.poi:poi:5.2.5'
+	// https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+	implementation 'org.apache.poi:poi-ooxml:5.2.5'
+	// https://mvnrepository.com/artifact/org.springframework.batch.extensions/spring-batch-excel
+	implementation 'org.springframework.batch.extensions:spring-batch-excel:0.1.1'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.33'

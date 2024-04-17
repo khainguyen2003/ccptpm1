@@ -3,14 +3,15 @@ package com.khai.admin.entity;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblbi")
 public class ImportBill {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "bi_id")
-    private int id;
+    private UUID id;
     @Column(name = "bill_status", columnDefinition = "smallint(1) default 0")
     private byte status;
 

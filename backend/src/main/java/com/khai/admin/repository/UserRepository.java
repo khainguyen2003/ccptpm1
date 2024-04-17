@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     // -------------- Dùng khi tự custom repository
 //    public boolean addUser(User user) throws AlreadyExist, SQLException;
 //    public boolean registerUser(User user) throws AlreadyExist, SQLException;
@@ -17,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 //    public User getUser(String username, String user_pass);
 //    public List<User> getUsers(User similar, short at, int total, String sortColumn);
     // --------------
-    Optional<User> findUserById(int id);
+    Optional<User> findUserById(UUID id);
 
     @Query("SELECT u FROM User u WHERE u.email=:email")
     Optional<User> findFirstByEmail(@Param("email") String email);

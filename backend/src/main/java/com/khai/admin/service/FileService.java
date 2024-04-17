@@ -5,6 +5,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -16,7 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -24,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,6 +45,7 @@ public class FileService {
     private String dataFolderPath;
     private final String TEST = "test";
     private final String PRODUCT = "product";
+    private final String[] EXCEL_EXTENSIONS = {".xlsx", ".xlsm", ".xlsb", ".xltx", ".xltm", ".xls", ".xlt", ".xml", ".xlam", ".xla", ".xlw", ".Xlr"};
 
     @Autowired
     public FileService(ResourceLoader rsloader) {
@@ -242,5 +252,115 @@ public class FileService {
 
         return false;
 
+    }
+
+    public boolean isExcelFile(String filename) {
+        for (String extension : EXCEL_EXTENSIONS) {
+            if (filename.endsWith(extension)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Phương thức lấy danh sách tên cột từ file người dùng gửi
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public String[] getColumnNames(MultipartFile file) throws IOException {
+        String[] columnNames = null;
+        if(isExcelFile(file.getOriginalFilename())) {
+            columnNames = getColumnNamesFromExcel(file);
+        }
+        return columnNames;
+    }
+
+    /**
+     * Phương thức lấy danh sách tên cột từ file người dùng gửi đã được upload tạm thời lên hệ thống để dùng cho batch config
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public String[] getColumnNames(String path) {
+        File file = new File(path);
+        List<String> columnNames = new ArrayList<>();
+
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            Workbook workbook;
+            if(path.endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(inputStream);
+            } else {
+                workbook = new HSSFWorkbook(inputStream);
+            }
+
+            Sheet sheet = workbook.getSheetAt(0); // Assuming the first sheet contains the data
+            Row row = sheet.getRow(0); // Assuming the first row contains column names
+
+            Iterator<Cell> cellIterator = row.cellIterator();
+            while (cellIterator.hasNext()) {
+                Cell cell = cellIterator.next();
+                columnNames.add(cell.getStringCellValue());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return columnNames.toArray(new String[0]);
+    }
+
+    public String[] getColumnNamesFromExcel(MultipartFile file) throws IOException {
+        List<String> columnNames = new ArrayList<>();
+
+        try (InputStream inputStream = file.getInputStream();) {
+            Workbook workbook;
+            if(file.getContentType().equalsIgnoreCase(".xlsx")) {
+                workbook = new XSSFWorkbook(inputStream);
+            } else {
+                workbook = new HSSFWorkbook(inputStream);
+            }
+
+            Sheet sheet = workbook.getSheetAt(0); // Assuming the first sheet contains the data
+            Row row = sheet.getRow(0); // Assuming the first row contains column names
+
+            Iterator<Cell> cellIterator = row.cellIterator();
+            while (cellIterator.hasNext()) {
+                Cell cell = cellIterator.next();
+                columnNames.add(cell.getStringCellValue());
+            }
+        }
+
+        return columnNames.toArray(new String[0]);
+    }
+
+    public String[] getColumnNamesFromExcel(String path) throws IOException {
+        List<String> columnNames = new ArrayList<>();
+
+        Workbook workbook = new XSSFWorkbook(path);;
+//        if(path.endsWith(".xlsx")) {
+//            workbook = new XSSFWorkbook(path);
+//        } else {
+//            workbook = new HSSFWorkbook(path);
+//        }
+
+
+        Sheet sheet = workbook.getSheetAt(0); // Assuming the first sheet contains the data
+        Row row = sheet.getRow(0); // Assuming the first row contains column names
+
+        Iterator<Cell> cellIterator = row.cellIterator();
+        while (cellIterator.hasNext()) {
+            Cell cell = cellIterator.next();
+            columnNames.add(cell.getStringCellValue());
+        }
+
+        return columnNames.toArray(new String[0]);
+    }
+
+    public String[] getExcelExtensions() {
+        return EXCEL_EXTENSIONS;
     }
 }

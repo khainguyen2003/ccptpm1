@@ -6,15 +6,16 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblpc")
 @Data
 public class Category {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "pc_id")
-    private int id;
+    private UUID id;
     @Column(name = "pc_name")
     private String name;
     @Column(name = "pc_notes")

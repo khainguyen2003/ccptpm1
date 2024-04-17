@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,17 +57,17 @@ public class CategoryController {
         return ResponseEntity.status(200).body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable("id") int id) {
+    public ResponseEntity<Category> getCategoryById(@PathVariable("id") UUID id) {
         Category response = categoryService.getCategoryById(id);
         return ResponseEntity.ok(response);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTutorial(@PathVariable("id") int id) {
+    public ResponseEntity<String> deleteTutorial(@PathVariable("id") UUID id) {
         categoryService.deleteById(id);
         return ResponseEntity.ok("Xóa danh mục thành công");
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateTutorial(@PathVariable("id") int id, @RequestBody Category category) {
+    public ResponseEntity<Category> updateTutorial(@PathVariable("id") UUID id, @RequestBody Category category) {
         Category updatedCategory = categoryService.updateCategory(id, category);
         return ResponseEntity.ok(updatedCategory);
     }
