@@ -5,12 +5,14 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.khai.admin.entity.User;
+import com.khai.admin.constants.HeaderSecurity;
 import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import net.htmlparser.jericho.*;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-public class Utilities {
+public class HtppUtilities {
 	
 	// Lấy dữ liệu kiểu Byte từ Para
 	public static byte getByteParam(ServletRequest request, String name) {
@@ -89,5 +91,23 @@ public class Utilities {
 		List<T> entities = objectMapper.readValue(file.getInputStream(), new TypeReference<List<T>>() {});
 //		List<User> entities = objectMapper.readValue(file.getInputStream(), new TypeReference<List<User>>() {});
 		return entities;
+	}
+
+	private String getTokenFromRequest(HttpServletRequest request){
+		String bearerToken = request.getHeader("Authorization");
+
+		if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
+			return bearerToken.substring(7);
+		}
+
+		return null;
+	}
+
+	private UUID getClientId(HttpServletRequest request) {
+		String userId = request.getHeader(HeaderSecurity.CLIENT_ID.getValue());
+		if(StringUtils.hasText(userId)) {
+			return UUID.fromString(userId);
+		}
+		return null;
 	}
 }
