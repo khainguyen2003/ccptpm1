@@ -84,7 +84,6 @@ public class EmployeeService {
         e.setStart_date(employeeDto.getStart_date());
         e.setRole(employeeDto.getRole());
         e.setModified_date(new Date());
-        e.setDeleted(employeeDto.isDeleted());
         e.setFullname(employeeDto.getFullname());
         e.setBirthday(employeeDto.getBirthday());
         e.setEmail(employeeDto.getEmail());
@@ -118,6 +117,22 @@ public class EmployeeService {
             }
         }
         return flag;
+    }
+
+    public Map<String, Object> getEmployeesInTrash(Pageable pageable) {
+        Map<String, Object> map = new HashMap<>();
+        List<EmployeeDto> employeeDtos = new ArrayList<>();
+        Page<Employee> employees = employeeRepository.findByDeleted(true, pageable);
+        employees.getContent().forEach(item -> {
+            employeeDtos.add(item.getDto());
+        });
+        map.put("employees", employeeDtos);
+        map.put("curPage", employees.getNumber());
+        map.put("totalPage", employees.getTotalPages());
+        map.put("totalElements", employees.getTotalElements());
+        map.put("pageSize", employees.getSize());
+        map.put("numberOfElements", employees.getNumberOfElements());
+        return map;
     }
 
 }

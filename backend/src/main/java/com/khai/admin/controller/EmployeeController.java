@@ -65,4 +65,16 @@ public class EmployeeController {
         return check ? new ResponseEntity<>("Xóa nhân viên thành công!", HttpStatus.OK) : new ResponseEntity<>("Xóa nhân viên không thành công!", HttpStatus.BAD_REQUEST);
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<Map<String, Object>> getEmployeesInTrash(
+        @RequestParam(defaultValue = "0") short page,
+        @RequestParam(defaultValue = "5") short size,
+        @RequestParam(defaultValue = "id:desc") String sort
+    ) {
+        List<Sort.Order> orders = httpServices.getSortOrders(sort);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
+        Map<String, Object> response = employeeService.getEmployeesInTrash(pageable);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }
