@@ -32,8 +32,6 @@ public class Employee {
     private byte status;
     @Column(name="employee_branch_start_date")
     private Date start_date;
-    @Column(name="employee_role", columnDefinition = "smallint(2) unsigned NOT NULL DEFAULT '0' COMMENT '(0-Nhân viên; 1-Quản lý gian hàng đơn vị; 2-Quản lý cấp cao)'")
-    private byte role;
     @Column(name="employee_created_date", columnDefinition = "DATETIME(6) NOT NULL COMMENT 'Ngày khởi tạo nhân viên'")
     private Date created_date;
     @Column(name="employee_modified_date", columnDefinition = "DATETIME(6) NOT NULL COMMENT 'Ngày chỉnh sửa thông tin nhân viên'")
@@ -54,10 +52,6 @@ public class Employee {
     private String notes;
     @Column(name = "employee_image")
     private String image;
-    @Column(name = "employee_name")
-    private String name;
-    @Column(name = "employee_pass")
-    private String pass;
 
     public EmployeeDto getDto() {
       EmployeeDto e = new EmployeeDto();
@@ -65,7 +59,6 @@ public class Employee {
       e.setContract_expire(contract_expire);
       e.setStatus(status);
       e.setStart_date(start_date);
-      e.setRole(role);
       e.setCreated_date(created_date);
       e.setModified_date(modified_date);
       e.setDeleted(deleted);
@@ -76,8 +69,6 @@ public class Employee {
       e.setNotes(notes);
       e.setImage(image);
       e.setAddress(address);
-      e.setName(fullname);
-      e.setPass(pass);
       return e;
     }
 
