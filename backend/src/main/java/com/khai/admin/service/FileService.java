@@ -36,6 +36,7 @@ public class FileService {
     private String dataFolderPath;
     private final String TEST = "test";
     private final String PRODUCT = "product";
+    private final String EMPLOYEE = "employee";
 
     @Autowired
     public FileService(ResourceLoader rsloader) {
@@ -47,8 +48,10 @@ public class FileService {
         try {
             Path testPath = Path.of(dataFolderPath + "/" + TEST);
             Path productPath = Path.of(dataFolderPath + "/" + PRODUCT);
+            Path employeePath = Path.of(dataFolderPath + "/" + EMPLOYEE);
             Files.createDirectories(testPath);
             Files.createDirectories(productPath);
+            Files.createDirectories(employeePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -146,11 +149,33 @@ public class FileService {
         }
     }
 
+    public String uploadMultipleFile(MultipartFile file, String folderPath) {
+        String result = null;
+        if(file != null && !file.isEmpty()) {
+            String filename = file.getOriginalFilename();
+            if(!isImageFile(filename)) throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "File không phải định dạng hình ảnh");
+            String ext = filename.substring(filename.lastIndexOf("."));
+            String path = folderPath + "/" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000) + ext;
+            if(uploadFileToSystem(file, path)) {
+                result = path;
+                System.out.println("Upload file: " + path);
+            } else {
+                System.out.println("Không thể tải file lên: " + path);
+            }
+        }
+        return result;
+    }
+
     public String getTestFolder() {
         return dataFolderPath + "/" + TEST;
     }
+
     public String getProductFolder() {
         return dataFolderPath + "/" + PRODUCT;
+    }
+
+    public String getEmployeeFolder() {
+        return dataFolderPath + "/" + EMPLOYEE;
     }
 
     /**

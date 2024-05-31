@@ -2,6 +2,8 @@ package com.khai.admin.dto;
 
 import java.util.Date;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Data;
 
 @Data
@@ -11,7 +13,6 @@ public class EmployeeDto {
     private Date contract_expire;
     private byte status;
     private Date start_date;
-    private byte role;
     private Date created_date;
     private Date modified_date;
     private boolean deleted;
@@ -22,7 +23,6 @@ public class EmployeeDto {
     private String address;
     private String notes;
     private String image;
-    private String name;
-    private String pass;
+    private MultipartFile imageUpload;
 
 }

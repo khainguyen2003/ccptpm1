@@ -35,34 +35,41 @@ public class EmployeeController {
     private final HttpServices httpServices;
     private final EmployeeService employeeService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<EmployeeDto> getEmployee(@PathVariable("id") int id) throws EmployeeException {
+        EmployeeDto e = employeeService.getEmployee(id);
+        return new ResponseEntity<>(e, HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<Map<String, Object>> getEmployees(
         @RequestParam(defaultValue = "0") short page,
         @RequestParam(defaultValue = "5") short size,
-        @RequestParam(defaultValue = "id:desc") String sort
+        @RequestParam(defaultValue = "id:desc") String sort,
+        @RequestParam(defaultValue = "") String key
     ) {
         List<Sort.Order> orders = httpServices.getSortOrders(sort);
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
-        Map<String, Object> response = employeeService.getEmployees(pageable);
+        Map<String, Object> response = employeeService.getEmployees(pageable, key);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeRequest) throws EmployeeException {
-        EmployeeDto e = this.employeeService.createEmployee(employeeRequest);
+        EmployeeDto e = employeeService.createEmployee(employeeRequest);
         return new ResponseEntity<>(e, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable("id") int id, @RequestBody EmployeeDto employeeRequest) throws EmployeeException {
-        EmployeeDto e = this.employeeService.updateEmployee(id, employeeRequest);
+        EmployeeDto e = employeeService.updateEmployee(id, employeeRequest);
         return new ResponseEntity<>(e, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable("id") int id) {
-        boolean check = this.employeeService.deleteEmployee(id);
-        return check ? new ResponseEntity<>("Xóa nhân viên thành công!", HttpStatus.OK) : new ResponseEntity<>("Xóa nhân viên không thành công!", HttpStatus.BAD_REQUEST);
+        employeeService.deleteEmployee(id);
+        return new ResponseEntity<>("Xóa nhân viên thành công!", HttpStatus.OK);
     }
 
     @GetMapping("/trash")
