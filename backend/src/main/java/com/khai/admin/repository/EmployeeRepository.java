@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
-    Optional<Employee> findFirstByName(String name);
+    Optional<Employee> findFirstByEmail(String email);
 
     @Query("SELECT e FROM Employee e WHERE e.fullname LIKE %:keyword% OR e.email LIKE %:keyword%")
     Page<Employee> findEmployees(@Param("keyword") String keyword, Pageable pageable);
