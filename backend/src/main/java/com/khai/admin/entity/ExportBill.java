@@ -1,5 +1,6 @@
 package com.khai.admin.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -25,7 +26,7 @@ public class ExportBill {
     @JoinColumn(name = "creator_id", referencedColumnName = "user_id")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "be_customer_id", referencedColumnName = "user_id")
     private User be_customer_id;
     @Column(name = "be_current_workplace_id")

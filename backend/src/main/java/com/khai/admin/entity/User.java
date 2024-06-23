@@ -24,67 +24,75 @@ public class User {
     @Column(name = "user_id", unique = true)
     private int id;
     @Column(name = "user_name", unique = true)
-    private String username; // tên đăng nhập
+    protected String username; // tên đăng nhập
     @Column(name = "user_email", unique = true)
-    private String email;
+    protected String email;
     @Column(name = "user_pass", nullable = false)
-    private String password;
+    protected String password;
     @Column(name = "first_name")
-    private String firstname;
+    protected String firstname;
     @Column(name = "last_name")
-    private String lastname;
+    protected String lastname;
     @Column(name = "user_address")
-    private String address;
+    protected String address;
     @Column(name = "user_job")
-    private String job;
+    protected String job;
     @Column(name = "user_position")
-    private String position;
-    @Column(name = "user_jobarea")
-    private String jobArea;
-    private String avatar;
+    protected String position;
+    protected String avatar;
     @Column(name = "created_at")
-    private Date createdAt;
+    protected Date createdAt;
     @Column(name = "last_modified")
-    private Date lastModified;
+    protected Date lastModified;
     @Column(columnDefinition = "BIT(1) DEFAULT b'0'")
-    private boolean deleted;
+    protected boolean deleted;
     @Column(columnDefinition = "BIT(1) DEFAULT b'1'")
-    private boolean active;
+    protected boolean active;
     @Column(name = "apply_year")
-    private short applyYear;
-    private Date birthday;
-    private String phone;
-    private String note;
+    protected short applyYear;
+    protected Date birthday;
+    protected String phone;
+    protected String note;
     @Column(name = "user_gender")
-    private String gender;
+    protected String gender;
     @Column(name="user_permission", columnDefinition = "TINYINT(1) DEFAULT 0")
-    private int permission;
+    protected int permission;
     @Column(name="user_roles")
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    protected UserRole role;
 
 //    mappedBy = "<Tên thuộc tính của LogDetail"
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private List<LogDetail> logDetailList;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    protected List<LogDetail> logDetailList;
+
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    private KeyStore keyStore;
+    protected KeyStore keyStore;
 
     @OneToMany(mappedBy = "creator")
     @JsonIgnore
-    private List<Log> logCreatedList;
-    @OneToMany(mappedBy = "creator")
+    protected List<Log> logCreatedList;
+  
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Product> createdProduct;
+    protected List<Product> createdProduct;
 
     @OneToMany(mappedBy = "last_modified_by")
     @JsonIgnore
-    private List<Workplace> lastModifiedWorkplace;
+    protected List<Workplace> lastModifiedWorkplace;
 
     @OneToMany(mappedBy = "creator")
     @JsonIgnore
-    private List<Workplace> createdWorkplace;
+    protected List<Workplace> createdWorkplace;
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Customer> createdCustomer;
+
+    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Provider> createdSubplier;
 
     public UserProfileDto toUserview() {
         UserProfileDto userProfileDto = new UserProfileDto();
