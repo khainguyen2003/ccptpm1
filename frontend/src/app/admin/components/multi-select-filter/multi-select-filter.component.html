@@ -1,0 +1,27 @@
+<p-panel
+    [header]="label"
+    [toggleable]="true"
+    toggler="header"
+    expandIcon="pi pi-angle-down"
+    collapseIcon="pi pi-angle-up"
+    styleClass="mb-4 shadow-12 filter-panel">
+    <p-multiSelect
+        [options]="options"
+        [placeholder]="placeholder"
+        [showToggleAll]="false"
+        [filter]="true"
+        optionLabel="name"
+        display="chip"
+        [(ngModel)]="optSelecteds"
+        (onChange)="handleSelected($event)"
+        [showClear]="true"
+        styleClass="w-full"
+        >
+        <ng-template let-option pTemplate="item">
+            <div class="select-item-label">
+                {{ option.name }}
+            </div>
+            <i class="pi pi-pencil edit-icon" (click)="openEditDialog($event, option)"></i>
+        </ng-template>
+    </p-multiSelect>
+</p-panel>

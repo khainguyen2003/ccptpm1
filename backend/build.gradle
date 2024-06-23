@@ -27,6 +27,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	// https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j
+	implementation 'net.sourceforge.tess4j:tess4j:5.11.0'
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.33'
@@ -37,6 +40,7 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.springframework.batch:spring-batch-test'
 	implementation 'commons-codec:commons-codec:1.16.0'
 	// https://mvnrepository.com/artifact/org.eclipse.birt.runtime/org.eclipse.birt.runtime
 //	implementation 'org.eclipse.birt.runtime:org.eclipse.birt.runtime:4.6.0-20160607'

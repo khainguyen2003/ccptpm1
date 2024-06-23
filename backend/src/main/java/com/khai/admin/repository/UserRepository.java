@@ -1,19 +1,10 @@
 package com.khai.admin.repository;
 
-import com.khai.admin.constants.USER_EDIT_TYPE;
-import com.khai.admin.dto.user.UserCreateDto;
-import com.khai.admin.dto.user.UserEditDto;
-import com.khai.admin.dto.user.UserView;
 import com.khai.admin.entity.User;
-import com.khai.admin.exception.AlreadyExist;
-import com.khai.admin.repository.share.ShareControl;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {

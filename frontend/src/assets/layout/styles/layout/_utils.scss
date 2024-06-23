@@ -18,3 +18,16 @@
         top: 100px;
     }
 }
+
+.danger-captions {
+    color: var(--red-600);
+    font-size: 14px;
+    .small {
+        font-size: 8px;
+    }
+}
+.field {
+    label {
+        font-weight: 600;
+    }
+}

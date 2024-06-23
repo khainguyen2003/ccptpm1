@@ -34,7 +34,7 @@ public class Category {
     @Column(name = "pc_images")
     private String images;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Product> products;
 

@@ -28,6 +28,7 @@ import {
     Validators,
 } from '@angular/forms';
 import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
+import { BarcodeData } from '../../components/print-label/print-label.component';
 
 @Component({
     templateUrl: './product.component.html',
@@ -35,26 +36,128 @@ import { AddCategoryModalComponent } from '../../components/add-category-modal/a
     providers: [MessageService],
 })
 export class ProductComponent implements OnInit {
-    addDialogVisible: boolean = false;
+    // For dialog
+    productDiaVisible: boolean = false;
     editDialogVisible: boolean = false;
     importFileDialogVisible: boolean = false;
     deleteProductDialogVisible: boolean = false;
     deleteProductsDialogVisible: boolean = false;
+    // -- end for dialog
+    //----------------- For filter
+    // http parameters
+    filter: Filter;
+    sort: string = '';
+
+    // -- For filter section
+    @ViewChild('filterSection') filterSection: ElementRef;
+    slcInvenStatus = {
+        name: 'invenFilter',
+        items: [
+            {
+                label: 'Tất cả',
+                checked: true,
+                value: 0
+            },
+            {
+                label: 'Dưới định mức tồn',
+                value: 1
+            },
+            {
+                label: 'Vượt định mức tồn',
+                value: 2
+            },
+            {
+                label: 'Còn hàng trong kho',
+                value: 3
+            },
+            {
+                label: 'Hết hàng',
+                value: 4
+            },
+            {
+                label: 'Lựa chọn khác',
+                value: 5
+            },
+        ]
+    };
+    slcSellStatus = {
+        name: 'invenFilter',
+        items: [
+            {
+                label: 'Tất cả',
+                value: 0
+            },
+            {
+                label: 'Hàng đang kinh doanh',
+                checked: true,
+                value: 1
+            },
+            {
+                label: 'Hàng ngừng kinh doanh',
+                value: 2
+            }
+        ]
+    };
+    proTypeFilter = {
+        name: 'typeFilter',
+        items: [
+            {
+                label: 'Hàng hóa',
+                checked: true,
+                value: 0
+            },
+            {
+                label: 'Dịch vụ',
+                value: 1
+            },
+            {
+                label: 'Combo - Đóng gói',
+                value: 2
+            }
+        ]
+    };
+    positionFilter = [
+        {
+            name: 'Nguyên xá',
+            checked: true,
+            value: 0
+        },
+        {
+            name: 'Trường đại học Công nghiệp Hà Nội',
+            value: 1
+        },
+        {
+            name: 'Ngõ 11, Nguyên Xá Quận Bắc Từ Liêm, Hà Nội',
+            value: 2
+        }
+    ];
+    catFilter: any[];
+    search: string | undefined;
+    selectedCat: SelectItem = { value: '' };
+    // for date filter
+    minDateFilter: Date = new Date();
+    // --  end for filter
+
+    // for print barcode
+    barcodeData: BarcodeData[];
+    // -- end for print barcode
+
+    // for interact with product
     products: any[] = [];
     product: Product = {};
     selectedProducts: Product[] = [];
     submitted: boolean = false;
+    headerProductDia: string = 'Thêm hàng';
+    //-- end for interact with product
     cols: any[] = [];
     expandedRows: expandedRows = {};
     isExpanded: boolean = false;
-    statuses: any[] = [];
     rowsPerPageOptions = [10, 25, 50];
     loading = false;
     first = 0;
     rows = 10;
     totalRecords!: number;
     errorMessage = '';
-    categories: SelectItem[];
     // For upload files
     uploadedFiles: File[] = [];
     selectedFiles: File[] = [];
@@ -65,8 +168,8 @@ export class ProductComponent implements OnInit {
         'https://th.bing.com/th?id=OSK.7c981adf524b78e11bf03e32204fcd68&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
         'https://th.bing.com/th?id=OSK.aa5618135e9f039c89b28eda34197ee1&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
     ];
-    defaultImg: number[] = [];
-
+    defaultImgs: string[] = [];
+    defaultImgUrl = "https://static.vecteezy.com/system/resources/previews/004/141/669/non_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg";
     lengthToDisplayDefault: number = 6;
     addForm!: FormGroup;
 
@@ -102,6 +205,58 @@ export class ProductComponent implements OnInit {
         // fake dữ liệu danh sách sản phẩm
         this.fakeData();
 
+        // bar code data init
+        this.barcodeData = [
+            {
+                code: '1233333',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1233333abc',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 9
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 5
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 8
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+            {
+                code: '1anndhdh',
+                creator: 'khai',
+                title: 'babcgg',
+                quantity: 1
+            },
+        ]
+
         this.cols = [
             { field: 'product', header: 'Product' },
             { field: 'price', header: 'Price' },
@@ -127,18 +282,18 @@ export class ProductComponent implements OnInit {
             },
         ];
 
-        this.categories = [
+        this.catFilter = [
             {
-                label: 'Abc',
+                name: 'Abc',
                 value: 'abc',
             },
             {
-                label: 'cc',
+                name: 'cc',
                 value: 'cc',
             },
         ];
 
-        this.generateIndexForDefault();
+        this.generateDefaultImgs();
     }
 
     onSelect(event: any) {
@@ -152,8 +307,7 @@ export class ProductComponent implements OnInit {
                 console.log(this.imgUploadedUrl);
                 if(this.imgUploadedUrl.indexOf(e.target.result) === -1) {
                     this.imgUploadedUrl.push(e.target.result);
-                    this.defaultImg.pop();
-                    console.log(this.defaultImg);
+                    this.defaultImgs.pop();
                 }
             };
             reader.readAsDataURL(file);
@@ -163,20 +317,17 @@ export class ProductComponent implements OnInit {
     removeImg(src: string) {
         this.imgUploadedUrl = this.imgUploadedUrl.filter(item => item !== src);
         if(this.imgUploadedUrl.length < this.lengthToDisplayDefault) {
-            this.defaultImg.push(1);
+            this.defaultImgs.push(this.defaultImgUrl);
         }
-        console.log(this.defaultImg);
-        console.log(this.imgUploadedUrl)
     }
-    generateIndexForDefault() {
+    generateDefaultImgs() {
         if(this.imgUploadedUrl.length < this.lengthToDisplayDefault){
             for(var i = this.imgUploadedUrl.length; i < 6; i++) {
-                this.defaultImg.push(1);
+                this.defaultImgs.push(this.defaultImgUrl);
             }
         } else {
-            this.defaultImg = [];
+            this.defaultImgs = [];
         }
-        console.log(this.defaultImg)
     }
 
     /**
@@ -216,28 +367,17 @@ export class ProductComponent implements OnInit {
     }
 
     // Sort
-    customSort($event: LazyLoadEvent) {
-        // event.data.sort((data1, data2) => {
-        //     let value1 = data1[event.field];
-        //     let value2 = data2[event.field];
-        //     let result = null;
-
-        //     if (value1 == null && value2 != null) result = -1;
-        //     else if (value1 != null && value2 == null) result = 1;
-        //     else if (value1 == null && value2 == null) result = 0;
-        //     else if (typeof value1 === 'string' && typeof value2 === 'string') result = value1.localeCompare(value2);
-        //     else result = value1 < value2 ? -1 : value1 > value2 ? 1 : 0;
-
-        //     return event.order * result;
-        // });
-        console.log($event);
+    customSort(event: LazyLoadEvent) {
+        console.log("sort: "+ event);
+        
     }
     // pagination end
 
     openNew() {
+        this.headerProductDia = 'Thêm hàng';
         this.product = {};
         this.submitted = false;
-        this.addDialogVisible = true;
+        this.productDiaVisible = true;
     }
 
     onUploadJson($event: UploadEvent) {
@@ -252,8 +392,9 @@ export class ProductComponent implements OnInit {
     }
 
     editProduct(product: Product) {
+        this.headerProductDia = 'Sửa hàng';
         this.product = { ...product };
-        this.editDialogVisible = true;
+        this.productDiaVisible = true;
     }
 
     deleteProduct(product: Product) {
@@ -290,7 +431,7 @@ export class ProductComponent implements OnInit {
     }
 
     hideDialog() {
-        this.addDialogVisible = false;
+        this.productDiaVisible = false;
         this.submitted = false;
     }
 
@@ -339,170 +480,29 @@ export class ProductComponent implements OnInit {
     }
 
     fakeData() {
-        this.products = [
-            {
-                id: 'sp01',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp02',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp03',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp04',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp05',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp06',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp07',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp08',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp09',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp10',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp11',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp12',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp13',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp14',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-            {
-                id: 'sp15',
-                code: 'abbssgsfaf',
-                name: 'Điện thoại thông minh Oppo gen 9 M1',
-                image: 'https://th.bing.com/th/id/OIP.Tvb715doMD5MM7pIkkYaZwHaFP?rs=1&pid=ImgDetMain',
-                importPrice: 100000000,
-                sellPrice: 100000000,
-                category: 'Điện thoại',
-                status: 'Đang kinh doanh'
-            },
-        ];
+        this.productService.fakeData().then((data) => {
+            this.products = data;
+            this.loading = false;
+        })
     }
 
-    loadProductsPage($event?: LazyLoadEvent) {
+    loadProductsPage(event?: LazyLoadEvent) {
         this.loading = true;
+        var sort: string = event?.sortField ?? '';
+        if(sort !== '') {
+            if(event.sortOrder === -1) {
+                sort += 'desc';
+            } else {
+                sort += 'asc';
+            }
+        }
 
         this.productService
             .getProducts(
-                JSON.stringify($event?.filters) ?? '',
-                $event?.sortOrder ?? 1,
-                $event?.first ?? 0,
-                $event?.rows ?? 10,
-                $event?.sortField ?? 'id'
+                JSON.stringify(event?.filters) ?? '',
+                sort,
+                event?.first ?? 0,
+                event?.rows ?? 10,
             )
             .pipe(
                 tap((res) => (this.products = res.products)),
@@ -526,6 +526,24 @@ export class ProductComponent implements OnInit {
     showAddCategoryDialog() {
         this.addCategory.showDialog();
     }
+
+    // For filter
+    /**
+     * 
+     * @param option Là giá trị nhận từ emit của thằng con
+     */
+    selectInvenOpt(option: string[]) {
+        // gọi http service để tạo request filter
+        console.log(option);
+        //this.filter.onHandFilter = option[0];
+    }
+
+    slcTypeOpt(options: any[]) {
+        console.log(options);
+    }
+    slcPosOpt(options: any[]) {
+        console.log(options);
+    }
 }
 
 interface UploadEvent {
@@ -535,4 +553,19 @@ interface UploadEvent {
 
 interface expandedRows {
     [key: string]: boolean;
+}
+interface Filter {
+    categories:  number[],
+    attrFilter: string[],
+    supplierIds: number[],
+    allowSale: number, // 0 -> all, 1 -> Đang kinh doanh, -1 -> Ngừng kinh doanh
+    // alltime: toàn thời gian | other để chỉ định thời gian bắt đầu và kết thúc | thời gian chỉ định, ví dụ afterThreeDay, ...
+    stockOutDate: string, 
+    stockoutStartDate: string, // thời gian bắt đầu
+    stockOutEndDate: string, // thời gian kết thúc
+    onHandFilter: number, // theo thứ tự từ  0-4 | -1 để nhập giá trị
+    onHandFilterStr: string, // >= 10 => str= >=:10
+    branchIds: number[],
+    directSell: number, // 0 -> all, 1 -> bán trực tiếp, -1 -> ko bán trực tiếp
+    relateToChanel: number, // tương tự như trên 
 }

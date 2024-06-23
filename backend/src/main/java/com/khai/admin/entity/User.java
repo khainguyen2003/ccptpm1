@@ -2,7 +2,7 @@ package com.khai.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.khai.admin.constants.UserRole;
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.user.UserProfileDto;
 import com.khai.admin.entity.security.KeyStore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -65,22 +65,24 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
     protected List<LogDetail> logDetailList;
 
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     protected KeyStore keyStore;
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator")
     @JsonIgnore
     protected List<Log> logCreatedList;
+  
     @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
     @JsonIgnore
     protected List<Product> createdProduct;
 
-    @OneToMany(mappedBy = "last_modified_by", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "last_modified_by")
     @JsonIgnore
     protected List<Workplace> lastModifiedWorkplace;
 
-    @OneToMany(mappedBy = "creator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "creator")
     @JsonIgnore
     protected List<Workplace> createdWorkplace;
 
@@ -92,9 +94,9 @@ public class User {
     @JsonIgnore
     private List<Provider> createdSubplier;
 
-    public UserView toUserview() {
-        UserView userView = new UserView();
-        userView.loadFromUser(this);
-        return userView;
+    public UserProfileDto toUserview() {
+        UserProfileDto userProfileDto = new UserProfileDto();
+        userProfileDto.loadFromUser(this);
+        return userProfileDto;
     }
 }

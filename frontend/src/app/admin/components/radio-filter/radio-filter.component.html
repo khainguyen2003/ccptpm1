@@ -1,0 +1,21 @@
+<p-panel [header]="title" [toggleable]="true" toggler="header" expandIcon="pi pi-angle-down" collapseIcon="pi pi-angle-up" styleClass="mb-4 shadow-2 filter-panel ">
+  <div class="flex flex-column">
+    @for (item of filterList.items; track item.value; let i =  $index) {
+      <!-- <div class="filter-field">
+        <input type="radio" [name]="filterList.name" [id]="filterList.name + i" (change)="filterChanged($event)" [checked]="item?.checked" [value]="item.value">
+        <label for="filterList.name + i">{{item.label}}</label>
+      </div> -->
+      <div class="field-radiobutton">
+        <p-radioButton [name]="filterList.name" [value]="item.value" inputId="filterList.name + i" [(ngModel)]="filterSelected" (onClick)="filterChanged($event)"></p-radioButton>
+        <label for="filterList.name + i">{{item.label}}</label>
+      </div>
+    }
+    <div *ngIf="hasOtherOpt" class="field-radiobutton">
+      <p-radioButton [name]="filterList.name" [value]="-1" [(ngModel)]="filterSelected" (onClick)="filterChanged($event)" label="Lựu chọn khác"></p-radioButton>
+      <div *ngIf="filterSelected == -1" class="flex">
+        <p-dropdown [options]="operators" [(ngModel)]="operator" [showClear]="true"></p-dropdown>
+        <input type="text" pInputText [(ngModel)]="value" label="Giá trị"/>
+      </div>
+    </div>
+  </div>
+</p-panel>

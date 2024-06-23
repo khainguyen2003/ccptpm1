@@ -1,36 +1,55 @@
 package com.khai.admin.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.khai.admin.dto.ProductDto;
-import com.khai.admin.dto.user.UserView;
+import com.khai.admin.dto.Product.ProductDto;
+import com.khai.admin.dto.user.UserProfileDto;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.CreatedBy;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tblproduct")
-@Data
+//@NamedEntityGraph(
+//        name = "Product.list",
+//        attributeNodes = {
+//                @NamedAttributeNode(value = "creator", subgraph = "creator"),
+//                @NamedAttributeNode(value = "category", subgraph = "category")
+//        },
+//        subgraphs = {
+//                @NamedSubgraph(name = "creator", attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("firstname"),
+//                        @NamedAttributeNode("lastname")
+//                }),
+//                @NamedSubgraph(name = "category", attributeNodes = {
+//                        @NamedAttributeNode("id"),
+//                        @NamedAttributeNode("name")
+//                })
+//        }
+//)
+@Getter
+@Setter
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "product_id")
-    private int id;
+    private UUID id;
     @Column(name = "product_name")
     private String name;
     @Column(name = "product_desc", length = 500)
     private String description;
     @Column(name = "product_images")
-    private String images;
+    private List<String> images;
     @CreatedDate
     @Column(name = "product_created_date")
     private Date createdDate;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_created_id", referencedColumnName = "user_id", nullable = false)
     @JsonProperty("created_by")
     private User creator;
@@ -50,11 +69,16 @@ public class Product {
     private float rate;
     // Các thuộc tính của sản phẩm
     private String attr;
-    @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "pc_id")
+
+    // pessimitic locking
+    @Version
+    private Long version;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", referencedColumnName = "pc_id", nullable = true)
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<WorkplaceDetail> wpd;
 
     public void applyToProduct(Product product) {
@@ -74,7 +98,7 @@ public class Product {
     }
 
     public ProductDto toDto() {
-        UserView createdBy = new UserView();
+        UserProfileDto createdBy = new UserProfileDto();
         createdBy.loadFromUser(creator);
         return new ProductDto(this);
     }

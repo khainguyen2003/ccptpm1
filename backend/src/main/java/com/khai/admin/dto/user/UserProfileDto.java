@@ -4,13 +4,12 @@ import com.khai.admin.constants.UserRole;
 import com.khai.admin.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Date;
 
 @Getter
 @NoArgsConstructor
-public class UserView {
+public class UserProfileDto {
     private int id;
     private String firstName;
     private String lastname;
