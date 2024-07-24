@@ -23,7 +23,6 @@ import { EditorModule } from 'primeng/editor';
 import { AddDepartmentModalComponent } from '../../components/add-department-modal/add-department-modal.component';
 import { CarouselModule } from 'primeng/carousel';
 import { BadgeModule } from 'primeng/badge';
-import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
 import { PanelModule } from 'primeng/panel';
 import { ListboxModule } from 'primeng/listbox';
 import { RadioFilterComponent } from '../../components/radio-filter/radio-filter.component';
@@ -33,6 +32,7 @@ import { MultiSelectFilterComponent } from '../../components/multi-select-filter
 import { EmployeeComponent } from './employee.component';
 import { EmployeeRoutingModule } from './employee-routing.module';
 import { MessageService } from 'primeng/api';
+import { CategoryComponent } from '../category/category.component';
 
 @NgModule({
     imports: [
@@ -61,7 +61,7 @@ import { MessageService } from 'primeng/api';
         TabViewModule,
         EditorModule,
         AddDepartmentModalComponent,
-        AddCategoryModalComponent,
+        CategoryComponent,
         CarouselModule,
         PanelModule,
         ListboxModule,

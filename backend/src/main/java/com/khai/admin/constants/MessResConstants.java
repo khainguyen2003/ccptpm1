@@ -1,6 +1,6 @@
 package com.khai.admin.constants;
 
-public class MessageResponseConstants {
+public class MessResConstants {
     public static final String CREATE_ERR = "Tạo không thành công";
     public static final String AUTH_ERROR = "Lỗi xác thực";
     public static final String INTERNAL_SERVER_ERROR = "Lỗi server";
@@ -18,6 +18,6 @@ public class MessageResponseConstants {
     }
 
     public static class ProductMess {
-        private static final String BLANK_NAME = "Tên sản phẩm " + BLANK_REQUIRED_VALUES;
+        public static final String BLANK_NAME = "Tên sản phẩm " + BLANK_REQUIRED_VALUES;
     }
 }

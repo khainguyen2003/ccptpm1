@@ -1,7 +1,6 @@
+import { HttpServices } from './../../services/http.service';
 import { AddDepartmentModalComponent } from './../../components/add-department-modal/add-department-modal.component';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Product } from 'src/app/demo/api/product';
-import { SelectEvent } from 'src/app/models/SelectEvent';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import {
     LazyLoadEvent,
     MenuItem,
@@ -9,33 +8,100 @@ import {
     SelectItem,
     SortEvent,
 } from 'primeng/api';
-import { Table } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
 import {
     catchError,
     debounceTime,
     distinctUntilChanged,
     finalize,
-    fromEvent,
-    merge,
     tap,
     throwError,
+    of as observableOf,
 } from 'rxjs';
 import { ProductService } from '../../services/product.service';
 import {
     AbstractControl,
+    FormArray,
+    FormBuilder,
     FormControl,
     FormGroup,
-    Validators,
+    FormsModule,
+    ReactiveFormsModule,
+    Validators
 } from '@angular/forms';
-import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
-import { BarcodeData } from '../../components/print-label/print-label.component';
+import { Product } from 'src/app/models/Product';
+import {UploadEvent} from '../../../models/UploadEvent';import { expandedRows } from 'src/app/models/ExpandedRows';
+import { CategoryComponent } from '../category/category.component';
+import { SaveCategoryModalComponent } from '../../components/save-category-modal/save-category-modal.component';
+import { PrintLabelComponent } from '../../components/print-label/print-label.component';
+import { MultiSelectFilterComponent } from '../../components/multi-select-filter/multi-select-filter.component';
+import { DateRangeFilterComponent } from '../../components/date-range-filter/date-range-filter.component';
+import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkbox-filter.component';
+import { RadioFilterComponent } from '../../components/radio-filter/radio-filter.component';
+import { ListboxModule } from 'primeng/listbox';
+import { PanelModule } from 'primeng/panel';
+import { CarouselModule } from 'primeng/carousel';
+import { EditorModule } from 'primeng/editor';
+import { CommonModule } from '@angular/common';
+import { BadgeModule } from 'primeng/badge';
+import { FileUploadModule } from 'primeng/fileupload';
+import { ButtonModule } from 'primeng/button';
+import { MenuModule } from 'primeng/menu';
+import { ToolbarModule } from 'primeng/toolbar';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { DropdownModule } from 'primeng/dropdown';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DialogModule } from 'primeng/dialog';
+import { ProductRoutingModule } from './product-routing.module';
+import { SkeletonModule } from 'primeng/skeleton';
+import { MenubarModule } from 'primeng/menubar';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { TabViewModule } from 'primeng/tabview';
+import { RatingModule } from 'primeng/rating';
+import { AppFooterComponent } from '../../layout/app.footer.component';
 
 @Component({
     templateUrl: './product.component.html',
     styleUrl: './product.component.scss',
+    standalone: true,
+    imports: [
+        CommonModule,
+        TableModule,
+        FileUploadModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ButtonModule,
+        MenuModule,
+        ToolbarModule,
+        RatingModule,
+        InputTextModule,
+        InputTextareaModule,
+        DropdownModule,
+        RadioButtonModule,
+        InputNumberModule,
+        DialogModule,
+        SkeletonModule,
+        MenubarModule,
+        MultiSelectModule,
+        TabViewModule,
+        EditorModule,
+        CarouselModule,
+        PanelModule,
+        ListboxModule,
+        RadioFilterComponent,
+        CheckboxFilterComponent,
+        DateRangeFilterComponent,
+        DialogModule,
+        MultiSelectFilterComponent,
+        PrintLabelComponent,
+        AddDepartmentModalComponent,
+        SaveCategoryModalComponent,
+    ],
     providers: [MessageService],
 })
-export class ProductComponent implements OnInit {
+export class ProductComponent implements OnInit, AfterViewInit {
     // For dialog
     productDiaVisible: boolean = false;
     editDialogVisible: boolean = false;
@@ -139,16 +205,17 @@ export class ProductComponent implements OnInit {
     // --  end for filter
 
     // for print barcode
-    barcodeData: BarcodeData[];
+    // barcodeData: BarcodeData[];
     // -- end for print barcode
 
     // for interact with product
-    products: any[] = [];
+    products: Product[] = [];
     product: Product = {};
     selectedProducts: Product[] = [];
     submitted: boolean = false;
     headerProductDia: string = 'Thêm hàng';
     //-- end for interact with product
+
     cols: any[] = [];
     expandedRows: expandedRows = {};
     isExpanded: boolean = false;
@@ -158,35 +225,35 @@ export class ProductComponent implements OnInit {
     rows = 10;
     totalRecords!: number;
     errorMessage = '';
+
     // For upload files
     uploadedFiles: File[] = [];
     selectedFiles: File[] = [];
-    imgUploadedUrl: string[] = [
-        'https://th.bing.com/th?id=OSK.da7181f009aaebfd25febccdbaca6a04&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
-        'https://th.bing.com/th?id=OSK.de50cc0c235faefc5d8cd6ba77c8de04&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
-        'https://th.bing.com/th?id=OSK.3722be2b715b17dba8a171946f8aa0e2&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
-        'https://th.bing.com/th?id=OSK.7c981adf524b78e11bf03e32204fcd68&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
-        'https://th.bing.com/th?id=OSK.aa5618135e9f039c89b28eda34197ee1&w=80&h=80&c=7&o=6&dpr=1.3&pid=SANGAM',
-    ];
     defaultImgs: string[] = [];
+    imgUploadedUrl: string[] = [];
     defaultImgUrl = "https://static.vecteezy.com/system/resources/previews/004/141/669/non_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg";
     lengthToDisplayDefault: number = 6;
-    addForm!: FormGroup;
+    saveForm!: FormGroup;
 
     // Menu import
     importOptions: MenuItem[] | undefined;
     // add department dialog
     @ViewChild('addDepartment')
     addDepartmentDialog: AddDepartmentModalComponent;
-    @ViewChild('addCategory') addCategory: AddCategoryModalComponent;
+    @ViewChild('saveCategory') saveCategory: SaveCategoryModalComponent;
 
     constructor(
         private productService: ProductService,
-        private message: MessageService
+        private message: MessageService,
+        private httpServices: HttpServices,
+        private fb: FormBuilder
     ) {}
+    ngAfterViewInit(): void {
+        this.loadProductsPage();
+    }
 
     ngOnInit() {
-        this.addForm = new FormGroup({
+        this.saveForm = new FormGroup({
             code: new FormControl(''),
             name: new FormControl('', Validators.required),
             categories: new FormControl('', Validators.required),
@@ -198,64 +265,11 @@ export class ProductComponent implements OnInit {
             maxInventory: new FormControl(0),
             desc: new FormControl(''),
             inventory: new FormControl(0),
+            newImages: new FormControl(null),
+            thumb: new FormControl(null, Validators.required),
+            attrs: new FormArray([]),
+            units: new FormArray([]),
         });
-        // Lấy dữ liệu cho product
-        // this.loadProductsPage();
-
-        // fake dữ liệu danh sách sản phẩm
-        this.fakeData();
-
-        // bar code data init
-        this.barcodeData = [
-            {
-                code: '1233333',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 1
-            },
-            {
-                code: '1233333abc',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 9
-            },
-            {
-                code: '1anndhdh',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 5
-            },
-            {
-                code: '1anndhdh',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 8
-            },
-            {
-                code: '1anndhdh',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 1
-            },
-            {
-                code: '1anndhdh',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 1
-            },
-            {
-                code: '1anndhdh',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 1
-            },
-            {
-                code: '1anndhdh',
-                creator: 'khai',
-                title: 'babcgg',
-                quantity: 1
-            },
-        ]
 
         this.cols = [
             { field: 'product', header: 'Product' },
@@ -292,19 +306,94 @@ export class ProductComponent implements OnInit {
                 value: 'cc',
             },
         ];
+        
 
         this.generateDefaultImgs();
     }
 
+    saveProduct() {
+        this.submitted = true;
+        const saveFormData = this.createFormData(this.saveForm);
+        this.uploadedFiles.forEach(file => saveFormData.append('new_images', file));
+
+        console.log(saveFormData);
+        
+        this.productService.createProduct(saveFormData)
+        .pipe(
+            tap((res) => {
+            //   this.categories.push(res);
+              this.loading = false;
+              this.message.add({ severity: 'success', summary: 'Đăng ký', detail: 'Đăng ký thành công' })
+            }),
+            catchError((err) => {
+                this.message.add({ severity: 'error', detail: err.error })
+                  console.log('Không tải được thông tin sản phẩm', err);
+                  return throwError(err);
+                }),
+            finalize(() => (this.loading = false))
+          )
+          .subscribe();
+    }
+
+    findIndexById(id: string): number {
+        let index = -1;
+        for (let i = 0; i < this.products.length; i++) {
+            if (this.products[i].id === id) {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
+    }
+
+    loadProductsPage(event?: LazyLoadEvent) {
+        this.loading = true;
+        
+        this.productService
+            .getProducts(
+                JSON.stringify(event?.filters) ?? '',
+                this.httpServices.getSort(event?.sortField ?? 'id', event?.sortOrder),
+                event?.first ?? 0,
+                event?.rows ?? 10,
+            )
+            .pipe(
+                tap((res) =>{
+                    this.loading = false;
+                    this.products = res?.items ?? [];
+                    this.totalRecords = res?.totalElements;
+                    this.first = res?.curPage;
+                } ),
+                catchError((err) => {
+                    console.log(err);
+                
+                    this.message.add({ severity: 'warn', summary: 'Warning', detail: err.message, life: 3000 });
+                    return observableOf(null);
+                })
+            )
+            .subscribe();
+    }
+
+    thumbChanged(event: any) {
+        if(event.target?.files?.length > 0) {
+            const file = event.target.files[0];
+            this.saveForm.patchValue({
+                thumb: file
+            })
+        }
+    }
+
     onSelect(event: any) {
-        this.selectedFiles = event.target.files;
+        this.selectedFiles = event.target?.files;
         this.uploadedFiles.push(event.target.files);
-        console.log(event.target.files);
+        
+        this.saveForm.patchValue({
+            newImages: this.uploadedFiles
+        });
         
         for (let file of event.target.files) {
             const reader = new FileReader();
             reader.onload = (e: any) => {
-                console.log(this.imgUploadedUrl);
                 if(this.imgUploadedUrl.indexOf(e.target.result) === -1) {
                     this.imgUploadedUrl.push(e.target.result);
                     this.defaultImgs.pop();
@@ -316,13 +405,13 @@ export class ProductComponent implements OnInit {
 
     removeImg(src: string) {
         this.imgUploadedUrl = this.imgUploadedUrl.filter(item => item !== src);
-        if(this.imgUploadedUrl.length < this.lengthToDisplayDefault) {
+        if(this.imgUploadedUrl?.length < this.lengthToDisplayDefault) {
             this.defaultImgs.push(this.defaultImgUrl);
         }
     }
     generateDefaultImgs() {
-        if(this.imgUploadedUrl.length < this.lengthToDisplayDefault){
-            for(var i = this.imgUploadedUrl.length; i < 6; i++) {
+        if(this.imgUploadedUrl?.length < this.lengthToDisplayDefault){
+            for(var i = this.imgUploadedUrl.length; i < this.lengthToDisplayDefault; i++) {
                 this.defaultImgs.push(this.defaultImgUrl);
             }
         } else {
@@ -335,7 +424,7 @@ export class ProductComponent implements OnInit {
      * </br>form['email']
      */
     get form(): { [key: string]: AbstractControl } {
-        return this.addForm.controls;
+        return this.saveForm.controls;
     }
 
     // Pagination
@@ -357,13 +446,13 @@ export class ProductComponent implements OnInit {
     }
 
     isLastPage(): boolean {
-        return this.products
-            ? this.first === this.products.length - this.rows
-            : true;
+        return this.first === this.products?.length - this.rows
+            ? true
+            : false;
     }
 
     isFirstPage(): boolean {
-        return this.products ? this.first === 0 : true;
+        return this.first === 0? true : false;
     }
 
     // Sort
@@ -375,6 +464,7 @@ export class ProductComponent implements OnInit {
 
     openNew() {
         this.headerProductDia = 'Thêm hàng';
+        this.generateDefaultImgs();
         this.product = {};
         this.submitted = false;
         this.productDiaVisible = true;
@@ -435,85 +525,11 @@ export class ProductComponent implements OnInit {
         this.submitted = false;
     }
 
-    saveProduct() {
-        this.submitted = true;
-        var addFormData = new FormData();
-        this.uploadedFiles.forEach(file => addFormData.append('files', file));
-        console.log(addFormData);
-        
-        // this.productService.createProduct(this.addForm.value)
-        // .pipe(
-        //     tap((res) => {
-        //       this.categories.push(res);
-        //       this.loading = false;
-        //       this.message.add({ severity: 'success', summary: 'Đăng ký', detail: 'Đăng ký thành công' })
-        //     }),
-        //     catchError((err) => {
-        //         this.message.add({ severity: 'error', detail: err.error })
-        //           console.log('Không tải được thông tin sản phẩm', err);
-        //           return throwError(err);
-        //         }),
-        //     finalize(() => (this.loading = false))
-        //   )
-        //   .subscribe();
-        // ;
-        
-    }
-
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products.length; i++) {
-            if (this.products[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    }
-
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal(
             (event.target as HTMLInputElement).value,
             'contains'
         );
-    }
-
-    fakeData() {
-        this.productService.fakeData().then((data) => {
-            this.products = data;
-            this.loading = false;
-        })
-    }
-
-    loadProductsPage(event?: LazyLoadEvent) {
-        this.loading = true;
-        var sort: string = event?.sortField ?? '';
-        if(sort !== '') {
-            if(event.sortOrder === -1) {
-                sort += 'desc';
-            } else {
-                sort += 'asc';
-            }
-        }
-
-        this.productService
-            .getProducts(
-                JSON.stringify(event?.filters) ?? '',
-                sort,
-                event?.first ?? 0,
-                event?.rows ?? 10,
-            )
-            .pipe(
-                tap((res) => (this.products = res.products)),
-                catchError((err) => {
-                    this.errorMessage = 'Không tải được thông tin sản phẩm';
-                    console.log('Không tải được thông tin sản phẩm', err);
-                    return throwError(err);
-                }),
-                finalize(() => (this.loading = false))
-            )
-            .subscribe();
     }
 
     showImportFileDialog() {
@@ -524,7 +540,7 @@ export class ProductComponent implements OnInit {
         this.addDepartmentDialog.showDialog();
     }
     showAddCategoryDialog() {
-        this.addCategory.showDialog();
+        this.saveCategory.showSaveCategoryDialog();
     }
 
     // For filter
@@ -544,16 +560,44 @@ export class ProductComponent implements OnInit {
     slcPosOpt(options: any[]) {
         console.log(options);
     }
+
+    createFormData(formGroup: FormGroup): FormData {
+        const formData = new FormData();
+        Object.keys(formGroup.controls).forEach(key => {
+            const control = formGroup.get(key);
+            if (control) {
+            if(control.value instanceof File) {
+                formData.append(key, control.value as Blob);  
+            } else {
+                formData.append(key, control.value);
+            }
+            }
+        });
+
+        return formData;
+    }
+
+    get attrs() {
+        return this.saveForm.get('attrs') as FormArray;
+    }
+    addAttrs() {
+        this.attrs.push(this.fb.control(''));
+    }
+    removeAttrs(index) {
+        this.attrs.removeAt(index);
+    }
+
+    get units() {
+        return this.saveForm.get('units') as FormArray;
+    }
+    addUnits() {
+        this.units.push(this.fb.control(''));
+    }
+    removeUnits(index) {
+        this.units.removeAt(index);
+    }
 }
 
-interface UploadEvent {
-    originalEvent: Event;
-    files: File[];
-}
-
-interface expandedRows {
-    [key: string]: boolean;
-}
 interface Filter {
     categories:  number[],
     attrFilter: string[],

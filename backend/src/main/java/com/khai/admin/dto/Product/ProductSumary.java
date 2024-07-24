@@ -25,7 +25,7 @@ public class ProductSumary {
 
     private String code;
 
-    private boolean isIsDraft;
+    private boolean isDraft;
 
     private boolean isPublish;
 
@@ -35,6 +35,14 @@ public class ProductSumary {
 
     public void fromEntity(Product entity) {
         this.id = entity.getId();
-        this.
+        this.name = entity.getName();
+        this.thumb = entity.getProduct_thumb();
+        this.sell_price = entity.getSell_price();
+        this.isDeleted = entity.isDeleted();
+        this.code = entity.getCode();
+        this.isDraft = entity.isDraft();
+        this.isPublish = entity.isPublish();
+        this.slug = entity.getSlug();
+        this.product_type = entity.getProduct_type();
     }
 }

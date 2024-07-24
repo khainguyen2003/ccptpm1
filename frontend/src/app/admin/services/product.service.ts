@@ -1,73 +1,52 @@
+import { HttpServices } from './http.service';
 import { CategoryService } from './category.service';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Product } from '../../models/product';
+import { Product } from '../../models/Product';
 import { Observable, map } from 'rxjs';
-import { Category } from 'src/app/models/category';
+import { Category } from 'src/app/models/Category';
 import { environment } from 'src/environments/environment';
-
+import { PaginationResponse } from 'src/app/models/PaginationResponse';
 @Injectable({
     providedIn: 'root'
 })
 export class ProductService {
-    private productApi = environment.testApiUrl + '/admin/products';
+    private productApi = this.httpServices.getProductAdminApi();
     constructor(
         private http: HttpClient,
-        private catService: CategoryService
+        private catService: CategoryService,
+        private httpServices: HttpServices
     ) {}
 
     getProducts(
-        filter: string,
-        sort: string,
-        page: number,
-        pageSize: number
-    ): Observable<any> {
-        var params = new HttpParams();
-        if(filter && filter.trim() !== '') {
-            params.append('filter', filter);
-        }
-        if(sort && sort.trim() !== '') {
-            params.append('sort', sort);
-        }
-        if(page) {
-            params.append('page', page);
-        }
-        if(pageSize) {
-            params.append('size', pageSize);
-        }
-        var headers: HttpHeaders = new HttpHeaders({
-            'Content-Type':  'application/json',
-            Authorization: 'my-auth-token'
-        })
+        filter: string = "",
+        sort: string = "",
+        page: number = 0,
+        pageSize: number = 10
+    ): Observable<PaginationResponse> {
+        var params = this.httpServices.createPaginationParams(filter, sort, page, pageSize);
+        var headers: HttpHeaders = this.httpServices.createAuthorizationHeader();
+        headers.append('Content-Type', 'application/json');
+        console.log(this.productApi);
+        console.log(headers);  
 
         return this.http
-            .get(this.productApi, {
+            .get<PaginationResponse>(this.productApi, {
                 params, headers
-            })
-            .pipe(map((res) => res['payload']));
+            });
     }
 
     getProductById(productId: number): Observable<Product> {
         return this.http.get<Product>(this.productApi + '/' + productId);
     }
-  
-    // findCategoriesContain(productId:number): Observable<any> {
-    //     return this.catService.
-    // }
-    createProduct(form: any): Observable<any> {
-        return this.http.post(this.productApi, form);
-    }
-    updateProduct(productId: number, form: any): Observable<any> {
-        return this.http.put(this.productApi + '/' + productId, form);
-    }
-    deleteProduct(productId: number): Observable<any> {
-        return this.http.delete(this.productApi + '/' + productId);
-    }
 
-    fakeData(
-    ) {
-        return this.http.get<any>('assets/demo/data/products.json')
-            .toPromise()
-            .then(res => res.data)
+    createProduct(form: any): Observable<Product> {
+        return this.http.post<Product>(this.productApi, form);
+    }
+    updateProduct(productId: number, form: any): Observable<Product> {
+        return this.http.put<Product>(this.productApi + '/' + productId, form);
+    }
+    deleteProduct(productId: number): Observable<string> {
+        return this.http.delete<string>(this.productApi + '/' + productId);
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.khai.admin.dto.EmployeeDto;
 import com.khai.admin.entity.Employee;
 import com.khai.admin.exception.EmployeeException;
-import com.khai.admin.repository.EmployeeRepository;
+import com.khai.admin.repository.jpa.EmployeeRepository;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +74,7 @@ public class EmployeeService {
         return this.employeeRepository.findFirstByName(name).isPresent();
     }
 
-    public EmployeeDto updateEmployee(int id, EmployeeDto employeeDto) throws EmployeeException {
+    public EmployeeDto updateEmployee(UUID id, EmployeeDto employeeDto) throws EmployeeException {
         if(!this.employeeRepository.existsById(id)) {
             throw new EmployeeException("Nhân viên không tồn tại!");
         }
@@ -104,7 +104,7 @@ public class EmployeeService {
         return e.getDto();
     }
 
-    public boolean deleteEmployee(int id) {
+    public boolean deleteEmployee(UUID id) {
         boolean flag = false;
         Optional<Employee> employee = this.employeeRepository.findById(id);
         if(employee.isPresent()) {

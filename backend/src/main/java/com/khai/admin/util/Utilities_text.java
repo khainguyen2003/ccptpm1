@@ -44,4 +44,12 @@ public class Utilities_text {
 		DecimalFormat decimalFormat = new DecimalFormat("#,###");
 		return decimalFormat.format(number);
 	}
+
+	public static boolean isTrue(String value) {
+		if(value.equalsIgnoreCase("Có") && value.equalsIgnoreCase("1")) {
+			return true;
+		}
+
+		return false;
+	}
 }

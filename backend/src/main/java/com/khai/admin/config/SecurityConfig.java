@@ -56,16 +56,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(
-                                        "/error", "/api/auth/admin/signup", "/api/auth/admin/login", "/test/**"
+                                        "/error", "/api/files/**", "/v3/api-docs", "/swagger-ui/**", "/swagger-ui-custom.html", "/api/auth/admin/signup", "/api/auth/admin/login", "/test/**"
                                 )
                                 .permitAll() // Các trang trên sẽ không được bảo vệ
 
                                 .requestMatchers(HttpMethod.GET,
                                          "/api/user/**", "/api/refresh-token"
-                                ).hasAnyRole(UserRole.USER.getRole(), UserRole.ADMIN.getRole())
-                                .requestMatchers(HttpMethod.PATCH, "/api/user/**", "/api/refresh-token").hasAnyRole(UserRole.USER.getRole(), UserRole.ADMIN.getRole())
+                                ).hasAnyAuthority(UserRole.ROLE_USER.getRole(), UserRole.ROLE_ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PATCH, "/api/user/**", "/api/refresh-token").hasAnyAuthority(UserRole.ROLE_USER.getRole(), UserRole.ROLE_ADMIN.getRole())
                                 .requestMatchers("/api/admin/**", "/api/admin/refresh-token")
-                                .hasRole(UserRole.ADMIN.getRole())
+                                .hasAuthority(UserRole.ROLE_ADMIN.getRole())
 
                                 .anyRequest()
                                 .authenticated()
@@ -128,9 +128,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "PUT"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "x-client-id"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "x-client-id"));
+        configuration.setAllowedMethods(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 

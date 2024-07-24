@@ -1,16 +1,26 @@
-interface InventoryStatus {
-    label: string;
-    value: string;
-}
+import { Category } from './Category';
+import { User } from './User';
 export interface Product {
     id?: string;
-    code?: string;
     name?: string;
-    description?: string;
+    code?: string;
     price?: number;
     quantity?: number;
-    inventoryStatus?: InventoryStatus;
-    category?: string;
-    image?: string;
-    rating?: number;
+    category?: Category;
+    description?: string;
+    thumb?: string;
+    images?: string[];
+    createdDate?: Date;
+    creator?: User;
+    deleted?: boolean;
+    isStopCell?: boolean;
+    isDirectCell?: boolean;
+    weight?: string;
+    rate?: number;
+    attr?: any[];
+    isPulished?: boolean;
+    isDraft?: boolean;
+    slug?: string;
+    import_price?: number;
+    sell_price?: number;
 }

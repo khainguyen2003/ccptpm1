@@ -43,8 +43,9 @@
     padding: 3px;
 }
 .preview {
-    width: 90px;
-    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
 }
 .rm-img-btn {
     position: absolute;

@@ -2,12 +2,14 @@ package com.khai.admin.service;
 
 import com.khai.admin.entity.User;
 import com.khai.admin.entity.security.UserDetailsImpl;
-import com.khai.admin.repository.UserRepository;
+import com.khai.admin.repository.jpa.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Service
 public class UserDetailSeviceImpl implements UserDetailsService {

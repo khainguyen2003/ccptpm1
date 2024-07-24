@@ -1,4 +1,3 @@
-import { LoginModule } from './../../../demo/components/auth/login/login.module';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 

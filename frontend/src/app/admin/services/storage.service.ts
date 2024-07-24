@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 
 const TOKEN = 'access_token';
 const USER = 'user';
+const x_client_id = 'x-client-id';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,10 @@ export class StorageService {
   public removeUser() : void {
     window.localStorage.removeItem(USER);
   }
+  public getClientId(): string {
+
+    return  this.getUser().id;
+  } 
   public isLoggedIn() : boolean {
     if(this.getAccessToken() == null && this.getUser() == null) {
       return true;

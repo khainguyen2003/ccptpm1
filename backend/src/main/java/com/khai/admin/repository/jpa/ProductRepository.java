@@ -1,15 +1,9 @@
-package com.khai.admin.repository;
+package com.khai.admin.repository.jpa;
 
-import com.khai.admin.dto.Product.ProductBarcode;
-import com.khai.admin.dto.Product.ProductDto;
-import com.khai.admin.dto.Product.ProductRecord;
-import com.khai.admin.dto.Product.ProductSumary;
 import com.khai.admin.entity.Product;
-import jakarta.persistence.LockModeType;
+import com.khai.admin.projections.ProductPreview;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,22 +15,19 @@ import java.util.UUID;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
 
-//    @Query("SELECT p, p.creator.id, p.creator.firstname, p.creator.lastname, p.creator.job, p.creator.position, p.category.id, p.category.name FROM Product p")
-//    @Query(value = "SELECT p FROM tblproduct p JOIN p.category c")
-//    @Query("SELECT new com.khai.admin.dto.Product.ProductDto(p, new com.khai.admin.dto.category( p FROM Product p")
-//    @EntityGraph(value = "Product.list", type = EntityGraph.EntityGraphType.LOAD)
-
-    Page<ProductDto> findBy(Pageable pageable);
-
-    Page<ProductDto> findAllBy(Pageable pageable);
-
     @Query("SELECT p FROM Product p WHERE p.isDraft=:isDraft")
     Page<Product> findAllProductDraft(@Param("isDraft") boolean isDraft, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.name=:name OR p.code=:code")
     Optional<Product> isExist(@Param("name") String name, @Param("code") String code);
 
-    List<ProductBarcode> findByIdIn(UUID[] ids);
+    @Query("SELECT p FROM Product p WHERE p.id IN(:ids) AND p.isPublish=true")
+    Page<ProductPreview> findByIdIn(List<UUID> ids, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE p.id IN(:ids) AND p.isPublish=true")
+    List<Product> findAllByIdIn(List<UUID> ids);
+
+    @Query("SELECT p FROM Product p WHERE p.shop.id=:shopId AND p.isPublish=true")
+    Page<ProductPreview> findByShopId(@Param("shopId") UUID shopId, Pageable pageable);
 
     @Query("UPDATE Product p set p.isStopCell=:status WHERE p.id IN(:ids)")
     @Modifying

@@ -2,6 +2,7 @@ package com.khai.admin.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,13 +55,13 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable("id") int id, @RequestBody EmployeeDto employeeRequest) throws EmployeeException {
+    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable("id") UUID id, @RequestBody EmployeeDto employeeRequest) throws EmployeeException {
         EmployeeDto e = this.employeeService.updateEmployee(id, employeeRequest);
         return new ResponseEntity<>(e, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable("id") int id) {
+    public ResponseEntity<String> deleteEmployee(@PathVariable("id") UUID id) {
         boolean check = this.employeeService.deleteEmployee(id);
         return check ? new ResponseEntity<>("Xóa nhân viên thành công!", HttpStatus.OK) : new ResponseEntity<>("Xóa nhân viên không thành công!", HttpStatus.BAD_REQUEST);
     }

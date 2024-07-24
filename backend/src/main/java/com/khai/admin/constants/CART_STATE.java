@@ -1,2 +1,5 @@
-package com.khai.admin.constants;public class CART_STATE {
+package com.khai.admin.constants;
+
+public enum CART_STATE {
+    ACTIVE, COMPLETED, FAILED, PENDING
 }

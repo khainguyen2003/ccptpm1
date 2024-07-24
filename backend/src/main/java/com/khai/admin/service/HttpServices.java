@@ -21,16 +21,20 @@ public class HttpServices {
      * @return
      */
     public List<Sort.Order> getSortOrders(String sort) {
-        List<Sort.Order> orders = new ArrayList<>();
-        sort = sort.trim();
-        String[] sorts = sort.split(",");
-        // will sort more than 2 fields
-        // sortOrder="field:direction"
-        for (String sortOrder : sorts) {
-            String[] _sort = sortOrder.split(":");
-            orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
+        if(sort != null && !sort.isBlank() && !sort.equalsIgnoreCase("null")) {
+            List<Sort.Order> orders = new ArrayList<>();
+            sort = sort.trim();
+            String[] sorts = sort.split(",");
+            // will sort more than 2 fields
+            // sortOrder="field:direction"
+            for (String sortOrder : sorts) {
+                String[] _sort = sortOrder.split(":");
+                orders.add(new Sort.Order(getSortDirection(_sort[1]), _sort[0]));
+            }
+            return orders;
         }
-        return orders;
+
+        return null;
     }
     /**
      * Phương thức chuyển giá trị direction trên đường dẫn thành kiểu Sort.Direction

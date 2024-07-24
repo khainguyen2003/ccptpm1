@@ -3,9 +3,11 @@ package com.khai.admin.util;
 import java.io.IOException;
 import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.khai.admin.constants.HeaderSecurity;
+import com.khai.admin.dto.Product.components.Screen;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import net.htmlparser.jericho.*;
@@ -109,5 +111,35 @@ public class HttpUtilities {
 			return UUID.fromString(userId);
 		}
 		return null;
+	}
+
+	public static String getRefreshToken(HttpServletRequest request) {
+		String refreshToken = request.getParameter(HeaderSecurity.REFRESH_TOKEN.getValue());
+		return refreshToken;
+	}
+
+	public static UUID getClientId(Map<String, Object> header) {
+		String userId = String.valueOf(header.get(HeaderSecurity.CLIENT_ID.getValue()));
+		if(StringUtils.hasText(userId)) {
+			return UUID.fromString(userId);
+		}
+		return null;
+	}
+
+	public static String getRefreshToken(Map<String, Object> header) {
+		String refreshToken = String.valueOf(header.get(HeaderSecurity.REFRESH_TOKEN.getValue()));
+		return refreshToken;
+	}
+
+	public static Map<String, Object> convertJsonToMap(String jsonData) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(jsonData, Map.class);
+	}
+
+	public static Map<String, Map<String, String>> convertJsonToMapJsonObject(String jsonData) throws JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		Map<String, Map<String, String>> jsonMap = objectMapper.readValue(jsonData, new TypeReference<Map<String, Map<String, String>>>() {});
+		return jsonMap;
 	}
 }

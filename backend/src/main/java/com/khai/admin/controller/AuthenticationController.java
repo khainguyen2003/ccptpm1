@@ -49,7 +49,7 @@ public class AuthenticationController {
 
     @PostMapping("/admin/signup")
     public ResponseEntity<String> signupV2(@RequestBody UserCreateDto userCreateDto) {
-        userCreateDto.setUserRole(UserRole.ADMIN);
+        userCreateDto.setUserRole(UserRole.ROLE_ADMIN);
         userService.createV2(userCreateDto);
         return ResponseEntity.ok("Đăng ký thành công");
     }

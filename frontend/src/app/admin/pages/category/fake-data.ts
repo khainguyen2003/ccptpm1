@@ -1,4 +1,4 @@
-import { Category } from 'src/app/models/category';
+import { Category } from 'src/app/models/Category';
 export const fakeCategories: Category[] = [
     {
         id: 101,

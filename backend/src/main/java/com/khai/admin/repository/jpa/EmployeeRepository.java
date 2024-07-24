@@ -1,4 +1,4 @@
-package com.khai.admin.repository;
+package com.khai.admin.repository.jpa;
 
 import com.khai.admin.entity.Employee;
 

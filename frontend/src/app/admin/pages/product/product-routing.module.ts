@@ -1,4 +1,3 @@
-import { Product } from 'src/app/demo/api/product';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ProductComponent } from './product.component';

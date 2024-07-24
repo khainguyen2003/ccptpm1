@@ -26,7 +26,6 @@ import { EditorModule } from 'primeng/editor';
 import { AddDepartmentModalComponent } from '../../components/add-department-modal/add-department-modal.component';
 import { CarouselModule } from 'primeng/carousel';
 import { BadgeModule } from 'primeng/badge';
-import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
 import { AppFooterComponent } from '../../layout/app.footer.component';
 import { PanelModule } from 'primeng/panel';
 import { ListboxModule } from 'primeng/listbox';
@@ -35,6 +34,8 @@ import { CheckboxFilterComponent } from '../../components/checkbox-filter/checkb
 import { DateRangeFilterComponent } from '../../components/date-range-filter/date-range-filter.component';
 import { MultiSelectFilterComponent } from '../../components/multi-select-filter/multi-select-filter.component';
 import { PrintLabelComponent } from '../../components/print-label/print-label.component';
+import { CategoryComponent } from '../category/category.component';
+import { SaveCategoryModalComponent } from '../../components/save-category-modal/save-category-modal.component';
 
 @NgModule({
     imports: [
@@ -63,7 +64,6 @@ import { PrintLabelComponent } from '../../components/print-label/print-label.co
         TabViewModule,
         EditorModule,
         AddDepartmentModalComponent,
-        AddCategoryModalComponent,
         CarouselModule,
         PanelModule,
         ListboxModule,
@@ -71,7 +71,8 @@ import { PrintLabelComponent } from '../../components/print-label/print-label.co
         CheckboxFilterComponent,
         DateRangeFilterComponent,
         MultiSelectFilterComponent,
-        PrintLabelComponent
+        PrintLabelComponent,
+        SaveCategoryModalComponent
     ],
     providers: [ProductService],
     declarations: [

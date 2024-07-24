@@ -1,18 +1,20 @@
 package com.khai.admin.controller;
 
-import com.khai.admin.dto.Product.BulkUpdateSellProduct;
-import com.khai.admin.dto.Product.ProductBarcode;
-import com.khai.admin.dto.Product.ProductDto;
+import com.khai.admin.dto.PaginationResponse;
+import com.khai.admin.dto.Product.*;
 import com.khai.admin.entity.Product;
+import com.khai.admin.projections.ProductPreview;
 import com.khai.admin.service.HttpServices;
 import com.khai.admin.service.ProductService;
 import com.khai.admin.util.HttpUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +29,7 @@ import java.util.UUID;
 public class ProductController {
     private ProductService productService;
     private final HttpServices httpServices;
+//    private final ProductElsService productElsService;
 
     @Autowired
     public ProductController(
@@ -51,57 +54,69 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestHeader Map<String, String> headers, @ModelAttribute ProductDto updatedProduct) {
+    @Transactional
+    public ResponseEntity<ProductDto> createProduct(
+            @RequestHeader Map<String, String> headers,
+            @ModelAttribute ProductSaveRequest updatedProduct
+    ) {
         ProductDto result = productService.create(headers, updatedProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-//    @PostMapping("/insert/batch")
-//    public ResponseEntity<?> insertProducts(@RequestBody MultipartFile fileData) {
-//        productService.batchInsertProducts(fileData);
-//        return new ResponseEntity<>("Import thành công", HttpStatus.OK);
-//    }
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getProducts(
+    public ResponseEntity<PaginationResponse> getProducts(
             @RequestParam(defaultValue = "0") short page,
-            @RequestParam(defaultValue = "5") short size,
+            @RequestParam(defaultValue = "20") short size,
             @RequestParam(defaultValue = "id:asc") String sort,
-            @RequestParam(value = "q", required = false) String search,
-            @RequestParam(defaultValue = "1", required = false) byte allowSale,
-            @RequestParam(defaultValue = "alltime") String stockOutDate,
-            @RequestParam(value = "stockoutStartDate", defaultValue = "") String stockoutStartDate,
-            @RequestParam(value = "stockoutEndDate", defaultValue = "") String stockoutEndDate,
-            @RequestParam(defaultValue = "0", required = false) byte onHandFilter,
-            @RequestParam(defaultValue = "", required = false) String onHandFilterStr,
-            @RequestParam(defaultValue = "", required = false) int[] branchIds,
-            @RequestParam(defaultValue = "0", required = false) byte directSell,
-            @RequestParam(defaultValue = "0", required = false) byte relateToChanel
-
+            @RequestParam(value = "q", required = false) String search
     ) {
         List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
         Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
-        Map<String, Object> response = productService.getProducts(pageable, search, allowSale, stockOutDate, stockoutStartDate, stockoutEndDate, onHandFilter, onHandFilterStr, branchIds, directSell, relateToChanel);
+        PaginationResponse response = productService.getProducts(pageable, search);
+        return ResponseEntity.status(200).body(response);
+    }
+
+    @GetMapping("/shop/{shop}/drafts")
+    public ResponseEntity<Map<String, Object>> getAllProductDrafts(
+        @RequestParam(defaultValue = "0") short page,
+        @RequestParam(defaultValue = "20") short size,
+        @RequestParam(defaultValue = "id:asc") String sort,
+        @RequestParam(value = "q", required = false) String search,
+        @PathVariable("shop") UUID shopId
+    ) {
+        List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
+        Map<String, Object> response = productService.getAllProductDraft(shopId, pageable);
         return ResponseEntity.status(200).body(response);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable("id") UUID id) {
-        ProductDto response = productService.getProductInfo(id);
+    public ResponseEntity<ProductDetail> getProduct(@PathVariable("id") UUID id) {
+        ProductDetail response = productService.getProductInfo(id);
         return ResponseEntity.ok(response);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("id") UUID id) {
-        productService.deleteById(id);
-        return ResponseEntity.ok("Xóa sản phẩm thành công");
+    public ResponseEntity<Boolean> deleteProduct(@PathVariable("id") UUID id) {
+        boolean isDel = productService.deleteById(id);
+        if(isDel) {
+            return new ResponseEntity<>(isDel, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(isDel, HttpStatus.BAD_REQUEST);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") UUID id, @ModelAttribute ProductDto product) {
-        ProductDto updatedProduct = productService.updateProduct(id, product);
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") UUID id, @ModelAttribute ProductSaveRequest saveRequest) {
+        ProductDto updatedProduct = productService.updateProduct(id, saveRequest);
         return ResponseEntity.ok(updatedProduct);
     }
 
+    @PutMapping("/publish/{id}")
+    public ResponseEntity<String> publishProduct(@PathVariable("id") UUID productId) {
+        boolean pulishSuccess = productService.publishProduct(productId);
+        return ResponseEntity.ok("Publish sản phẩm thành công");
+    }
+
     @PutMapping("/sellstatus/{id}")
-    public ResponseEntity<ProductDto> updateSellStatus(@RequestHeader Map<String, String> headers, @PathVariable("id") UUID id, @RequestBody ProductDto productDto) {
-        String apiKey = headers.get("x-api-key");
+    public ResponseEntity<ProductDto> updateSellStatus(@RequestHeader Map<String, Object> headers, @PathVariable("id") UUID id, @RequestBody ProductDto productDto) {
+//        String apiKey = headers.get("x-api-key");
 
         ProductDto res = productService.updateSellStatus(id, productDto);
         return ResponseEntity.ok(res);
@@ -114,10 +129,15 @@ public class ProductController {
     }
 
     @PostMapping("/print/barcode")
-    public ResponseEntity<List<ProductBarcode>> printBarcode(@RequestBody UUID[] ids) {
-        List<ProductBarcode> data = productService.printBarcode(ids);
+    public ResponseEntity<Page<ProductPreview>> printBarcode(
+            @RequestBody List<UUID> ids,
+            @RequestParam(defaultValue = "0") short page,
+            @RequestParam(defaultValue = "20") short size,
+            @RequestParam(defaultValue = "id:asc") String sort
+    ) {
+        List<Sort.Order> orders = this.httpServices.getSortOrders(sort);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(orders));
+        Page<ProductPreview> data = productService.printBarcode(ids, pageable);
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
-
-
 }

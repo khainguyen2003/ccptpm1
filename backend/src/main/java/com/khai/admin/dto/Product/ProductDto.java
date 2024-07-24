@@ -6,6 +6,10 @@ import com.khai.admin.dto.user.UserViewDto;
 import com.khai.admin.entity.Category;
 import com.khai.admin.entity.Product;
 import com.khai.admin.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
@@ -14,12 +18,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class ProductDto implements Serializable {
     private UUID id;
     private String name;
     private String description;
+    private String thumb;
     private List<String> images;
-    private MultipartFile[] files;
     private Date createdDate;
     private UserViewDto creator;
     private boolean deleted;
@@ -29,34 +37,15 @@ public class ProductDto implements Serializable {
     private String code;
     private float rate;
     private String attr;
+    private boolean isPulished;
+    private boolean isDraft;
+    private String slug;
+    private int quantity;
+    private float import_price;
+    private float sell_price;
     private CategoryViewDto category;
 //    private List<WorkplaceDetailDto> wpd;
 
-    public ProductDto() {
-    }
-
-    /*
-    For a projection class to work in tandem with a repository interface, the parameter names of its constructor must match the properties of the root entity class.
-
-    We must also define equals and hashCode implementations; they allow Spring Data to process projection objects in a collection.
-     */
-    public ProductDto(UUID id, String name, String description, List<String> images, Date createdDate, User creator, boolean deleted, boolean isStopCell, boolean isDirectCell, String weight, String code, float rate, String attr, Category category) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.images = images;
-        this.createdDate = createdDate;
-        this.creator = new UserViewDto(creator);
-        this.deleted = deleted;
-        this.isStopCell = isStopCell;
-        this.isDirectCell = isDirectCell;
-        this.weight = weight;
-        this.code = code;
-        this.rate = rate;
-        this.attr = attr;
-        this.category = new CategoryViewDto(category);
-//        this.wpd = wpd;
-    }
 
     public ProductDto(Product product) {
         this.id = product.getId();
@@ -65,176 +54,39 @@ public class ProductDto implements Serializable {
         }
         this.description = product.getDescription();
         this.images = product.getImages();
+        this.thumb = product.getProduct_thumb();
+        this.createdDate = product.getCreatedDate();
+        this.creator = new UserViewDto(product.getShop());
+        this.attr = product.getAttrs();
+
         this.deleted = product.isDeleted();
         this.isStopCell = product.isStopCell();
         this.isDirectCell = product.isDirectCell();
         this.weight = product.getWeight();
         this.code = product.getCode();
         this.rate = product.getRate();
-        this.attr = product.getAttr();
+        this.isPulished = product.isPublish();
+        this.isDraft = product.isDraft();
+        this.slug = product.getSlug();
         if(product.getCategory() != null) {
             this.category = new CategoryViewDto(product.getCategory());
         }
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return description;
-    }
-
-    public void setDesc(String description) {
-        this.description = description;
-    }
-
-    public List<String> getImages() {
-        return images;
-    }
-
-    public void setImages(List<String> images) {
-        this.images = images;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public UserViewDto getCreatedBy() {
-        return creator;
-    }
-
-    public void setCreatedBy(UserViewDto createdBy) {
-        this.creator = createdBy;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public boolean isStopCell() {
-        return isStopCell;
-    }
-
-    public void setStopCell(boolean stopCell) {
-        this.isStopCell = stopCell;
-    }
-
-    public boolean isDirectCell() {
-        return isDirectCell;
-    }
-
-    public void setDirectCell(boolean directCell) {
-        isDirectCell = directCell;
-    }
-
-    public String getWeight() {
-        return weight;
-    }
-
-    public void setWeight(String weight) {
-        this.weight = weight;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public float getRate() {
-        return rate;
-    }
-
-    public void setRate(float rate) {
-        this.rate = rate;
-    }
-
-    public String getAttr() {
-        return attr;
-    }
-
-    public void setAttr(String attr) {
-        this.attr = attr;
-    }
-
-    public CategoryViewDto getCategory() {
-        return category;
-    }
-
-    public void setCategory(CategoryViewDto category) {
-        this.category = category;
-    }
-
-//    public List<WorkplaceDetailDto> getWpd() {
-//        return wpd;
-//    }
-//
-//    public void setWpd(List<WorkplaceDetailDto> wpd) {
-//        this.wpd = wpd;
-//    }
-
-
-    public MultipartFile[] getFiles() {
-        return files;
-    }
-
-    public void setFiles(MultipartFile[] files) {
-        this.files = files;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public UserViewDto getCreator() {
-        return creator;
-    }
-
-    public void setCreator(UserViewDto creator) {
-        this.creator = creator;
-    }
-
     public void applyToProduct(Product product) {
-        product.setId(id);
         if(!this.getName().isBlank()) {
             product.setName(name);
         }
         product.setCode(code);
         product.setDescription(description);
         product.setRate(rate);
-        product.setAttr(attr);
         product.setCode(code);
         product.setWeight(weight);
         product.setDirectCell(isDirectCell);
         product.setImages(this.images);
+        product.setSlug(this.slug);
+        product.setDraft(isDraft);
+        product.setProduct_thumb(thumb);
         if(category != null) {
             product.setCategory(category.convertToCategory());
         }

@@ -84,4 +84,12 @@ public class UserViewDto implements Serializable {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public void fromEntity(User user) {
+        this.id = user.getId();
+        this.firstName = user.getFirstname();
+        this.lastname = user.getLastname();
+        this.jobarea = user.getJobArea();
+        this.position = user.getPosition();
+    }
 }

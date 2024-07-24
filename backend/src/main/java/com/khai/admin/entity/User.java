@@ -75,7 +75,7 @@ public class User {
     @OneToMany(mappedBy = "creator")
     @JsonIgnore
     private List<Log> logCreatedList;
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "shop")
     @JsonIgnore
     private List<Product> createdProduct;
 

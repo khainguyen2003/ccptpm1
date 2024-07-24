@@ -25,7 +25,7 @@ public class Employee {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "employee_id", columnDefinition = "INT(11)")
+    @Column(name = "employee_id")
     private UUID id;
     @Column(name="employee_contract_expired_date", columnDefinition = "DATETIME(6) DEFAULT NULL COMMENT 'Ngày kết thúc hợp đồng'")
     private Date contract_expire;

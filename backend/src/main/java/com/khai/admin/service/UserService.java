@@ -5,8 +5,9 @@ import com.khai.admin.dto.user.UserCreateDto;
 import com.khai.admin.dto.user.UserProfileDto;
 import com.khai.admin.entity.User;
 import com.khai.admin.entity.security.KeyStore;
+import com.khai.admin.entity.security.UserDetailsImpl;
 import com.khai.admin.exception.AlreadyExist;
-import com.khai.admin.repository.UserRepository;
+import com.khai.admin.repository.jpa.UserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,13 +22,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -121,7 +119,7 @@ public class UserService {
         String username;
         // Nếu người dùng đã đăng nhập thì lấy thông tin chi tiết
         if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
+            username = ((UserDetailsImpl) principal).getUsername();
         } else {
             // Trường hợp người gửi request không đăng nhập
             // principal có thể là một đối tượng vô danh hoặc một đối tượng khác
@@ -131,12 +129,29 @@ public class UserService {
         return username;
     }
 
-    public User getCurrentLogin() {
-        String email = getCurrentUserEmail();
-        if(email == null) {
-            return null;
+    public UUID getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID userId;
+        // Nếu người dùng đã đăng nhập thì lấy thông tin chi tiết
+        if (principal instanceof UserDetails) {
+            userId = ((UserDetailsImpl) principal).getUserId();
+        } else {
+            // Trường hợp người gửi request không đăng nhập
+            // principal có thể là một đối tượng vô danh hoặc một đối tượng khác
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthoried");
         }
-        return userRepository.findFirstByEmail(email).get();
+
+        return userId;
+    }
+
+    public User getCurrentLogin() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Nếu người dùng đã đăng nhập thì lấy thông tin chi tiết
+        if (principal instanceof UserDetails) {
+            User user = ((UserDetailsImpl) principal).getCurrentUserLogin();
+            return user;
+        }
+        return null;
     }
 
     // chuyển lại bằng cách bỏ signinKey và chuyển thành jwtService
@@ -192,15 +207,19 @@ public class UserService {
             User user = userRepository.findFirstByEmail(request.getEmail()).get();
             // update security context
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println(user.getId());
             // generate AT and RT
+            KeyStore keyStore = keyTokenService.findByUserId(user.getId());
             KeyPair keyPair = keyTokenService.generateKeyPair();
             String accessToken = jwtServiceV2.generateAccessToken(user, keyPair.getPrivate());
             String refreshToken = jwtServiceV2.generateRefreshToken(user, keyPair.getPrivate());
             // save to dbs
-            KeyStore keyStore = new KeyStore();
+            if(keyStore == null) {
+                keyStore = new KeyStore();
+            }
+            keyStore.setUser(user);
             keyStore.setPrivateKey(keyPair.getPrivate().getEncoded());
             keyStore.setPublicKey(keyPair.getPublic().getEncoded());
-            keyStore.setUser(user);
             keyStore.setRefreshToken(refreshToken);
             keyTokenService.save(keyStore);
             // convert to response
@@ -260,6 +279,20 @@ public class UserService {
         }
     }
 
+    /** Phương thức xử lý yêu cầu refresh token
+     * 1. check xem refresh token nay đã được dùng chưa (refreshTokenUsed)
+     * 2. Nếu có thì decode và xóa giải mã refresh token,
+     * xóa tất cả token trong keystore và yêu cầu người dùng đăng nhập lại
+     * 3. Nếu không có thì check xem refresh token có tồn tại ở trường refreshToken không
+     * 4. Nếu refeshToken không tồn tại thì trả về AuthError('Shop not register')
+     * 5. Nếu <b>refeshToken tồn tại</b> thì kiểm tra userId và email có tồn tại không
+     *  Nếu không tồn tại thì trả về AuthError
+     *  Nếu có tồn tại tạo cặp token mới, thêm refreshToken vào danh sách refreshToken đã sử dụng
+     * @param jwtView
+     * @param publicKey
+     * @param privateKey
+     * @return
+     */
     public JwtView refreshToken(JwtView jwtView, PublicKey publicKey, PrivateKey privateKey) {
         boolean isExpiredAccessToken = jwtServiceV2.isExpired(jwtView.getAccessToken(), publicKey);
         Claims claims = jwtServiceV2.parseToken(jwtView.getAccessToken(), publicKey);

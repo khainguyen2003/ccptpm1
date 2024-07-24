@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,16 +17,22 @@ public class UserDetailsImpl implements UserDetails {
     private User user;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(user.getPermission() <= 2) {
-            return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
-        }
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_ADMIN"));
+//        if(user.getPermission() <= 1) {
+//            return Collections.singleton(new SimpleGrantedAuthority("USER"));
+//        }
+//        return Collections.singleton(new SimpleGrantedAuthority("ADMIN"));
+
+        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().getRole()));
     }
 
     @Override
     public String getPassword() {
         return user.getPassword();
     }
+
+    public UUID getUserId() { return getUserId();}
+
+    public User getCurrentUserLogin() {return this.user;}
 
     @Override
     public String getUsername() {
@@ -39,7 +46,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.isActive();
+        return user.isActive() && !user.isDeleted();
     }
 
     @Override

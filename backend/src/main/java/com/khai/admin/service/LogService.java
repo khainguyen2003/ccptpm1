@@ -2,8 +2,8 @@ package com.khai.admin.service;
 
 import com.khai.admin.dto.user.UserProfileDto;
 import com.khai.admin.entity.Log;
-import com.khai.admin.repository.LogDetailRepository;
-import com.khai.admin.repository.LogRepository;
+import com.khai.admin.repository.jpa.LogDetailRepository;
+import com.khai.admin.repository.jpa.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,7 @@
 package com.khai.admin.service;
 
 import com.khai.admin.exception.StorageException;
+import com.khai.admin.repository.jpa.ResourceRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,10 +32,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -41,15 +40,23 @@ import java.util.stream.Stream;
 public class FileService {
 
     private final ResourceLoader rsloader;
-    @Value("${folder.absPath}")
+    private final ResourceRepository resourceRepository;
+    @Value("${folder.dataPath}")
     private String dataFolderPath;
+
+    private final String apiUrl = "http://localhost:8080/api/files";
     private final String TEST = "test";
     private final String PRODUCT = "product";
     private final String[] EXCEL_EXTENSIONS = {".xlsx", ".xlsm", ".xlsb", ".xltx", ".xltm", ".xls", ".xlt", ".xml", ".xlam", ".xla", ".xlw", ".Xlr"};
+    private final String CATEGORY_FOLDER = "category";
 
     @Autowired
-    public FileService(ResourceLoader rsloader) {
+    public FileService(
+            ResourceLoader rsloader,
+            ResourceRepository resourceRepository
+    ) {
         this.rsloader = rsloader;
+        this.resourceRepository = resourceRepository;
     }
 
     @PostConstruct
@@ -57,11 +64,23 @@ public class FileService {
         try {
             Path testPath = Path.of(dataFolderPath + "/" + TEST);
             Path productPath = Path.of(dataFolderPath + "/" + PRODUCT);
+            Path categoryPath = Path.of(dataFolderPath + "/" + CATEGORY_FOLDER);
             Files.createDirectories(testPath);
+            Files.createDirectories(categoryPath);
             Files.createDirectories(productPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getTestFolder() {
+        return dataFolderPath + "/" + TEST;
+    }
+    public String getProductFolder() {
+        return dataFolderPath + "/" + PRODUCT;
+    }
+    public String getCategoryFolder() {
+        return dataFolderPath + "/" + CATEGORY_FOLDER;
     }
 
 
@@ -72,6 +91,15 @@ public class FileService {
             return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public com.khai.admin.entity.Resource getFileByAssetId(String assetId) {
+        Optional<com.khai.admin.entity.Resource> fileOpt = this.resourceRepository.findByAssetId(assetId);
+        if(fileOpt.isPresent()) {
+            return fileOpt.get();
+        } else {
+            throw new NoSuchElementException();
         }
     }
 
@@ -98,17 +126,33 @@ public class FileService {
         }
     }
 
-    public boolean uploadFileToSystem(MultipartFile file, String filePath) {
+    public String uploadFileToSystem(MultipartFile file, String folder) {
 
         boolean isSaveToFileSystem = false;
+        String filepath = null;
         try {
-            File newfile = new File(filePath);
+            String fileName = file.getOriginalFilename();
+            fileName = convertToUniqueFileName(fileName);
+            Path path = Paths.get(folder, fileName);
+            Files.createDirectories(path.getParent());
             if(file.isEmpty()) {
                 throw new StorageException("File lỗi");
             }
             // save file to file system
-            file.transferTo(newfile);
-            isSaveToFileSystem = true;
+            Files.write(path, file.getBytes());
+
+            // Save to db
+            Date now = new Date();
+            String assetID = String.valueOf(System.currentTimeMillis());
+            com.khai.admin.entity.Resource resource_entity = new com.khai.admin.entity.Resource();
+            resource_entity.setFile_name(fileName);
+            resource_entity.setResource_type(file.getContentType());
+            resource_entity.setFolder(folder);
+            resource_entity.setAsset_id(assetID);
+            resource_entity.setCreate_at(now);
+//            filepath = this.apiUrl + "/" + assetID;
+            resource_entity.setPublic_id(assetID);
+            resourceRepository.save(resource_entity);
         } catch (IOException e) {
             e.printStackTrace();
             throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, e.getMessage());
@@ -118,17 +162,17 @@ public class FileService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, e.getMessage());
         } finally {
-            return isSaveToFileSystem;
+            return filepath;
         }
     }
 
     /**
      * Phương thức upload nhiều file được tải lên từ client
      * @param files
-     * @param folderPath
+     * @param folder
      * @return đường dẫn của file để chuyển thành api localhost://8080/api/files/<file-name>
      */
-    public List<String> uploadMultipleFilesToSystem(MultipartFile[] files, String folderPath) {
+    public List<String> uploadMultipleFilesToSystem(MultipartFile[] files, String folder) {
         List<String> resultList = new ArrayList<>();
         try {
             if(files != null && files.length > 0) {
@@ -137,12 +181,8 @@ public class FileService {
                     if(!isImageFile(fileName)) {
                         throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "File không phải định dạng hình ảnh");
                     }
-                    int extensionIndex = fileName.lastIndexOf(".");
-                    String extensionFile = fileName.substring(extensionIndex);
-                    String name = fileName.substring(0, extensionIndex);
-                    String filePath = folderPath + "/" + name + "_" + System.currentTimeMillis() + extensionFile;
-                    boolean uploaded = this.uploadFileToSystem(file, filePath);
-                    if(uploaded) {
+                    String filePath = this.uploadFileToSystem(file, folder);
+                    if(filePath != null) {
                         resultList.add(filePath);
                     } else {
                         System.out.println("Tải files "+file.getOriginalFilename()+" lên không thành công");
@@ -156,11 +196,11 @@ public class FileService {
         }
     }
 
-    public String getTestFolder() {
-        return dataFolderPath + "/" + TEST;
-    }
-    public String getProductFolder() {
-        return dataFolderPath + "/" + PRODUCT;
+    public String convertToUniqueFileName(String fileName) {
+        int extensionIndex = fileName.lastIndexOf(".");
+        String extensionFile = fileName.substring(extensionIndex);
+        String name = fileName.substring(0, extensionIndex);
+        return name + "_" + System.currentTimeMillis() + extensionFile;
     }
 
     /**
@@ -181,17 +221,24 @@ public class FileService {
     }
 
     public Resource loadFileAsResource(String filePath) {
+        return loadFileAsResource(Paths.get(filePath).toUri());
+    }
+    public Resource loadFileAsResource(URI uri) {
         try {
-            URI uri = Paths.get(filePath).toUri();
             Resource resource = new UrlResource(uri);
             if (resource.exists())
                 return resource;
             else
-                throw new RuntimeException("File not found " + filePath);
+                throw new RuntimeException("File not found ");
         } catch (MalformedURLException e) {
-            throw new RuntimeException("File not found " + filePath, e);
+            throw new RuntimeException("File not found ", e);
         }
     }
+    public Resource loadFileAsResource(Path filePath) {
+        return loadFileAsResource(filePath.toUri());
+    }
+
+
 
     public String convertImageToText(String imagePath) {
         File image = new File(imagePath);
@@ -235,11 +282,13 @@ public class FileService {
     }
 
     public void updateFileInSystem(List<String> oldPath, List<String> newPath) {
-        oldPath.forEach(path -> {
-            if(!newPath.contains(path)) {
-                this.deleteFileFromSystem(path);
-            }
-        });
+        if(oldPath != null && !oldPath.isEmpty() && newPath != null && !newPath.isEmpty()) {
+            oldPath.forEach(path -> {
+                if(!newPath.contains(path)) {
+                    this.deleteFileFromSystem(path);
+                }
+            });
+        }
     }
 
     public boolean isImageFile(String filename) {
@@ -363,4 +412,44 @@ public class FileService {
     public String[] getExcelExtensions() {
         return EXCEL_EXTENSIONS;
     }
+
+    /**
+     * Phương thức tìm vị trí của các header đã định nghĩa trong header sheet<br/>
+     * Nếu tìm thấy thì thêm vào danh sách tên cột và vị trí cột<br/>
+     * Nếu không tìm thấy thì cho vị trí là -1
+     * @param sheet
+     * @param headers Tên các trường đã định nghĩa của file
+     * @return danh sách vị trí và tên cột
+     * @Author Khải
+     */
+    public Map<String, Integer> findPosHeaders(Sheet sheet, String[] headers) {
+        Map<String, Integer> headersPos = new HashMap<>();
+        Row headerRow = sheet.getRow(0);
+        if (headerRow == null) {
+            return null; // No header row found
+        }
+
+        int lastColumn = headerRow.getLastCellNum();
+        for (int i = 0; i < headers.length; i++) {
+            String requiredHeader = headers[i];
+            boolean headerFound = false;
+            for (int j = 0; j < lastColumn; j++) {
+                Cell cell = headerRow.getCell(j);
+                if (cell != null && cell.getStringCellValue().equals(requiredHeader)) {
+                    headersPos.put(requiredHeader, j);
+                    headerFound = true;
+                    break;
+                }
+
+                headersPos.put(requiredHeader, -1);
+            }
+            if (!headerFound) {
+                return null; // Required header not found
+            }
+        }
+        return headersPos; // All required headers found
+    }
+
+
+
 }

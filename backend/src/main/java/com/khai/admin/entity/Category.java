@@ -32,8 +32,16 @@ public class Category {
     private Date created_date;
     @Column(name = "pc_images")
     private String images;
+    // Vị trí suất hiện của category khi hiển thị các category
+    @Column(name = "pc_sort")
+    private int sort;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    private List<Category> childCategories;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Product> products;
 

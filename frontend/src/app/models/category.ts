@@ -1,3 +1,5 @@
+import { User } from "./User";
+
 export interface Category {
     id: number;
     name: string;
@@ -8,6 +10,6 @@ export interface Category {
     last_modified: Date;
     created_date: Date;
     images?: string;
-    deleted_author?: number;
+    deleted_author?: User;
     created_author_id?: number;
 }

@@ -1,8 +1,7 @@
 package com.khai.admin.service;
 
-import com.khai.admin.entity.User;
 import com.khai.admin.entity.security.KeyStore;
-import com.khai.admin.repository.TokenRepository;
+import com.khai.admin.repository.jpa.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -42,11 +41,22 @@ public class KeyTokenService {
         }
     }
 
+    public KeyStore updateKey(UUID userId, KeyStore updatedKeyStore) {
+        KeyStore existKey = tokenRepository.findByUserId(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user id ko hợp lệ"));
+        System.out.println(userId);
+        System.out.println(existKey);
+        existKey.setPublicKey(updatedKeyStore.getPublicKey());
+        existKey.setPrivateKey(updatedKeyStore.getPrivateKey());
+        existKey.setRefreshToken(updatedKeyStore.getRefreshToken());
+        existKey.setRefreshTokensUsed(updatedKeyStore.getRefreshTokensUsed());
+        return tokenRepository.save(existKey);
+    }
+
     public KeyPair generateKeyPair() {
         KeyPairGenerator generator = null;
         try {
-            generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(512);
+            generator = KeyPairGenerator.getInstance("EC");
+            generator.initialize(256);
             KeyPair pair= generator.generateKeyPair();
             return pair;
         } catch (NoSuchAlgorithmException e) {
@@ -58,6 +68,26 @@ public class KeyTokenService {
     public void deleteTokenById(UUID id) {
         this.tokenRepository.deleteById(id);
     }
+    public void deleteTokenByUserId(UUID userId) {
+        this.tokenRepository.deleteByUserId(userId);
+    }
+    public KeyStore findByUserId(UUID userId) {
+        Optional<KeyStore> keyOpt = this.tokenRepository.findByUserId(userId);
+        if(keyOpt.isPresent()) {
+            return keyOpt.get();
+        }
+
+        return null;
+    }
+
+    public KeyStore findByRefreshToken(String refreshToken) {
+        Optional<KeyStore> key = tokenRepository.findByRefreshToken(refreshToken);
+        if(key.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request khong hợp lệ");
+        }
+        return key.get();
+    }
+
 
     public KeyStore getKeyStoreByUserId(UUID userId) {
         Optional<KeyStore> keyStore = tokenRepository.findByUserId(userId);
@@ -137,7 +167,7 @@ public class KeyTokenService {
         PublicKey key = null;
         try {
             X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
             key = keyFactory.generatePublic(spec);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -148,7 +178,7 @@ public class KeyTokenService {
 
     public PrivateKey decodePrivateKey(byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PrivateKey key = keyFactory.generatePrivate(keySpec);
         return key;
     }

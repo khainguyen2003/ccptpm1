@@ -1,7 +1,7 @@
+import { HttpServices } from './http.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HeaderService } from './header.service';
 import { environment } from 'src/environments/environment';
 import { Employee, EmployeeResponse } from 'src/app/models/employee';
 
@@ -14,7 +14,7 @@ export class EmployeeService {
 
   constructor(
     private http: HttpClient,
-    private headerService: HeaderService,
+    private HttpServices: HttpServices,
   ) { }
 
   getEmployees({page, size, sort}: EmployeeParams): Observable<EmployeeResponse> {

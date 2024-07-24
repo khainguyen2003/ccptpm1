@@ -1,25 +1,41 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MessageService } from 'primeng/api';
-import { Table } from 'primeng/table';
-import { Category } from 'src/app/models/category';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { LazyLoadEvent, MessageService } from 'primeng/api';
+import { Table, TableModule } from 'primeng/table';
+import { Category } from 'src/app/models/Category';
 import { CategoryService } from '../../services/category.service';
-import { fakeCategories } from './fake-data';
-import { AddCategoryModalComponent } from '../../components/add-category-modal/add-category-modal.component';
+import { catchError, tap, finalize, startWith, of } from 'rxjs';
+import { HttpServices } from '../../services/http.service';
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
+import { ToolbarModule } from 'primeng/toolbar';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
+import { InputTextareaModule } from 'primeng/inputtextarea';
 
 @Component({
+    selector: 'app-category',
+    standalone: true,
+    imports: [
+        DialogModule, TableModule, ToastModule, ToolbarModule, CommonModule, FormsModule, ReactiveFormsModule, MultiSelectModule, InputTextModule, ButtonModule, 
+        CheckboxModule, InputTextareaModule],
     templateUrl: './category.component.html',
+    styleUrl: './category.component.scss',
     providers: [MessageService]
 })
-export class CategoryComponent implements OnInit {
-
-    categoryDialog: boolean = false;
+export class CategoryComponent implements AfterViewInit {
+    isLoading: boolean = false;
     deleteCategoryDialog: boolean = false;
-    deleteCategoriesDialog: boolean = false;
+    delMultiple: boolean = false;
+    
     categoryResponse: any;
     categories: Category[] = [];
     category:Category;
     selectedCategories: Category[] = [];
-    submitted: boolean = false;
+    // submitted: boolean = false;
     cols: any[] = [];
     statuses: any[] = [];
     rowsPerPageOptions = [5, 10, 20];
@@ -27,70 +43,67 @@ export class CategoryComponent implements OnInit {
     pageNum: number = 0;
     pageSize: number = 10;
 
-    @ViewChild('addCategory') addCategory: AddCategoryModalComponent;
+    
 
     constructor(
         private categoryService: CategoryService,
         private messageService: MessageService,
-    ) { }
-
-    ngOnInit() {
+        private httpServices: HttpServices
+    ) { 
+    }
+    ngAfterViewInit(): void {
         this.loadCategories();
     }
 
-    loadCategories() {
-        this.categoryService.getCategories().subscribe({
-            next: res => {
-                this.categoryResponse = res;
-                this.categories = res.categories;
-            },
-            error: err => {
-                this.categories = fakeCategories;
-                this.messageService.add({ severity: 'warn', summary: 'Warning', detail: `Đây là danh sách giả để demo và được tạo ra khi không lấy đc dữ liệu`, life: 3000 });
-                console.log(err);
-            },
-            complete: () => {}
-        }).add(() => {
-            //Chạy sau khi subcribe xong.
-        });
+    loadCategories(event?: LazyLoadEvent) {
+        this.isLoading = true;
+        var sort: string = this.httpServices.getSort(event?.sortField ?? 'id', event?.sortOrder);
+        this.categoryService.getCategories(
+            JSON.stringify(event?.filters) ?? '',
+            sort,
+            event?.first ?? 0,
+            event?.rows ?? 10
+        )
+        .pipe(
+            tap((res) => {
+                this.isLoading = false;
+                this.categories = res?.items ?? [];
+            }),
+            catchError((err) => {
+                this.messageService.add({ severity: 'warn', summary: 'Warning', detail: err.error, life: 3000 });
+                return of(null);
+            }),
+            finalize(() => (this.isLoading = false))
+        ).subscribe();
     }
 
-    showAddCategoryDialog() {
-        this.addCategory.showDialog();
+    getCategoryById(id: string) {
+    this.isLoading = true;  
+    this.categoryService.getCategoryById(id)
+        .pipe(
+        tap((res) => (this.category = res)),
+        catchError((err) => {
+                this.messageService.add({ severity: 'success', summary: 'Successful', detail: err, life: 3000 });
+                return of(null);
+            }),
+            finalize(() => (this.isLoading = false))
+        )
+        .subscribe();
     }
 
-    deleteSelectedCategories() {
-        this.deleteCategoriesDialog = true;
-    }
-
-    editCategory(category: Category) {
-        this.category = { ...category };
-        this.categoryDialog = true;
-    }
-
-    saveCategory() {
-        this.categoryDialog = false;
-        this.categoryService.updateCategory(this.category, this.category.id).subscribe({
-            next: res => {
-                this.categories = [this.category, ...this.categories.filter(item => item.id !== this.category.id)];
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Cập nhật thành công.', life: 3000 });
-                console.log(res);
-            },
-            error: err => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cập nhật không thành công.', life: 3000 });
-                console.log(err);
-            },
-            complete: () => {}
-        }).add(() => this.category = null);
-    }
-
-    deleteCategory(category: Category) {
+    
+    showDelDialog() {
         this.deleteCategoryDialog = true;
-        this.category = { ...category };
+        this.delMultiple = false;
+    }
+    deleteSelectedCategories() {
+        this.deleteCategoryDialog = true;
+        this.delMultiple = true;
     }
 
     confirmDeleteSelected() {
-        this.deleteCategoriesDialog = false;
+        this.deleteCategoryDialog = false;
+        this.delMultiple = false;
         this.categories = this.categories.filter(val => !this.selectedCategories.includes(val));
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Đã xóa danh sách thể loại được chọn', life: 3000 });
         this.selectedCategories = [];
@@ -98,48 +111,7 @@ export class CategoryComponent implements OnInit {
 
     confirmDelete() {
         this.deleteCategoryDialog = false;
-        this.categoryService.deleteCategory(this.category.id).subscribe({
-            next: res => {
-                this.categories = this.categories.filter(val => val.id !== this.category.id);
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: `Đã xóa thể loại ${this.category.name}`, life: 3000 });
-                console.log(res);
-            },
-            error: err => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: `Xóa thể loại ${this.category.name} không thành công!`, life: 3000 });
-                console.log(err);
-            },
-            complete: () => {}
-        }).add(() => {
-            this.category = null;
-        });
-    }
-
-    hideDialog() {
-        this.categoryDialog = false;
-        this.submitted = false;
-        this.category = null;
-    }
-
-    findIndexById(id: string): number {
-        // let index = -1;
-        // for (let i = 0; i < this.products.length; i++) {
-        //     if (this.products[i].id === id) {
-        //         index = i;
-        //         break;
-        //     }
-        // }
-
-        // return index;
-        return 0;
-    }
-
-    createId(): string {
-        let id = '';
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
+        this.categoryService.deleteCategory(this.category.id).subscribe();
     }
 
     onGlobalFilter(table: Table, event: Event) {

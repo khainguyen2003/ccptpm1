@@ -1,3 +1,4 @@
+import { User } from './../../../../models/User';
 import { LayoutService } from 'src/app/admin/layout/service/app.layout.service';
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -72,10 +73,18 @@ export class LoginComponent implements OnInit {
                 //     });
                 //   }
                     this.loading = false;
-                    this.storageService.setAccessToken(response.body.access_token);
-                    this.storageService.setUser(response.body.userDetails);
-                    this.loginMess.add({ severity: 'success', summary: 'Đăng nhập', detail: 'Đăng nhập thành công' })
-                    this.router.navigateByUrl('/admin');
+                    var accessToken = response.body?.accessToken;
+                    var user: User = response.body?.userDetails;
+                    console.log(user);
+                    if(accessToken && user) {
+                        this.storageService.setAccessToken(response.body.accessToken);
+                        this.storageService.setUser(response.body.userDetails);
+                        this.loginMess.add({ severity: 'success', summary: 'Đăng nhập', detail: 'Đăng nhập thành công' })
+                        this.router.navigateByUrl('/admin');
+                    } else {
+                        this.loginMess.add({ severity: 'success', summary: 'Đăng nhập', detail: 'Đăng nhập không thành công' })
+                    }
+                
                 },
                 (error) => {
                     this.loading = false;

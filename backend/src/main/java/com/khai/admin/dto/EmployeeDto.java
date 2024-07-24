@@ -1,13 +1,14 @@
 package com.khai.admin.dto;
 
 import java.util.Date;
+import java.util.UUID;
 
 import lombok.Data;
 
 @Data
 public class EmployeeDto {
 
-    private int id;
+    private UUID id;
     private Date contract_expire;
     private byte status;
     private Date start_date;

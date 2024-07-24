@@ -1,2 +1,5 @@
-package com.khai.admin.constants;public class DISCOUNT_APPLY_TO {
+package com.khai.admin.constants;
+
+public enum DISCOUNT_APPLY_TO {
+    ALL, SPECIFIC
 }

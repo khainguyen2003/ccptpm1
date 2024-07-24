@@ -1,2 +1,5 @@
-package com.khai.admin.constants;public class NotificationStatus {
+package com.khai.admin.constants;
+
+public enum NotificationStatus {
+    READ, UNREAD, SENT
 }

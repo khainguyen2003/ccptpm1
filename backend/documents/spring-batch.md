@@ -92,6 +92,9 @@ lý
 1. Nếu sử dụng trường primary key là indentity thì hibernate tự tắt tính năng batch
 nên phải dùng UUID hoặc SEQUENCE
 
+
+
 ## Tham khảo
 [Tìm hiểu sâu về spring batch](https://docs.spring.io/spring-batch/reference/spring-batch-architecture.html)
+[Ví dụ spring batch](https://github.com/spring-projects/spring-batch/tree/main/spring-batch-samples/src/main/java/org/springframework/batch/samples)
 [Spring batch with jpa](https://www.baeldung.com/jpa-hibernate-batch-insert-update)

@@ -1,43 +1,40 @@
 package com.khai.admin.dto.Product;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.khai.admin.dto.category.CategoryViewDto;
+import com.khai.admin.dto.category.CategoryRequest;
 import com.khai.admin.dto.user.UserViewDto;
 import com.khai.admin.entity.Product;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Getter
 @Setter
-public class ProductCreateRequest {
+public class ProductSaveRequest {
     private String name;
-    private String description;
+    private String desc;
     private List<String> old_images;
     private MultipartFile thumb;
-    private MultipartFile[] new_images;
-    private UserViewDto creator;
-    private boolean deleted;
-    private boolean isStopCell;
-    private boolean isDirectCell;
-    private boolean isDraft;
-    private boolean isPublished;
+    private String new_images;
+    private Boolean deleted;
+    private Boolean isStopCell;
+    private Boolean isDirectCell;
+    private Boolean isDraft;
+    private Boolean isPublished;
     private String weight;
     private String code;
-    private float import_price;
-    private float sell_price;
+    private Float importPrice;
+    private Float sellPrice;
     private String attrs;
     private Map<String, String> variations;
-    private String type;
-    private int quantity;
+    private String categoryId;
+    private Integer quantity;
 
-    public ProductCreateRequest() {
+    public ProductSaveRequest() {
 
     }
 
@@ -46,16 +43,29 @@ public class ProductCreateRequest {
         if(!this.getName().isBlank()) {
             product.setName(name);
         }
-        product.setCode(code);
-        product.setDescription(description);
-        product.setCode(code);
-        product.setWeight(weight);
-        product.setDirectCell(isDirectCell);
-        product.setDirectCell(isDirectCell);
-        product.setDraft(this.isDraft);
-        product.setSell_price(sell_price);
-        product.setImport_price(import_price);
-        product.setProduct_type(type);
-        product.setQuantity(quantity);
+        if(this.code != null && !this.code.isBlank()) {
+            product.setCode(code);
+
+        }
+        product.setDescription(desc);
+        if(this.weight != null) {
+            product.setWeight(weight);
+
+        }
+        if(this.isDraft != null ) {
+            product.setDraft(this.isDraft);
+        }
+        if(this.isDirectCell != null ) {
+            product.setDirectCell(isDirectCell);
+        }
+        if(this.sellPrice != null ) {
+            product.setSell_price(sellPrice);
+        }
+        if(this.importPrice != null ) {
+            product.setImport_price(importPrice);
+        }
+        if(this.quantity != null) {
+            product.setQuantity(quantity);
+        }
     }
 }

@@ -9,8 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,12 +60,12 @@ public class JwtServiceV2 {
     private String generateToken(User user, long expiration, PrivateKey privateKey) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
-
+        System.out.printf("private key: [format: %s, alogrithm: %s]", privateKey.getFormat(), privateKey.getAlgorithm());
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS256, privateKey)
+                .signWith(privateKey)
                 .compact();
     }
 
@@ -116,5 +120,9 @@ public class JwtServiceV2 {
         }
 
         return false;
+    }
+
+    private SecretKey generalKey(byte[] keyBytes) {
+        return new SecretKeySpec(keyBytes, "HmacSHA512");
     }
 }
